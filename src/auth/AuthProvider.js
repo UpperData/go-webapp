@@ -41,6 +41,24 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
+    const loginByToken = async (token) => {
+        await axios({
+            method: "get",
+            url: `/login/${token}`
+        }).then(async (res) => {
+            console.log(res);
+            let token = res.data.token;
+            localStorage.setItem(AUTH_TOKEN, token);
+            await dispatch(handleLogin(res));
+
+            return res;
+        }).catch((err) => {
+            // console.log(err);
+            throw err;
+        });
+    };
+
+
     const logout = async () => {
         localStorage.removeItem(AUTH_TOKEN);
         await dispatch(handleLogout());
@@ -74,7 +92,7 @@ export const AuthProvider = ({ children }) => {
             // Using the provider so that ANY component in our application can 
             // use the values that we are sending.
 
-            <AuthContext.Provider value={{ auth, login, logout }}>
+            <AuthContext.Provider value={{ auth, login, logout, loginByToken }}>
                 {children}
             </AuthContext.Provider>
     );

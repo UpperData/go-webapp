@@ -26,7 +26,7 @@ const MENU_OPTIONS = [
   {
     label: 'Perfil',
     icon:   personFill,
-    linkTo: '#'
+    linkTo: '/dashboard/ACcoUNt/prOfile'
   },
   /*
   {
@@ -122,7 +122,7 @@ export default function AccountPopover() {
         ))}
 
         <Box sx={{ p: 2, pt: 1.5 }}>
-          <Button onClick={() => handleLogout()} fullWidth color="inherit" variant="outlined">
+          <Button onClick={() => handleLogout()} fullWidth color="primary" variant="outlined">
             Cerrar sesión
           </Button>
         </Box>

@@ -52,7 +52,7 @@ NavItem.propTypes = {
 function NavItem({ item, active }) {
   const theme = useTheme();
   const isActiveRoot = active(item.path);
-  const { title, path, icon, info, children } = item;
+  const { title, path, icon, info, children, module, sModule, name} = item;
   const [open, setOpen] = useState(isActiveRoot);
 
   const handleOpen = () => {
@@ -71,7 +71,10 @@ function NavItem({ item, active }) {
     fontWeight: 'fontWeightMedium'
   };
 
-  if (children) {
+  if (children || sModule) {
+
+    let subitems = sModule || children;
+
     return (
       <>
         <ListItemStyle
@@ -80,8 +83,11 @@ function NavItem({ item, active }) {
             ...(isActiveRoot && activeRootStyle)
           }}
         >
-          <ListItemIconStyle>{icon && icon}</ListItemIconStyle>
-          <ListItemText disableTypography primary={title} />
+          <ListItemIconStyle>
+            {icon && typeof icon !== "string" && icon}
+            {icon && typeof icon === "string" && <i className={"mdi "+icon} />}
+          </ListItemIconStyle>
+          <ListItemText disableTypography primary={module} />
           {info && info}
           <Box
             component={Icon}
@@ -92,15 +98,15 @@ function NavItem({ item, active }) {
 
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {children.map((item) => {
-              const { title, path } = item;
+            {subitems.map((item) => {
+              const { title, path, route, name } = item;
               const isActiveSub = active(path);
 
               return (
                 <ListItemStyle
-                  key={title}
+                  key={name}
                   component={RouterLink}
-                  to={path}
+                  to={'/dashboard'+route}
                   sx={{
                     ...(isActiveSub && activeSubStyle)
                   }}
@@ -124,7 +130,7 @@ function NavItem({ item, active }) {
                       }}
                     />
                   </ListItemIconStyle>
-                  <ListItemText disableTypography primary={title} />
+                  <ListItemText disableTypography primary={name} />
                 </ListItemStyle>
               );
             })}
@@ -153,6 +159,31 @@ NavSection.propTypes = {
   navConfig: PropTypes.array
 };
 
+function slugify(str){
+    str = str.replace(/^\s+|\s+$/g, '');
+
+    // Make the string lowercase
+    str = str.toLowerCase();
+
+    // Remove accents, swap ñ for n, etc
+    let from = "ÁÄÂÀÃÅČÇĆĎÉĚËÈÊẼĔȆÍÌÎÏŇÑÓÖÒÔÕØŘŔŠŤÚŮÜÙÛÝŸŽáäâàãåčçćďéěëèêẽĕȇíìîïňñóöòôõøðřŕšťúůüùûýÿžþÞĐđßÆa·/_,:;";
+    let to   = "AAAAAACCCDEEEEEEEEIIIINNOOOOOORRSTUUUUUYYZaaaaaacccdeeeeeeeeiiiinnooooooorrstuuuuuyyzbBDdBAa------";
+    
+    // eslint-disable-next-line no-plusplus
+    for (let i=0, l=from.length ; i < l ; i++) {
+        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+    }
+
+    // Remove invalid chars
+    str = str.replace(/[^a-z0-9 -]/g, '') 
+    // Collapse whitespace and replace by -
+    .replace(/\s+/g, '-') 
+    // Collapse dashes
+    .replace(/-+/g, '-'); 
+
+    return str;
+}
+
 export default function NavSection({ navConfig, ...other }) {
   const { pathname } = useLocation();
   const match = (path) => (path ? !!matchPath({ path, end: false }, pathname) : false);
@@ -161,7 +192,7 @@ export default function NavSection({ navConfig, ...other }) {
     <Box {...other}>
       <List disablePadding>
         {navConfig.map((item) => (
-          <NavItem key={item.title} item={item} active={match} />
+          <NavItem key={item.hasOwnProperty("module") ? slugify(item.module) : item.title} item={item} active={match} />
         ))}
       </List>
     </Box>

@@ -1,10 +1,13 @@
-import {useState} from "react"
+import {useState, useEffect} from "react"
 import { Navigate, useRoutes, Routes } from 'react-router-dom';
 import {useSelector, useDispatch} from "react-redux"
 
 // layouts
 import DashboardLayout from './layouts/dashboard';
 import LogoOnlyLayout from './layouts/LogoOnlyLayout';
+
+import { useAuth } from "./auth/AuthProvider";
+import Loader from "./components/Loader/Loader"
 
 //
 // import Login from './pages/Login';
@@ -30,57 +33,54 @@ function Router() {
   // const [loged, setloged]             = useState(false);
   // const [loadingData, setLoadingData] = useState(true);
 
-  // const [loading, setloading] = useState(true);
-  // const [loaded, setloaded]   = useState(true);
+  const [loading, setloading]             = useState(true);
+  const [loaded, setloaded]               = useState(false);
+  const [searchSession, setsearchSession] = useState(true);
+  const [loadingData, setloadingData]     = useState(false);
+
+  const AUTH_TOKEN 			      = 'authTkn'
+  const {loginByToken}        = useAuth();
 
   let failRequestByToken      = false;
 
-  /*
-  const CustomRoute = (Component, access = true, isPrivate = false, ...rest) => { 
-    if(!isPrivate){
-      if(auth){
-        return <Navigate to="/dashboard/" />
-      }
-      return <Component />
-    }
-
-    // Private
-    if(!auth){
-      return <Navigate to="/" />
-    }
-    return <Component />
+  async function handleLoginByToken(){
+    let token = localStorage.getItem(AUTH_TOKEN);
+    
+    await loginByToken(token);
+    setloadingData(true);
   }
-  */
 
-  /*
-  return useRoutes([
-    {
-      path: '/dashboard',
-      element: <DashboardLayout />,
-      children: [
-        // { element:        <Navigate to="/dashboard/app" replace /> },
-        { path: 'app',    element: <CustomRoute Component={DashboardApp} isPrivate /> },
-        
-        { path: 'user', element: <User /> },
-        { path: 'products', element: <Products /> },
-        { path: 'blog', element: <Blog /> }
-        
-      ]
-    },
-    {
-      path: '/',
-      element: <LogoOnlyLayout />,
-      children: [
-        { path: 'login',    element: <CustomRoute Component={Login} /> },
-        // { path: 'register', element: <Register /> },
-        { path: '404',      element: <NotFound /> },
-        { path: '/',        element: <Navigate to="/login" /> },
-        { path: '*',        element: <Navigate to="/404" /> }
-      ]
-    },
-    { path: '*', element: <Navigate to="/404" replace /> }
-  ]); 
-  */
+  useEffect(() => {
+    if(!loaded){
+      if(loading){
+
+        let token = localStorage.getItem(AUTH_TOKEN);
+
+        if(searchSession && loadingData === false){
+          // Buscando datos de sesion anterior por token almacenado
+          setsearchSession(false);
+          if(token){
+            handleLoginByToken();
+          }else{
+            setloadingData(true);
+          }
+        }else if(loadingData && !searchSession){
+          if(auth && token){
+            // Buscar datos para el render del router privado
+            setloaded(true);
+          }else{
+            // no se cargan datos adicionales y entra en el router publico
+            setloaded(true);
+          }
+        }
+
+      }
+    }
+  });
+  
+  if(!loaded){
+    return <Loader isFullPage />
+  }
 
   if(auth){
     return <Dashboard />

@@ -36,14 +36,14 @@ export default function AuthLayout({ children }) {
   return (
     <HeaderStyle>
       <RouterLink to="/">
-        <img src="/static/img/isotipo.png" width="100px" alt="logo" />
+        <img src="/static/img/logo.png" width="300px" alt="logo" />
       </RouterLink>
 
       <MHidden width="smDown">
         <Typography
           variant="body2"
           sx={{
-            mt: { md: -2 }
+            mt: { my: 1 }
           }}
         >
           {children}

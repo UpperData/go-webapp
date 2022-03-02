@@ -44,7 +44,16 @@ DashboardSidebar.propTypes = {
 
 export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
   const { pathname }      = useLocation();
+
   const userData          = useSelector(state => state.session.userData.data);
+  const menu              = useSelector(state => state.dashboard.menu);
+
+  console.log("menues =====");
+  console.log(menu);
+  console.log(sidebarConfig);
+
+  let finalMenuConfig = sidebarConfig.concat(menu);
+  console.log(finalMenuConfig);
 
   useEffect(() => {
     if (isOpenSidebar) {
@@ -82,7 +91,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
         </Link>
       </Box>
 
-      <NavSection navConfig={sidebarConfig} />
+      <NavSection navConfig={finalMenuConfig} />
 
       <Box sx={{ flexGrow: 1 }} />
       {/* 

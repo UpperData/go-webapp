@@ -52,11 +52,12 @@ service.interceptors.response.use( (response) => response.data, (error) => {
 	
 	// Remove token and redirect 
 	if (error.response.status === 400 || error.response.status === 403) {
-		notificationParam.message 		= 'Authentication Fail'
-		notificationParam.description 	= 'Please login again'
-		// localStorage.removeItem(AUTH_TOKEN)
+		notificationParam.message 		= 'Authentication Fail';
+		notificationParam.description 	= 'Please login again';
+
+		localStorage.removeItem(AUTH_TOKEN)
 		// history.push(ENTRY_ROUTE)
-		// window.location.reload();
+		window.location.reload();
 	}
 
 	if (error.response.status === 404) {

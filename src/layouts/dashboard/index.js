@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 //
 import DashboardNavbar from './DashboardNavbar';
-import DashboardSidebar from './DashboardSidebar';
+import DashboardSidebar from './Sidebar';
 
 // ----------------------------------------------------------------------
 
