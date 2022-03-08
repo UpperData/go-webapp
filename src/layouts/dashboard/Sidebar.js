@@ -47,6 +47,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
 
   const userData          = useSelector(state => state.session.userData.data);
   const menu              = useSelector(state => state.dashboard.menu);
+  const role              = useSelector(state => state.dashboard.role);
 
   console.log("menues =====");
   console.log(menu);
@@ -84,7 +85,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
                 {userData.people.firstName+' '+userData.people.lastName}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {account.role}
+                {role.name}
               </Typography>
             </Box>
           </AccountStyle>

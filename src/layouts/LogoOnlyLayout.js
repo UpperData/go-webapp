@@ -24,9 +24,12 @@ export default function LogoOnlyLayout() {
   return (
     <>
       <HeaderStyle>
+        
+        
         <RouterLink to="/">
           <img src="/static/img/isotipo.png" width="100px" alt="logo" />
         </RouterLink>
+        
       </HeaderStyle>
       <Outlet />
     </>

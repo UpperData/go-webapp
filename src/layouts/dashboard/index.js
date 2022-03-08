@@ -40,6 +40,7 @@ export default function DashboardLayout() {
       <DashboardNavbar onOpenSidebar={() => setOpen(true)} />
       <DashboardSidebar isOpenSidebar={open} onCloseSidebar={() => setOpen(false)} />
       <MainStyle>
+        <div className='overlay-page-dashboard' />
         <Outlet />
       </MainStyle>
     </RootStyle>

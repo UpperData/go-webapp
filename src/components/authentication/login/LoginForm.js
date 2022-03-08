@@ -92,7 +92,10 @@ export default function LoginForm() {
             label="Recuerdame"
           />
 
-          <Link component={RouterLink} variant="subtitle2" to="#">
+          <Link component={RouterLink} variant="subtitle2" 
+          // color="" 
+          to="#"
+          >
             ¿Olvidó su password?
           </Link>
         </Stack>
@@ -103,6 +106,8 @@ export default function LoginForm() {
           type="submit"
           variant="contained"
           loading={isSubmitting}
+          color="white"
+          sx={{mt: 5}}
         >
           Iniciar sesión
         </LoadingButton>

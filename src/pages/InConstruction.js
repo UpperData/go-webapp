@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
 // material
 import { styled } from '@mui/material/styles';
-import { Box, Button, Typography, Container } from '@mui/material';
+import { Box, Card, Button, Typography, Container } from '@mui/material';
 // components
 import { MotionContainer, varBounceIn } from '../components/animate';
 import Page from '../components/Page';
@@ -24,10 +24,10 @@ export default function InConstruction() {
   return (
     <RootStyle title="404 Page Not Found | Minimal-UI">
         <Container>
-            <Box sx={{ maxWidth: 480, margin: 'auto', textAlign: 'center' }}>
+            <Card sx={{ margin: 'auto', textAlign: 'center', py: 5 }}>
                 <motion.div variants={varBounceIn}>
                 <Typography variant="h3" paragraph>
-                    Segmento en construcción
+                    Segmento en construcción .. 
                 </Typography>
                 </motion.div>
                 <Typography sx={{ color: 'text.secondary' }}>
@@ -39,7 +39,7 @@ export default function InConstruction() {
                         Volver al inicio
                     </Button>
                 </Box>
-            </Box>
+            </Card>
         </Container>
     </RootStyle>
   );

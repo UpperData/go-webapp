@@ -7,6 +7,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 import { AuthProvider } from './auth/AuthProvider'
 
+import './styles/app.scss'
+
 // store
 import store from './store/store';
 

@@ -46,7 +46,7 @@ const SECONDARY = {
 };
 const INFO = {
   lighter: alpha('#52A3D8', 0.2),
-  light: alpha('#52A3D8', 0.4),
+  light: '#DCEDF7',
   main: '#52A3D8',
   dark: darken('#52A3D8', 0.5),
   darker: darken('#52A3D8', 0.7),
@@ -68,6 +68,7 @@ const WARNING = {
   darker: '#7A4F01',
   contrastText: GREY[800]
 };
+
 const ERROR = {
   lighter: '#FFE7D9',
   light: '#FFA48D',
@@ -75,6 +76,15 @@ const ERROR = {
   dark: '#B72136',
   darker: '#7A0C2E',
   contrastText: '#fff'
+};
+
+const WHITE = {
+  lighter: '#fff',
+  light: '#fff',
+  main: '#fff',
+  dark: '#fff',
+  darker: '#fff',
+  contrastText: PRIMARY.main
 };
 
 const GRADIENTS = {
@@ -107,6 +117,7 @@ const palette = {
   divider: GREY[500_24],
   text: { primary: GREY[800], secondary: GREY[600], disabled: GREY[500] },
   background: { paper: '#fff', default: '#fff', neutral: GREY[200] },
+  white: WHITE,
   action: {
     active: GREY[600],
     hover: GREY[500_8],
