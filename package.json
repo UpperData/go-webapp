@@ -45,6 +45,7 @@
     "@mui/lab": "^5.0.0-alpha.70",
     "@mui/material": "^5.4.3",
     "@mui/utils": "^5.4.2",
+    "@mui/x-data-grid": "^5.6.0",
     "@reduxjs/toolkit": "^1.7.2",
     "@testing-library/jest-dom": "^5.16.2",
     "apexcharts": "^3.33.1",

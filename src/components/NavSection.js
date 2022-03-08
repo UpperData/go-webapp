@@ -50,6 +50,7 @@ NavItem.propTypes = {
 };
 
 function NavItem({ item, active }) {
+
   const theme = useTheme();
   const isActiveRoot = active(item.path);
   const { title, path, icon, info, children, module, sModule, name} = item;
@@ -75,12 +76,29 @@ function NavItem({ item, active }) {
 
     let subitems = sModule || children;
 
+    let isActiveRootInSub      = false;
+    let isActiveRootInSubCount = 0;
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < subitems.length; i++) {
+      const subi = subitems[i];
+      // console.log('/dashboard'+subi.route);
+      const isActiveSub = active('/dashboard'+subi.route);
+      if(isActiveSub){
+        isActiveRootInSubCount += 1;
+      }
+    }
+
+    if(isActiveRootInSubCount > 0){
+      isActiveRootInSub = true;
+    }
+
     return (
       <>
         <ListItemStyle
           onClick={handleOpen}
           sx={{
-            ...(isActiveRoot && activeRootStyle)
+            ...(isActiveRootInSub && activeRootStyle)
           }}
         >
           <ListItemIconStyle>
@@ -99,14 +117,19 @@ function NavItem({ item, active }) {
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {subitems.map((item) => {
+
               const { title, path, route, name } = item;
-              const isActiveSub = active(path);
+              let routeLink = '/dashboard'+route;
+              const isActiveSub = active(routeLink);
+
+              // console.log(route);
+              // console.log(isActiveSub);
 
               return (
                 <ListItemStyle
                   key={name}
                   component={RouterLink}
-                  to={'/dashboard'+route}
+                  to={routeLink}
                   sx={{
                     ...(isActiveSub && activeSubStyle)
                   }}
@@ -187,6 +210,8 @@ function slugify(str){
 export default function NavSection({ navConfig, ...other }) {
   const { pathname } = useLocation();
   const match = (path) => (path ? !!matchPath({ path, end: false }, pathname) : false);
+
+  // console.log(match);
 
   return (
     <Box {...other}>

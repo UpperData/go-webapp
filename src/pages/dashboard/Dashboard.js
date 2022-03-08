@@ -12,6 +12,8 @@ import InConstruction from '../InConstruction';
 import {useSelector, useDispatch} from "react-redux"
 import { set_menu, set_role } from '../../store/dashboard/actions';
 
+import RestorePassword from './content/usuarios-y-permisos/RestorePassword';
+
 function PrivateRoute({ children }) {
     // const auth = useAuth();
     let isAuth = true;
@@ -44,7 +46,7 @@ function Dashboard() {
         }
 
         // role = session.userData.data.role[0];
-        console.log("Role:"+role);
+        // console.log("Role:"+role);
 
         await dispatch(set_role(role));
         return role;
@@ -52,7 +54,7 @@ function Dashboard() {
 
     async function getData(){
         let role = await getRole();
-        console.log(role);
+        // console.log(role);
 
         await dispatch(set_menu(role.id));
         setloaded(true);
@@ -91,7 +93,7 @@ function Dashboard() {
 
                 {/* users */}
                 <Route path="admin/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
                 <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 
                 <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>

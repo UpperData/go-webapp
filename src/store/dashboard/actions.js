@@ -8,7 +8,7 @@ export const set_menu = (role) => {
         await axios
           .get(url)
           .then(res => {
-            console.log(res);
+            // console.log(res);
 
             if(res){
                 dispatch({

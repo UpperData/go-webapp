@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     const session           = useSelector(state => state.session);
     const [auth, setAuth]   = useState(session.auth);
 
-    console.log("Is authenticate:"+auth);
+    // console.log("Is authenticate:"+auth);
 
     const login = async (nick, pass) => {
         await axios({
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
             method: "get",
             url: `/login/${token}`
         }).then(async (res) => {
-            console.log(res);
+            // console.log(res);
             let token = res.data.token;
             localStorage.setItem(AUTH_TOKEN, token);
             await dispatch(handleLogin(res));

@@ -49,9 +49,9 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
   const menu              = useSelector(state => state.dashboard.menu);
   const role              = useSelector(state => state.dashboard.role);
 
-  console.log("menues =====");
-  console.log(menu);
-  console.log(sidebarConfig);
+  // console.log("menues =====");
+  // console.log(menu);
+  // console.log(sidebarConfig);
 
   let finalMenuConfig = sidebarConfig.concat(menu);
   console.log(finalMenuConfig);
