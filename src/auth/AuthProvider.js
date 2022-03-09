@@ -29,15 +29,19 @@ export const AuthProvider = ({ children }) => {
               pass
             }
         }).then(async (res) => {
-            console.log(res);
+            // console.log(res);
             let token = res.data.token;
             localStorage.setItem(AUTH_TOKEN, token);
             await dispatch(handleLogin(res));
 
-            return res;
+            return res.data;
         }).catch((err) => {
-            // console.log(err);
-            throw err;
+            console.log(err);
+            if(err.response){
+                return Promise.reject(err.response.data.data);
+
+                // return err.response.data.data;
+            }
         });
     };
 
@@ -57,7 +61,6 @@ export const AuthProvider = ({ children }) => {
             throw err;
         });
     };
-
 
     const logout = async () => {
         localStorage.removeItem(AUTH_TOKEN);

@@ -37,7 +37,7 @@ export default function AuthLayout({ children }) {
     <HeaderStyle>
       {/* 
         <RouterLink to="/">
-          <img src="/static/img/logo.png" width="300px" alt="logo" />
+          <img src="/static/logo.png" width="300px" alt="logo" />
         </RouterLink>
       */}
 

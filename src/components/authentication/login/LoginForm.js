@@ -14,7 +14,8 @@ import {
   TextField,
   IconButton,
   InputAdornment,
-  FormControlLabel
+  FormControlLabel,
+  Alert
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import axios from '../../../auth/fetch'
@@ -26,6 +27,8 @@ export default function LoginForm() {
   const navigate                        = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const {login} = useAuth();
+
+  const [formErrors, setformErrors]     = useState("");
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Email must be a valid email address').required('Email is required'),
@@ -40,9 +43,12 @@ export default function LoginForm() {
     },
     validationSchema: LoginSchema,
     onSubmit: async (values) => {
-      // ('/dashboard', { replace: true });
-      // console.log(values);
-      let handleLogin = await login(values.email, values.password);
+      try {
+        setformErrors("");
+        await login(values.email, values.password);
+      } catch(e) {
+        setformErrors(e);
+      }
     }
   });
 
@@ -55,6 +61,13 @@ export default function LoginForm() {
   return (
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+        {formErrors !== "" &&
+          <div>
+            <Alert sx={{mb: 3}} severity="error">
+              {formErrors.message}
+            </Alert>
+          </div>
+        }
         <Stack spacing={3}>
           <TextField
             fullWidth
@@ -106,7 +119,7 @@ export default function LoginForm() {
           type="submit"
           variant="contained"
           loading={isSubmitting}
-          color="white"
+          color="primary"
           sx={{mt: 5}}
         >
           Iniciar sesión

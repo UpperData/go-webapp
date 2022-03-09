@@ -86,7 +86,7 @@ export default function Login() {
             
             <SectionStyleInto sx={{ py: 5 }}>
               <div className="text-center">
-                <img src="/static/img/logo.png" className='mx-auto w-100' style={{maxWidth: "300px"}} alt="login" />
+                <img src="/static/logo.png" className='mx-auto w-100' style={{maxWidth: "300px"}} alt="login" />
               </div>
               
               <div className="text-center">
