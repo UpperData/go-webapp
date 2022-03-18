@@ -6,13 +6,16 @@ import Loader from "../../components/Loader/Loader"
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import DashboardApp from './content/DashboardApp';
+import Home from './content/Home';
 import InConstruction from '../InConstruction';
 
 import {useSelector, useDispatch} from "react-redux"
 import { set_menu, set_role } from '../../store/dashboard/actions';
 
 import RestorePassword from './content/usuarios-y-permisos/RestorePassword';
+import Security from './content/configuraciones/Security';
+import Permissions from './content/usuarios-y-permisos/Permissions';
+import CreateAccount from './content/usuarios-y-permisos/CreateAccount';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -83,24 +86,23 @@ function Dashboard() {
     return (
         <Routes>
             <Route path="/dashboard" element={<DashboardLayout />} >
-                <Route path="app"    element={<PrivateRoute><DashboardApp /></PrivateRoute>}/>
+                <Route path="app"    element={<PrivateRoute><Home /></PrivateRoute>}/>
                 <Route path=""       element={<Navigate to="/dashboard/app" replace />}/>
 
                 {/* config */}
-                <Route path="ACcoUNt/securE"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="ACcoUNt/securE"    element={<PrivateRoute><Security /></PrivateRoute>}/>
                 <Route path="ACcoUNt/prOfile"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
 
-
                 {/* users */}
-                <Route path="admin/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
                 <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
                 <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 
                 <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                <Route path="grant/acCOUnT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
+                
             
                 {/* rrhh */}
-
                 <Route path="rRHH/EmPloyEE/FILE"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
             </Route>
 

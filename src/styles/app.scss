@@ -115,3 +115,45 @@ header{
 
     z-index: -5;
 }
+
+
+.list-unstyled{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.d-none{
+    display: none;
+}
+
+.content-imput-file{
+    cursor: pointer;
+
+    .file-selector{
+        width: 250px;
+        height: 250px;
+
+        border-radius: 50%;
+        display: flex;
+        margin: auto;
+        overflow: hidden;
+
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+        background-color: #F4F6F8;
+
+        transition: all .3s ease;
+        border: 1px solid transparent;
+
+        i{
+            font-size: 4em;
+        }
+
+        &:hover{
+            border: 10px solid #fff;
+        }
+    }
+}

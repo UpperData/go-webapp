@@ -45,8 +45,8 @@ const SECONDARY = {
   contrastText: '#fff'
 };
 const INFO = {
-  lighter: alpha('#52A3D8', 0.2),
-  light: '#DCEDF7',
+  lighter: alpha('#52A3D8', 0.4),
+  light: '#7CB9E1',
   main: '#52A3D8',
   dark: darken('#52A3D8', 0.5),
   darker: darken('#52A3D8', 0.7),

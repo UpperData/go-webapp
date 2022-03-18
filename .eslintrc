@@ -65,7 +65,9 @@
     "import/no-extraneous-dependencies": 0,
     "import/order":0,
     "no-prototype-builtins": 0,
+    "jsx-a11y/label-has-associated-control": 0,
     "react/jsx-key": 1,
+    "jsx-boolean-value": 0,
     "react-hooks/rules-of-hooks": 2,
     "no-unused-vars": [
       1,

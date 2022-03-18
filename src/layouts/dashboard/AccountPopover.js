@@ -102,13 +102,29 @@ export default function AccountPopover() {
             El rol seleccionado determina las opciones del menú, los permisos y las limitaciones generales del usuario dentro del sistema.
           </Typography>
           <Typography id="modal-modal-description" sx={{ my: 2, color: "text.secondary" }}>
-            Rol actual: <Typography component="span" color="primary.main"> {dashboard.role.name} </Typography>
+            Rol actual: <Typography component="span" color="primary.main" sx={{fontWeight: "bold"}}> 
+              {dashboard.role.name} 
+            </Typography>
           </Typography>
           <div>
-            {!(roleList >= 2) &&
+            {(roleList.length < 2) 
+            ?
               <Alert variant="filled" severity="info">
-                El usuario no posee roles adicionales a "{dashboard.role.name}" por lo cual no es posible cambiarlo.
+                <Typography align='center'>
+                  El usuario no posee roles adicionales.
+                </Typography>
               </Alert>
+            :
+              <div>
+                {roleList.map((item, key) => {
+                  let data = item;
+                  return (
+                    <div key={key}>
+                      {data.name}
+                    </div>
+                  )
+                })}
+              </div>
             }
           </div>
         </RootStyle>

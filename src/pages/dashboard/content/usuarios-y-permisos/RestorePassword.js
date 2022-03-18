@@ -100,16 +100,19 @@ export default function RestorePassword() {
         { 
             field: 'name',     
             headerName: 'Nombre de usuario',
-            width: 250
+            width: 250,
+            sortable: false
         },
         { 
             field: 'email',    
             headerName: 'Email',
-            width: 300
+            width: 300,
+            sortable: false
         },
         { 
             field: 'token',    
-            headerName: 'Token' 
+            headerName: 'Token',
+            sortable: false
         },
         { 
             field: 'id',    
@@ -119,7 +122,8 @@ export default function RestorePassword() {
                 return <Button variant="contained" color="primary">
                             Revocar
                         </Button>
-            }
+            },
+            sortable: false
         },
         /*
         {
