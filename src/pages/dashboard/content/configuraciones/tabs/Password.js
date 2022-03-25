@@ -2,17 +2,35 @@ import React, {useState} from 'react'
 import * as Yup from 'yup';
 import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
+
 import { useFormik, Form, FormikProvider } from 'formik';
+
 import { LoadingButton } from '@mui/lab';
+import axios from "../../../../../auth/fetch"
+import Loader from '../../../../../components/Loader/Loader';
 
 function Info() {
 
     const [formErrors, setformErrors]     = useState("");
+    const [alertSuccessMessage, setalertSuccessMessage] = useState("");
+    const [alertErrorMessage,   setalertErrorMessage]   = useState("");
+
+    let urlPasswordUpdate = "/PASSwORD/UPDATE";
 
     const LoginSchema = Yup.object().shape({
         password:           Yup.string().required('Debe ingresar su password'),
         newpassword:        Yup.string().required('Debe ingresar un nuevo password'),
-        repeatnewpassword:  Yup.string().required('Repita su password')
+        repeatnewpassword:  Yup.string()
+        .required('Repita su password')
+        .test('testpass', 'Su password debe coincidir', function checkEnd(val){
+           const { newpassword } = this.parent;
+
+            if (newpassword === val) {
+              return true;
+            }
+
+            return false;
+        })
     });
 
     const formik = useFormik({
@@ -22,10 +40,44 @@ function Info() {
           repeatnewpassword:    ''
         },
         validationSchema: LoginSchema,
-        onSubmit: async (values) => {
+        onSubmit: async (values, {resetForm}) => {
           try {
             // setformErrors("");
             // await login(values.email, values.password);
+
+            setalertSuccessMessage("");
+            setalertErrorMessage("");
+
+            axios({
+                method: "PUT",
+                url: urlPasswordUpdate,
+                data: {
+                    currentPassword: values.password,
+                    newPassword: values.newpassword
+                }
+            }).then((res) => {
+                console.log(res.data);
+
+                if(res.data.result){
+                    setalertSuccessMessage(res.data.data.message);
+                    resetForm();
+
+                    setTimeout(() => {
+                        setalertSuccessMessage("");
+                    }, 20000);
+                }
+
+            }).catch((err) => {
+                let fetchError = err;
+
+                console.error(fetchError);
+                if(fetchError.response){
+                    console.log(err.response);
+                    setalertErrorMessage(err.response.data.data.message);
+                    // return Promise.reject(err.response.data.data);
+                }
+            });
+
           } catch(e) {
             // setformErrors(e);
           }
@@ -36,6 +88,18 @@ function Info() {
 
     return (
         <Box>
+            {alertSuccessMessage !== "" &&
+                <Alert sx={{mb: 3}} severity="success">
+                    {alertSuccessMessage}
+                </Alert>
+            }
+
+            {alertErrorMessage !== "" &&
+                <Alert sx={{mb: 3}} severity="error">
+                    {alertErrorMessage}
+                </Alert>
+            }
+
             <Grid sx={{ pb: 3 }} item xs={12}>
                 <Grid container alignItems="center" justifyContent="space-between" columnSpacing={3}>
                     <Grid item md={6} xs={12}>

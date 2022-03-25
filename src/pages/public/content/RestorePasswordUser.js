@@ -8,6 +8,7 @@ import AuthLayout from '../../../layouts/AuthLayout';
 import Page from '../../../components/Page';
 import { MHidden } from '../../../components/@material-extend';
 import { LoginForm } from '../../../components/authentication/login';
+import { RestorePassForm } from '../../../components/authentication/restorepass';
 
 // import AuthSocial from '../../../components/authentication/AuthSocial';
 
@@ -59,9 +60,9 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function Login() {
+export default function RestorePasswordUser() {
   return (
-    <RootStyle title="Login | CEMA">
+    <RootStyle title="Restaurar password | CEMA">
       {/* 
       <AuthLayout>
         
@@ -81,12 +82,12 @@ export default function Login() {
               CEMA
             </Typography>
             <Typography color="body1" variant="h5" sx={{ px: 5 }}>
-                Es momento de hacer un plan de salud para ti y tu familia, inicie sesión ahora mismo y hágalo realidad.
+                Recupera tus datos de inicio de sesión y comienza a hacer un plan de salud para ti y tu familia.
             </Typography>
             
             <SectionStyleInto sx={{ py: 2 }}>
               <div className="text-center">
-                <img src="/static/mobiledoctor.png" className='mx-auto w-100' style={{maxWidth: "400px", minWidth: "400px"}} alt="login" />
+                <img src="/static/password.png" className='mx-auto w-100' style={{maxWidth: "400px", minWidth: "400px"}} alt="login" />
               </div>
             </SectionStyleInto>
 
@@ -95,32 +96,14 @@ export default function Login() {
       </MHidden>
 
       <Container className='' maxWidth="sm">
-        <div className='overlay-bottom' />
         <ContentStyle>
-          
           <Stack sx={{ mb: 5 }}>
             <Typography variant="h3" gutterBottom>
-              Iniciar sesión
+              Restaurar password
             </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>Ingrese sus datos a continuación.</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>Para cambiar y o recuperar su password complete los datos a continuación.</Typography>
           </Stack>
-
-          {/* 
-            <AuthSocial />
-          */}
-
-          <LoginForm />
-
-          {/* 
-          <MHidden width="smUp">
-            <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-              ¿Aun no posees una cuenta?&nbsp;
-              <Link variant="subtitle2" component={RouterLink} to="register">
-              Registrate
-              </Link>
-            </Typography>
-          </MHidden>
-          */}
+          <RestorePassForm />
         </ContentStyle>
       </Container>
     </RootStyle>

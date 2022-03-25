@@ -81,12 +81,15 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
           <AccountStyle>
             <Avatar src={account.photoURL} alt="photoURL" />
             <Box sx={{ ml: 2 }}>
+
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
                 {userData.people.firstName+' '+userData.people.lastName}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              
+              <Typography variant="body2" sx={{ fontSize: 10, fontWeight: 800 }}>
                 {role.name}
               </Typography>
+              
             </Box>
           </AccountStyle>
         </Link>

@@ -1,71 +1,112 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Grid, Container, Typography, Divider } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
+import {useSelector, useDispatch} from "react-redux"
+import axios from "../../../../../auth/fetch"
+import Loader from '../../../../../components/Loader/Loader';
+import moment from "moment";
+
+require('moment/locale/es');
+
+moment.locale('es-ES');
 
 function Info() {
-  return (
-    <Box>
-        <Grid sx={{ pb: 3 }} item xs={12}>
-            <Grid container justifyContent="space-between" columnSpacing={3}>
-                <Grid item md={6} xs={12}>
+    const userData              = useSelector(state => state.session.userData.data);
+    const [loading, setloading] = useState(true);
+    const [search, setsearch]   = useState(true);
+    const [data, setdata]       = useState(null);
 
-                    <Grid sx={{mb: 3}} container columnSpacing={3}>
-                        <Grid item xs={6} md={5}>
-                            <Typography style={{fontWeight:'bold'}}>
-                                Fecha Creación: 
-                            </Typography>
+    let urlProfile = "/accoUNT/pROfiLE";
+
+    const roleList = userData.role;
+
+    useEffect(() => {
+       if(loading){
+            if(search){
+                axios.get(urlProfile)
+                .then((res) => {
+
+                    console.log("-----");
+                    console.log(res.data);
+
+                    setdata(res.data.data);
+                    setloading(false);
+
+                }).catch((err) => {
+                    console.error(err);
+                });
+            }
+       }
+    }, []);
+        
+
+    if(!loading){
+        return (
+            <Box>
+                <Grid sx={{ pb: 3 }} item xs={12}>
+                    <Grid container justifyContent="space-between" columnSpacing={3}>
+                        <Grid item md={6} xs={12}>
+
+                            <Grid sx={{mb: 3}} container columnSpacing={3}>
+                                <Grid item xs={6} md={5}>
+                                    <Typography style={{fontWeight:'bold'}}>
+                                        Fecha Creación: 
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6} md={7}>
+                                    <Typography color="text.secondary">
+                                        {moment(data.createdAt.split("T")[0], "YYYY-MM-DD").format("D, MMMM YYYY")} 
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+
+                            <Grid sx={{mb: 3}} container columnSpacing={3}>
+                                <Grid item xs={6} md={5}>
+                                    <Typography style={{fontWeight:'bold'}}>
+                                        Última modificación:
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6} md={7}>
+                                    <Typography color="text.secondary">
+                                        {moment(data.updatedAt.split("T")[0], "YYYY-MM-DD").format("D, MMMM YYYY")}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+
+                            <div>
+                                <Typography style={{fontWeight:'bold'}} sx={{mb: 1}}>
+                                    Membresías: 
+                                </Typography>
+                                <Box sx={{px: 3}}>
+                                    <ul className="list-unstyled">
+                                        {roleList.map((item, key) => {
+                                            let data = item;
+                                            return (
+                                                <li key={key}>
+                                                    <Typography color="text.secondary">
+                                                        - {data.name}
+                                                    </Typography>
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </Box>
+                            </div>
+
                         </Grid>
-                        <Grid item xs={6} md={7}>
-                            <Typography color="text.secondary">
-                                02, febrero 2022
-                            </Typography>
+                        <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
+                        <Grid item md={5} xs={12}>
+                            <Box sx={{width: "100%", maxWidth: "250px", margin: "auto"}}>
+                                <img src="/static/info.png" alt="Informacion de perfil" />
+                            </Box>
                         </Grid>
                     </Grid>
-
-                    <Grid sx={{mb: 3}} container columnSpacing={3}>
-                        <Grid item xs={6} md={5}>
-                            <Typography style={{fontWeight:'bold'}}>
-                                Última modificación:
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={6} md={7}>
-                            <Typography color="text.secondary">
-                                02, febrero 2022
-                            </Typography>
-                        </Grid>
-                    </Grid>
-
-                    <div>
-                        <Typography style={{fontWeight:'bold'}} sx={{mb: 1}}>
-                            Membresías: 
-                        </Typography>
-                        <Box sx={{px: 3}}>
-                            <ul className="list-unstyled">
-                                <li>
-                                    <Typography color="text.secondary">
-                                        - Administrador
-                                    </Typography>
-                                </li>
-                                <li>
-                                    <Typography color="text.secondary">
-                                        - Médico Internista
-                                    </Typography>
-                                </li>
-                            </ul>
-                        </Box>
-                    </div>
-
                 </Grid>
-                <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                <Grid item md={5} xs={12}>
-                    <Box sx={{width: "100%", maxWidth: "250px", margin: "auto"}}>
-                        <img src="/static/info.png" alt="Informacion de perfil" />
-                    </Box>
-                </Grid>
-            </Grid>
-        </Grid>
-    </Box>
-  )
+            </Box>
+        )
+    }
+
+    return <Loader />
 }
 
 export default Info

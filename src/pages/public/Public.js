@@ -4,6 +4,7 @@ import {Routes, Route, Navigate} from "react-router-dom"
 
 import LogoOnlyLayout from '../../layouts/LogoOnlyLayout';
 import Login from './content/Login';
+import RestorePasswordUser from './content/RestorePasswordUser';
 
 function PublicRoute({ children }) {
     // const auth = useAuth();
@@ -20,6 +21,7 @@ function Public() {
         <Routes>
             <Route path="/" element={<LogoOnlyLayout />} >
                 <Route path="login" element={<PublicRoute><Login /></PublicRoute>}/>
+                <Route path="restore-password" element={<PublicRoute><RestorePasswordUser /></PublicRoute>}/>
                 <Route path=""      element={<Navigate to="/login" replace />}/>
             </Route>
 

@@ -157,3 +157,20 @@ header{
         }
     }
 }
+
+.content-upload-label{
+    input{
+        display: none;
+    }
+}
+
+.content-img-uploaded{
+    min-height: 150px;
+    background-color: #F4F6F8;
+    border: 2px solid #4C5863;
+    border-radius: .4em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

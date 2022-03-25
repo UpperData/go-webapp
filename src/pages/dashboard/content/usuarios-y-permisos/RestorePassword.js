@@ -1,9 +1,12 @@
-// material
-import { Box, Grid, Container, Typography, Card, Button, Modal, TextField } from '@mui/material';
+import React, { useEffect, useState } from 'react'
+import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { alpha, styled } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
+
+import axios from "../../../../auth/fetch"
+import Loader from '../../../../components/Loader/Loader';
 
 // components
 import Page from '../../../../components/Page';
@@ -24,44 +27,6 @@ import {
 
 // ----------------------------------------------------------------------
 
-
-const RootStyle = styled(Card)(({ theme }) => ({
-  boxShadow: 'none',
-  textAlign: 'center',
-  padding: theme.spacing(5, 5),
-  color: "#fff",
-  backgroundColor: theme.palette.info.lighter
-}));
-
-const IconWrapperStyle = styled('div')(({ theme }) => ({
-  margin: 'auto',
-  display: 'flex',
-  borderRadius: '50%',
-  alignItems: 'center',
-  width: theme.spacing(8),
-  height: theme.spacing(8),
-  justifyContent: 'center',
-  marginBottom: theme.spacing(3),
-  color: theme.palette.primary.dark,
-  backgroundImage: `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0)} 0%, ${alpha(
-    theme.palette.primary.dark,
-    0.24
-  )} 100%)`
-}));
-  
-/*
-const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
-*/
 
 const rows = [
     {
@@ -94,6 +59,51 @@ let heightColumn = 79.7;
 heightColumn *= rows.length;
 
 export default function RestorePassword() {
+
+    const [formErrors, setformErrors]       = useState("");
+    const [isVerify, setisVerify]           = useState(false);
+    const [isVerifyMsg, setisVerifyMsg]     = useState("");
+
+    const [sending, setsending] = useState(false);
+
+    const [loading, setloading] = useState(true);
+    const [search, setsearch]   = useState(true);
+    const [data, setdata]       = useState(null);
+
+    const [alertSuccessMessage, setalertSuccessMessage] = useState("");
+    const [alertErrorMessage,   setalertErrorMessage]   = useState("");
+
+    let urlIsVerifyEmail    = "/ACCount/ENaBLed/to/RESTAR";
+
+    const getList = async () => {
+        axios.get(urlIsVerifyEmail)
+        .then((res) => {
+
+            console.log("-----");
+            console.log(res.data);
+
+            setdata(res.data.data);
+            setloading(false);
+
+        }).catch((err) => {
+
+            let error = err.response;
+            if(error){
+                if(error.data){
+                    setloading(true);
+                }
+            }
+            
+        });
+    }
+
+    useEffect(async () => {
+        if(loading){
+            if(search){
+                await getList();
+            }
+        }
+    }, []);
 
     const columns = [
         // { field: 'id',          headerName: 'ID', width: 70 },
@@ -148,56 +158,76 @@ export default function RestorePassword() {
             </Box>
 
             <Grid sx={{ pb: 3 }} item xs={12}>
-                <Card sx={{py: 3, px: 5}}>
-                    <Grid container sx={{mb: 3}} columnSpacing={3}>
-                        <Grid item xs={12}>
-                            <Typography sx={{mb: 1}} variant="h6">
-                                Filtrar
-                            </Typography>
-                        </Grid>
-                        <Grid sx={{pt: 0}} item xs={10}>
-                            <TextField 
-                                fullWidth 
-                                size="small" 
-                                id="outlined-basic" 
-                                label="Usuario/email" 
-                                variant="outlined" 
-                            />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <Button fullWidth sx={{px: 5, py: 1}} variant="outlined" color="primary">
-                                Restaurar
-                            </Button>
-                        </Grid>
-                    </Grid>
+                {!loading &&
+                    <Card sx={{py: 3, px: 5}}>
 
-                    <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>
-                        <DataGrid
-                            sx={{mb:3}}
-                            rows={rows}
-                            columns={columns}
+                        {data.length > 0 &&
+                            <div>
+                                <Grid container sx={{mb: 3}} columnSpacing={3}>
+                                    <Grid item xs={12}>
+                                        <Typography sx={{mb: 1}} variant="h6">
+                                            Filtrar
+                                        </Typography>
+                                    </Grid>
+                                    <Grid sx={{pt: 0}} item xs={10}>
+                                        <TextField 
+                                            fullWidth 
+                                            size="small" 
+                                            id="outlined-basic" 
+                                            label="Usuario/email" 
+                                            variant="outlined" 
+                                        />
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Button fullWidth sx={{px: 5, py: 1}} variant="outlined" color="primary">
+                                            Restaurar
+                                        </Button>
+                                    </Grid>
+                                </Grid>
 
-                            // page={0}
-                            pageSize={6}
-                            // rowsPerPageOptions={[]}
-                            // autoPageSize
-                            rowCount={rows.length}
+                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>
+                                    <DataGrid
+                                        sx={{mb:3}}
+                                        rows={rows}
+                                        columns={columns}
 
-                            disableColumnFilter
-                            disableColumnMenu
-                            autoHeight 
-                            disableColumnSelector
-                            disableSelectionOnClick
-                            // checkboxSelection
-                        />
-                    </div>
+                                        // page={0}
+                                        pageSize={6}
+                                        // rowsPerPageOptions={[]}
+                                        // autoPageSize
+                                        rowCount={rows.length}
 
-                    <div className="text-center">
-                        <Button sx={{px: 5}} variant="contained" color="primary">
-                            Restaurar
-                        </Button>
-                    </div>
-                </Card>
+                                        disableColumnFilter
+                                        disableColumnMenu
+                                        autoHeight 
+                                        disableColumnSelector
+                                        disableSelectionOnClick
+                                        // checkboxSelection
+                                    />
+                                </div>
+
+                                <div className="text-center">
+                                    <Button sx={{px: 5}} variant="contained" color="primary">
+                                        Restaurar
+                                    </Button>
+                                </div>
+                            </div>
+                        }
+
+                        {data.length <= 0 &&
+                            <Alert severity='info'>
+                                No existen cuentas con token de recuperación
+                            </Alert>
+                        }
+                        
+                    </Card>
+                }
+
+                {loading &&
+                    <Card sx={{py: 3, px: 5}}>
+                        <Loader />
+                    </Card>
+                }
             </Grid>
         </Container>
         </Page>

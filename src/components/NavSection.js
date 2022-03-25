@@ -103,7 +103,7 @@ function NavItem({ item, active }) {
         >
           <ListItemIconStyle>
             {icon && typeof icon !== "string" && icon}
-            {icon && typeof icon === "string" && <i className={"mdi "+icon} />}
+            {icon && typeof icon === "string" && <Box sx={{fontSize: 20}}><i className={"mdi "+icon} /></Box>}
           </ListItemIconStyle>
           <ListItemText disableTypography primary={module} />
           {info && info}

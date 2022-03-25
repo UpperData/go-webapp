@@ -16,6 +16,9 @@ import RestorePassword from './content/usuarios-y-permisos/RestorePassword';
 import Security from './content/configuraciones/Security';
 import Permissions from './content/usuarios-y-permisos/Permissions';
 import CreateAccount from './content/usuarios-y-permisos/CreateAccount';
+import FichaPersonal from './content/rrhh/FichaPersonal';
+import InformeMedico from './content/citas/InformeMedico';
+
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -86,6 +89,7 @@ function Dashboard() {
     return (
         <Routes>
             <Route path="/dashboard" element={<DashboardLayout />} >
+                {/* dashboard */}
                 <Route path="app"    element={<PrivateRoute><Home /></PrivateRoute>}/>
                 <Route path=""       element={<Navigate to="/dashboard/app" replace />}/>
 
@@ -96,14 +100,17 @@ function Dashboard() {
                 {/* users */}
                 <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
                 <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
-                <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                    <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 
-                <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                    <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
                 
-            
                 {/* rrhh */}
-                <Route path="rRHH/EmPloyEE/FILE"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="rRHH/EmPloyEE/FILE"    element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
+            
+                {/* citas */}
+                <Route path="appointment/admin"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="appointment/report"    element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
             </Route>
 
             <Route path="/login"  element={<Navigate to="/dashboard/app" replace />}/>

@@ -31,8 +31,8 @@ export default function LoginForm() {
   const [formErrors, setformErrors]     = useState("");
 
   const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-    password: Yup.string().required('Password is required')
+    email: Yup.string().email('Debe utilizar un email valido').required('El email es requerido'),
+    password: Yup.string().required('El password es requerido')
   });
 
   const formik = useFormik({
@@ -107,7 +107,7 @@ export default function LoginForm() {
 
           <Link component={RouterLink} variant="subtitle2" 
           // color="" 
-          to="#"
+          to="/restore-password"
           >
             ¿Olvidó su password?
           </Link>

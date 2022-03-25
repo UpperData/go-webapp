@@ -6,7 +6,7 @@ import personFill from '@iconify/icons-eva/person-fill';
 import cog from '@iconify/icons-eva/settings-2-fill';
 
 // import settings2Fill from '@iconify/icons-eva/settings-2-fill';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // material
 import { alpha, styled } from '@mui/material/styles';
 import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton, Modal, Card, Alert } from '@mui/material';
@@ -14,9 +14,11 @@ import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton, Modal, 
 import MenuPopover from '../../components/MenuPopover';
 //
 import account from '../../_mocks_/account';
-import {useSelector} from "react-redux"
+import {useSelector, useDispatch} from "react-redux"
 
 import {useAuth} from "../../auth/AuthProvider"
+import {set_role, set_menu} from '../../store/dashboard/actions';
+import Loader from '../../components/Loader/Loader';
 
 // ----------------------------------------------------------------------
 
@@ -50,6 +52,11 @@ export default function AccountPopover() {
   const userData            = useSelector(state => state.session.userData.data);
   const dashboard           = useSelector(state => state.dashboard);
 
+  const [loadingRole, setloadingRole]   = useState(false);
+
+  const dispatch  = useDispatch();
+  let navigate    = useNavigate();
+
   let {logout}            = useAuth();
 
   const handleOpen = () => {
@@ -82,8 +89,27 @@ export default function AccountPopover() {
     backgroundColor: "#fff",
   }));
 
+  const BtnRoleStyle = styled(Button)(({ theme }) => ({
+    boxShadow: 'none',
+    textAlign: 'center',
+    padding: theme.spacing(5, 5),
+    margin: "auto",
+    // backgroundColor: "#fff"
+  }));
+
   const roleList = userData.role;
   console.log(roleList);
+
+  const changeRole = async (role) => {
+    console.log(role);
+
+    setloadingRole(true);
+    await dispatch(set_role(role));
+    await dispatch(set_menu(role.id));
+
+    navigate("/");
+    setloadingRole(false);
+  }
 
   return (
     <>
@@ -107,24 +133,40 @@ export default function AccountPopover() {
             </Typography>
           </Typography>
           <div>
-            {(roleList.length < 2) 
+            {!loadingRole 
             ?
-              <Alert variant="filled" severity="info">
-                <Typography align='center'>
-                  El usuario no posee roles adicionales.
-                </Typography>
-              </Alert>
-            :
               <div>
-                {roleList.map((item, key) => {
-                  let data = item;
-                  return (
-                    <div key={key}>
-                      {data.name}
-                    </div>
-                  )
-                })}
+                {(roleList.length < 2) 
+                ?
+                  <Alert variant="filled" severity="info">
+                    <Typography align='center'>
+                      El usuario no posee roles adicionales.
+                    </Typography>
+                  </Alert>
+                :
+                  <div>
+                    <Typography id="modal-modal-description" sx={{ color: "text.secondary" }}>
+                      Roles disponibles: 
+                    </Typography>
+                    {roleList.map((item, key) => {
+                      let data = item;
+                      if(item.id !== dashboard.role.id){
+                        return (
+                          <BtnRoleStyle onClick={() => changeRole(item)} variant="outlined" color="secondary" sx={{mt: 3}} key={key}>
+                            {data.name}
+                          </BtnRoleStyle>
+                        )
+                      }
+
+                      return false
+                    })}
+                  </div>
+                }
               </div>
+            :
+            <div>
+              <Loader />
+            </div>
             }
           </div>
         </RootStyle>

@@ -1,5 +1,6 @@
 import { Link as RouterLink, Outlet } from 'react-router-dom';
 // material
+import { Card, Stack, Container, Typography, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 // components
 import Logo from '../components/Logo';
@@ -24,10 +25,13 @@ export default function LogoOnlyLayout() {
   return (
     <>
       <HeaderStyle>
-        
-        <RouterLink to="/">
-          <img src="/static/img/isotipo.png" width="100px" alt="logo" />
-        </RouterLink>
+        <Grid container>
+          <Grid item xs={6} md={4}>
+            <RouterLink to="/">
+              <img src="/static/isotipo.png" width="100px" alt="logo" />
+            </RouterLink>
+          </Grid>
+        </Grid>
         
       </HeaderStyle>
       <Outlet />
