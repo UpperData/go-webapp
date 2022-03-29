@@ -19,6 +19,7 @@ function Secret() {
 
     const [data, setdata]                       = useState(null);
     const [secretQuestions, setsecretQuestions] = useState(null);
+    const [password, setpassword]               = useState("");
 
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
@@ -49,6 +50,12 @@ function Secret() {
         });
     }
 
+    const reset = async () => {
+        await setpassword("");
+        await setloading(true);
+        await getQuestions();
+    }
+
     useEffect(async () => {
         if(loading){
             if(search){
@@ -64,7 +71,10 @@ function Secret() {
     });
 
     const LoginSchema1 =  Yup.object().shape({
+        question:        Yup.string().required('Debe ingresar su pregunta'),
         response:        Yup.string().required('Debe ingresar su respuesta'),
+
+        question2:       Yup.string().required('Debe ingresar su pregunta'),
         response2:       Yup.string().required('Debe ingresar su respuesta')
     });
 
@@ -76,56 +86,75 @@ function Secret() {
         },
         validationSchema: LoginSchema,
         onSubmit: async (values, {resetForm}) => {
-          try {
-            setalertSuccessMessage("");
-            setalertErrorMessage("");
-            setsending(true);
 
-            let urlUpdateSecurity = "/cema/security/cont/";
-            let formattedData = {
-                secret: [
-                    {
-                        answer:     secretQuestions[0],
-                        question:   values.responseOne
-                    },
-                    {
-                        answer:     secretQuestions[1],
-                        question:   values.responseTwo
-                    }
-                ]
+            if(password !== ""){
+                try {
+
+                        setalertSuccessMessage("");
+                        setalertErrorMessage("");
+                        setsending(true);
+
+                        let urlUpdateSecurity = "/cema/security/cont/";
+                        let formattedData = {
+                            currentPassword: password,
+                            secret: [
+                                {
+                                    answer:     values.responseOne,
+                                    question:   secretQuestions[0]
+                                },
+                                {
+                                    answer:     values.responseTwo,
+                                    question:   secretQuestions[1]
+                                }
+                            ]
+                        }
+
+                        axios({
+                            method: "PUT",
+                            url:    urlUpdateSecurity,
+                            data:   formattedData
+                        }).then((res) => {
+                            console.log(res.data);
+                            setsending(false);
+
+                            if(res.data.result){
+
+                                setalertSuccessMessage(res.data.message);
+                                resetForm();
+                                reset();
+                                setpassword("");
+
+                                setTimeout(() => {
+                                    setalertSuccessMessage("");
+                                }, 10000);
+                            }
+
+                        }).catch((err) => {
+                            let fetchError = err;
+
+                            console.error(fetchError);
+                            if(fetchError.response){
+                                console.log(err.response);
+                                setalertErrorMessage(err.response.data.data.message);
+
+                                setTimeout(() => {
+                                    setalertErrorMessage("");
+                                }, 20000);
+
+                                setsending(false);
+                                // return Promise.reject(err.response.data.data);
+                            }
+                        });
+
+                } catch(e) {
+                    // setformErrors(e);
+                }
+
+            }else{
+                console.log("Error");
+                setalertErrorMessage("Debe ingresar su password");
             }
 
-            axios({
-                method: "GET",
-                url: urlUpdateSecurity+`?`+formattedData,
-                // data: formattedData
-            }).then((res) => {
-                console.log(res.data);
-                setsending(false);
-
-                if(res.data.result){
-                    setalertSuccessMessage(res.data.message);
-                    resetForm();
-
-                    setTimeout(() => {
-                        setalertSuccessMessage("");
-                    }, 20000);
-                }
-
-            }).catch((err) => {
-                let fetchError = err;
-
-                console.error(fetchError);
-                if(fetchError.response){
-                    console.log(err.response);
-                    setalertErrorMessage(err.response.data.message);
-                    setsending(false);
-                    // return Promise.reject(err.response.data.data);
-                }
-            });
-          } catch(e) {
-            // setformErrors(e);
-          }
         }
     });
 
@@ -138,15 +167,76 @@ function Secret() {
             response2:  ''
         },
         validationSchema: LoginSchema1,
-        onSubmit: async (values) => {
-          try {
-            // setformErrors("");
-            // await login(values.email, values.password);
+        onSubmit: async (values, {resetForm}) => {
 
+            if(password !== ""){
+                try {
 
-          } catch(e) {
-            // setformErrors(e);
-          }
+                        setalertSuccessMessage("");
+                        setalertErrorMessage("");
+                        setsending(true);
+
+                        let urlUpdateSecurity = "/cema/security/cont/";
+                        let formattedData = {
+                            currentPassword: password,
+                            secret: [
+                                {
+                                    answer:     values.response,
+                                    question:   values.question
+                                },
+                                {
+                                    answer:     values.response2,
+                                    question:   values.question2
+                                }
+                            ]
+                        }
+
+                        axios({
+                            method: "PUT",
+                            url:    urlUpdateSecurity,
+                            data:   formattedData
+                        }).then((res) => {
+                            console.log(res.data);
+                            setsending(false);
+
+                            if(res.data.result){
+
+                                setalertSuccessMessage(res.data.message);
+                                resetForm();
+                                reset();
+                                setpassword("");
+
+                                setTimeout(() => {
+                                    setalertSuccessMessage("");
+                                }, 10000);
+                            }
+
+                        }).catch((err) => {
+                            let fetchError = err;
+
+                            console.error(fetchError);
+                            if(fetchError.response){
+                                console.log(err.response);
+                                setalertErrorMessage(err.response.data.data.message);
+
+                                setTimeout(() => {
+                                    setalertErrorMessage("");
+                                }, 20000);
+
+                                setsending(false);
+                                // return Promise.reject(err.response.data.data);
+                            }
+                        });
+
+                } catch(e) {
+                    // setformErrors(e);
+                }
+
+            }else{
+                console.log("Error");
+                setalertErrorMessage("Debe ingresar su password");
+            }
+
         }
     });
 
@@ -180,25 +270,25 @@ function Secret() {
                                             </Alert>
                                         </div>
                                     }
-
-                                    {/* 
-                                        <Stack spacing={3} sx={{mt: 2, mb: 5}}>
-                                            <TextField
-                                                size='small'
-                                                fullWidth
-                                                autoComplete="password"
-                                                type="password"
-                                                label="Ingrese su password"
-                                                {...getFieldProps('password')}
-                                                error={Boolean(touched.password && errors.password)}
-                                                helperText={touched.password && errors.password}
-                                            />
-                                        </Stack>
-                                    */}
+                                    
+                                    <Stack spacing={3} sx={{mt: 2, mb: 5}}>
+                                        <TextField
+                                            size='small'
+                                            fullWidth
+                                            autoComplete="password"
+                                            type="password"
+                                            label="Ingrese su password"
+                                            // {...getFieldProps('password')}
+                                            // error={Boolean(touched.password && errors.password)}
+                                            // helperText={touched.password && errors.password}
+                                            onChange={(e) => setpassword(e.target.value)}
+                                            value={password}
+                                        />
+                                    </Stack>                               
 
                                     <Box sx={{mb: 4}}>
-                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h6">
-                                            #1: {secretQuestions[0]}
+                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
+                                            - {secretQuestions[0]}
                                         </Typography>
                                         <TextField
                                             sx={{mt:0, pt:0}}
@@ -214,8 +304,8 @@ function Secret() {
                                     </Box>
 
                                     <Box>
-                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h6">
-                                            #2: {secretQuestions[1]}
+                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
+                                            - {secretQuestions[1]}
                                         </Typography>
                                         <TextField
                                             sx={{mt:0, pt:0}}
@@ -238,7 +328,6 @@ function Secret() {
                                         loading={sending}
                                         color="primary"
                                         sx={{mt: 5}}
-                                        disabled
                                     >
                                         Actualizar Respuestas
                                     </LoadingButton>
@@ -249,10 +338,9 @@ function Secret() {
                         <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
                         
                         <Grid item md={5} alignItems="end" xs={12}>
-
                             <FormikProvider value={formik1}>
                                 <Form autoComplete="off" noValidate onSubmit={handleSubmit1}>
-                                    <Stack spacing={3} sx={{my: 2}}>
+                                    <Stack spacing={2} sx={{mb: 4}}>
                                         <TextField
                                             size='small'
                                             fullWidth
@@ -275,7 +363,7 @@ function Secret() {
                                         />
                                     </Stack>
 
-                                    <Stack spacing={3}>
+                                    <Stack spacing={2}>
                                         <TextField
                                             size='small'
                                             fullWidth
@@ -303,10 +391,9 @@ function Secret() {
                                         size="large"
                                         type="submit"
                                         variant="contained"
-                                        loading={isSubmitting1}
+                                        loading={sending}
                                         color="secondary"
                                         sx={{mt: 5}}
-                                        disabled
                                     >
                                         Renovar Preguntas
                                     </LoadingButton>

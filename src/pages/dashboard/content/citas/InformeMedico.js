@@ -17,6 +17,9 @@ import CaretUp from "@iconify/icons-ant-design/caret-up"
 import CaretRight from "@iconify/icons-ant-design/caret-right"
 import CaretLeft from "@iconify/icons-ant-design/caret-left"
 
+import axios from "../../../../auth/fetch"
+import Loader from '../../../../components/Loader/Loader';
+
 // components
 import Page from '../../../../components/Page';
 import {
@@ -34,7 +37,6 @@ import {
   AppConversionRates
 } from '../../../../components/_dashboard/app';
 
-
 export default function InformeMedico() {
 
     const [data, setdata]                               = useState(null);
@@ -42,6 +44,9 @@ export default function InformeMedico() {
     const [examsSelected,       setexamsSelected]       = useState([]);
 
     const [typeDni, settypeDni]                         = useState("V");
+
+    const [withExams, setwithExams]                     = useState(false);
+    const [withMedicine, setwithMedicine]               = useState(false);
 
     const LoginSchema =     Yup.object().shape({
         email:              Yup.string().required('Debe ingresar su email'),
@@ -97,6 +102,14 @@ export default function InformeMedico() {
 
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
 
+    const changeWithMedicine = (showMedicine) => {
+        setwithMedicine(showMedicine);
+    }
+
+    const changeWithExams = (showWithExams) => {
+        setwithExams(showWithExams);
+    }
+
     return (
         <Page title="Ficha de empleado | Cema">
         <Container maxWidth="xl">
@@ -109,6 +122,7 @@ export default function InformeMedico() {
                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                     <Grid sx={{ pb: 3 }} item xs={12}>
                         <Card sx={{py: 3, px: 5}}>
+
                             <Grid sx={{mb: 3}} container columnSpacing={3}>
                                 <Grid item lg={3}>
                                     <Button variant="outlined" fullWidth>
@@ -135,6 +149,7 @@ export default function InformeMedico() {
 
                             <Grid container columnSpacing={3}>
                                 <Grid item lg={12}>
+                                    
                                     <Box sx={{ pb: 1 }}>
                                         <Typography variant="h5">
                                             Información General
@@ -181,73 +196,94 @@ export default function InformeMedico() {
 
                                     <Grid sx={{mt:4}} container columnSpacing={3}>
                                         <Grid item xs={6}>
-                                            <Card sx={{py: 3, px: 3}}>
-                                                <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
-                                                    Medicamentos Aplicados
-                                                </Typography>
-                                                <List>
-                                                    <ListItem 
-                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                        // disablePadding
-                                                    >
-                                                        <Grid container alignItems="center">
-                                                            <Grid xs={7}>
-                                                                Diclofenaco 10mg 
-                                                            </Grid>
-                                                            <Grid xs={5}>
-                                                                <Grid container alignItems="center">
-                                                                    <Grid xs={4}>
-                                                                        <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="secondary" variant="contained">
-                                                                            <Icon icon={CaretLeft} />
-                                                                        </Button>
-                                                                    </Grid>
-                                                                    <Grid xs={4}>
-                                                                        <TextField
-                                                                            hiddenLabel
-                                                                            size='small'
-                                                                            fullWidth
-                                                                            autoComplete="lastname"
-                                                                            type="number"
-                                                                            label=""
-                                                                            InputProps={{
-                                                                                readOnly: true,
-                                                                            }}
-                                                                            {...getFieldProps('lastname')}
-                                                                            error={Boolean(touched.lastname && errors.lastname)}
-                                                                            helperText={touched.lastname && errors.lastname}
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid xs={4}>
-                                                                        <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="secondary" variant="contained">
-                                                                            <Icon icon={CaretRight} />
-                                                                        </Button>
+
+                                            <Typography sx={{mb: 1}} align="center" variant="h5">
+                                                ¿Se aplicaron medicamentos? 
+                                            </Typography>
+                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                <Button onClick={() => changeWithMedicine(!withMedicine)} sx={{py: .81}} variant={withMedicine  ? "contained" : "outlined"} color="primary">Si</Button>
+                                                <Button onClick={() => changeWithMedicine(!withMedicine)} sx={{py: .81}} variant={!withMedicine ? "contained" : "outlined"} color="primary">No</Button>
+                                            </ButtonGroup>
+
+                                            {withMedicine &&
+                                                <Card sx={{py: 3, px: 3}}>
+                                                    <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
+                                                        Medicamentos Aplicados
+                                                    </Typography>
+                                                    <List>
+                                                        <ListItem 
+                                                            // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                            // disablePadding
+                                                        >
+                                                            <Grid container alignItems="center">
+                                                                <Grid xs={7}>
+                                                                    Diclofenaco 10mg 
+                                                                </Grid>
+                                                                <Grid xs={5}>
+                                                                    <Grid container alignItems="center">
+                                                                        <Grid xs={4} sx={{px: .5}}>
+                                                                            <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                                                                                <Icon icon={CaretLeft} />
+                                                                            </Button>
+                                                                        </Grid>
+                                                                        <Grid xs={4}>
+                                                                            <TextField
+                                                                                hiddenLabel
+                                                                                size='small'
+                                                                                fullWidth
+                                                                                autoComplete="lastname"
+                                                                                type="number"
+                                                                                label=""
+                                                                                InputProps={{
+                                                                                    readOnly: true,
+                                                                                }}
+                                                                            />
+                                                                        </Grid>
+                                                                        <Grid xs={4} sx={{px: .5}}>
+                                                                            <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                                                                                <Icon icon={CaretRight} />
+                                                                            </Button>
+                                                                        </Grid>
                                                                     </Grid>
                                                                 </Grid>
                                                             </Grid>
-                                                        </Grid>
-                                                    </ListItem>
-                                                </List>
-                                            </Card>
+                                                        </ListItem>
+                                                    </List>
+                                                </Card>
+                                            }
+
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <Card sx={{py: 3, px: 3}}>
-                                                <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
-                                                    Exámenes Aplicados
-                                                </Typography>
-                                                <List>
-                                                    <ListItem 
-                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                        // disablePadding
-                                                    >
-                                                        <ListItemButton 
-                                                            selected={examsSelected.includes("Drafts")} 
-                                                            onClick={() => toggleValueToExams("Drafts")}
+
+                                            <Typography sx={{mb: 1}} align="center" variant="h5">
+                                                ¿Requiere exámenes médicos? 
+                                            </Typography>
+                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                <Button onClick={() => changeWithExams(!withExams)} sx={{py: .81}} variant={withExams  ? "contained" : "outlined"} color="primary">Si</Button>
+                                                <Button onClick={() => changeWithExams(!withExams)} sx={{py: .81}} variant={!withExams ? "contained" : "outlined"} color="primary">No</Button>
+                                            </ButtonGroup>
+
+                                            {withExams &&
+                                                <Card sx={{py: 3, px: 3}}>
+                                                    <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
+                                                        Exámenes Aplicados
+                                                    </Typography>
+                                                    <List>
+                                                        <ListItem 
+                                                            // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                            // disablePadding
                                                         >
-                                                            <ListItemText primary="Drafts" />
-                                                        </ListItemButton>
-                                                    </ListItem>
-                                                </List>
-                                            </Card>
+                                                            <ListItemButton 
+                                                                selected={examsSelected.includes("Drafts")} 
+                                                                onClick={() => toggleValueToExams("Drafts")}
+                                                            >
+                                                                <ListItemText primary="Drafts" />
+                                                            </ListItemButton>
+                                                        </ListItem>
+                                                    </List>
+                                                </Card>
+                                            }
+
                                         </Grid>
                                     </Grid>
 

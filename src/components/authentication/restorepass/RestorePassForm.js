@@ -35,16 +35,19 @@ export default function RestorePassForm() {
 
   // const [email, setemail]               = useState("");
 
-  const [verify, setverify]             = useState(false);
-  const [validEmail, setvalidEmail]     = useState(false);
+  const [verify, setverify]                   = useState(false);
+  const [validEmail, setvalidEmail]           = useState(false);
 
-  const [formErrors, setformErrors]     = useState("");
+  const [formErrors, setformErrors]           = useState("");
+
+  const [secretQuestions, setsecretQuestions] = useState(null);
 
   const [alertSuccessMessage, setalertSuccessMessage] = useState("");
   const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
   const validateEmail = (email) => {
     let url = `/accoUnt/EmAIl/VALIDAtor/${email}`;
+    let urlGetSecretQuestions = `/aCCoUnt/EMAIl/Get/QUEStIOns/${email}`;
 
     setalertSuccessMessage("");
     setalertErrorMessage("");
@@ -55,10 +58,22 @@ export default function RestorePassForm() {
         console.log("-----");
         console.log(res.data);
         if(res.data.result){
-          setvalidEmail(true);
-        }
+          // get questions
+          axios.get(urlGetSecretQuestions)
+          .then((res) => {
+              console.log(res.data);
 
-        setverify(false);
+              if(res.data.result){
+                setsecretQuestions(res.data.data);
+                setvalidEmail(true);
+                setverify(false);
+              }
+
+          }).catch((err) => {
+                let error = err.response;
+                console.log(error);
+          });
+        }
     }).catch((err) => {
         let error = err.response;
         if(error){
@@ -73,14 +88,21 @@ export default function RestorePassForm() {
   }
 
   const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Verifique el formato de su email').required('Su email es requerido')
+    email:    Yup.string().email('Verifique el formato de su email').required('Su email es requerido'),
+    token:    Yup.string().required('Ingrese su token de seguridad'),
+    password: Yup.string().required('Ingrese su nuevo password'),
+
+    firstResponse: Yup.string().required('Responda a la pregunta de seguridad'),
+    secondResponse: Yup.string().required('Responda a la pregunta de seguridad'),
   });
 
   const formik = useFormik({
     initialValues: {
       email: '',
-      password: '',
-      remember: true
+      token: '',
+      newpassword: '',
+      firstResponse: '',
+      secondResponse: ''
     },
     validationSchema: LoginSchema,
     onSubmit: async (values) => {
@@ -127,41 +149,41 @@ export default function RestorePassForm() {
             </Alert>
         }
 
-        {!validEmail &&
-          <Grid container columnSpacing={3}>
-            <Grid item md={9}>
-              <TextField
-                fullWidth
-                autoComplete="username"
-                type="email"
-                label="Email"
+        <div>
+          {!validEmail &&
+              <Grid container columnSpacing={3}>
+                <Grid item md={9}>
+                  <TextField
+                    fullWidth
+                    autoComplete="username"
+                    type="email"
+                    label="Email"
 
-                // value={email}
-                // onChange={(e) => setemail(e.target.value)}
+                    // value={email}
+                    // onChange={(e) => setemail(e.target.value)}
 
-                {...getFieldProps('email')}
-                error={Boolean(touched.email && errors.email)}
-                helperText={touched.email && errors.email}
-              />
-            </Grid>
-            <Grid item md={3}>
-              <LoadingButton 
-                sx={{py: 3.5}} 
-                size='large' 
-                variant='contained' 
-                color="primary"
-                onClick={() => validateEmail(values.email)}
-                type="button"
-                loading={verify}
-              >
-                Validar
-              </LoadingButton>
-            </Grid>
-          </Grid>
-        }
+                    {...getFieldProps('email')}
+                    error={Boolean(touched.email && errors.email)}
+                    helperText={touched.email && errors.email}
+                  />
+                </Grid>
+                <Grid item md={3}>
+                  <LoadingButton 
+                    sx={{py: 3.5}} 
+                    size='large' 
+                    variant='contained' 
+                    color="primary"
+                    onClick={() => validateEmail(values.email)}
+                    type="button"
+                    loading={verify}
+                  >
+                    Validar
+                  </LoadingButton>
+                </Grid>
+              </Grid>
+          }
 
-        {validEmail &&
-          <div>
+          {validEmail &&
             <Grid container columnSpacing={3}>
               <Grid item md={9}>
                 <TextField
@@ -194,28 +216,34 @@ export default function RestorePassForm() {
                 </Button>
               </Grid>
             </Grid>
+          }
+        </div>
 
+        {/* FORMULARIO */}
+
+        {validEmail &&
+          <div>
             <Stack spacing={3} sx={{mt: 3}}>
                 <TextField
                   fullWidth
-                  autoComplete="username"
-                  type="email"
+                  autoComplete="token"
+                  type="text"
                   label="Token"
-                  {...getFieldProps('email')}
-                  error={Boolean(touched.email && errors.email)}
-                  helperText={touched.email && errors.email}
+                  {...getFieldProps('token')}
+                  error={Boolean(touched.token && errors.token)}
+                  helperText={touched.token && errors.token}
                 />
             </Stack>
 
             <Stack spacing={3} sx={{mt: 3}}>
                 <TextField
                   fullWidth
-                  autoComplete="username"
-                  type="email"
+                  autoComplete="newpassword"
+                  type="password"
                   label="Nuevo Password"
-                  {...getFieldProps('email')}
-                  error={Boolean(touched.email && errors.email)}
-                  helperText={touched.email && errors.email}
+                  {...getFieldProps('newpassword')}
+                  error={Boolean(touched.newpassword && errors.newpassword)}
+                  helperText={touched.newpassword && errors.newpassword}
                 />
             </Stack>
           </div>
@@ -229,33 +257,33 @@ export default function RestorePassForm() {
               Preguntas de seguridad
             </Typography>
 
-            <Stack spacing={3}>
+            <Stack spacing={1}>
                 <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
-                  Preguntas de seguridad
+                  {secretQuestions[0]}
                 </Typography>
                 <TextField
                   fullWidth
-                  autoComplete="username"
-                  type="email"
+                  autoComplete="firstResponse"
+                  type="text"
                   label="Respuesta"
-                  {...getFieldProps('email')}
-                  error={Boolean(touched.email && errors.email)}
-                  helperText={touched.email && errors.email}
+                  {...getFieldProps('firstResponse')}
+                  error={Boolean(touched.firstResponse && errors.firstResponse)}
+                  helperText={touched.firstResponse && errors.firstResponse}
                 />
             </Stack>
 
-            <Stack spacing={3} sx={{mt: 3}}>
+            <Stack spacing={1} sx={{mt: 3}}>
               <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
-                Preguntas de seguridad
+                {secretQuestions[1]}
               </Typography>
                 <TextField
                   fullWidth
-                  autoComplete="username"
-                  type="email"
+                  autoComplete="secondResponse"
+                  type="text"
                   label="Respuesta"
-                  {...getFieldProps('email')}
-                  error={Boolean(touched.email && errors.email)}
-                  helperText={touched.email && errors.email}
+                  {...getFieldProps('secondResponse')}
+                  error={Boolean(touched.secondResponse && errors.secondResponse)}
+                  helperText={touched.secondResponse && errors.secondResponse}
                 />
             </Stack>
           </div>
@@ -281,7 +309,9 @@ export default function RestorePassForm() {
           loading={isSubmitting}
           color="secondary"
           sx={{mt: 5}}
-          disabled={!validEmail}
+          // disabled={!validEmail}
+
+          disabled
         >
           Restaurar Password
         </LoadingButton>

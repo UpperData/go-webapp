@@ -106,11 +106,15 @@ function Dashboard() {
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
                 
                 {/* rrhh */}
-                <Route path="rRHH/EmPloyEE/FILE"    element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
+                <Route path="rRHH/EmPloyEE/FILE"        element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
             
                 {/* citas */}
-                <Route path="appointment/admin"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                <Route path="appointment/report"    element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
+                <Route path="appointment/admin"         element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="appointment/report"        element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
+
+                {/* inventario */}
+                <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="InVeNTorY/assigment"       element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
             </Route>
 
             <Route path="/login"  element={<Navigate to="/dashboard/app" replace />}/>

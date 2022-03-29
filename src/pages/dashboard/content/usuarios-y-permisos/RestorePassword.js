@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import * as Yup from 'yup';
 import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -24,6 +25,9 @@ import {
   AppCurrentSubject,
   AppConversionRates
 } from '../../../../components/_dashboard/app';
+
+import { useFormik, Form, FormikProvider } from 'formik';
+import { LoadingButton } from '@mui/lab';
 
 // ----------------------------------------------------------------------
 
@@ -73,16 +77,100 @@ export default function RestorePassword() {
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
-    let urlIsVerifyEmail    = "/ACCount/ENaBLed/to/RESTAR";
+    let urlGetEmailsWithToken    = "/ACCount/ENaBLed/to/RESTAR";
+    let urlGetTokenFromEmail     = "/accOunT/passWord/ReSeT/";
+    let urlValidateEmail         = "/accoUnt/EmAIl/VALIDAtor/";
+    let urlRevokePassword        = "/AcCoUNT/GET/REvOKE/paSSwoRD/";
+
+    const LoginSchema =     Yup.object().shape({
+        email:              Yup.string().required('Debe ingresar su email')
+    });
+
+    const formik = useFormik({
+        initialValues: {
+            email:      ""
+        },
+        validationSchema: LoginSchema,
+        onSubmit: async (values, {resetForm}) => {
+          try {
+
+            setsending(true);
+            setalertErrorMessage("");
+            setalertSuccessMessage("");
+
+            axios.get(`${urlValidateEmail+values.email}`)
+            .then((res) => {
+                if(res.data.result){
+
+                    console.log(res.data);
+                    
+                    axios.get(`${urlGetTokenFromEmail+values.email}`)
+                    .then(async (res) => {
+                        if(res.data.result){
+
+                            console.log(res.data);
+                            console.log("is validate");
+
+                            await resetForm();
+                            await getList();
+                            setalertSuccessMessage(res.data.message);
+
+
+                            setTimeout(() => {
+                                setalertSuccessMessage("");
+                            }, 10000);
+                        }
+                    }).catch((err) => {
+
+                        let fetchError = err;
+
+                        console.error(fetchError);
+                        if(fetchError.response){
+                            console.log(err.response);
+                            setalertErrorMessage(err.response.data.message);
+                            setsending(false);
+                            // return Promise.reject(err.response.data.data);
+                        }
+
+                    });
+
+                }
+            }).catch((err) => {
+
+                let fetchError = err;
+
+                console.error(fetchError);
+                if(fetchError.response){
+                    console.log(err.response);
+                    setalertErrorMessage(err.response.data.data.message);
+                    setsending(false);
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 10000);
+                    // return Promise.reject(err.response.data.data);
+                }
+
+            });
+            
+          } catch(e) {
+            // setformErrors(e);
+            setsending(false);
+          }
+        }
+    });
+
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
 
     const getList = async () => {
-        axios.get(urlIsVerifyEmail)
+        axios.get(urlGetEmailsWithToken)
         .then((res) => {
 
             console.log("-----");
             console.log(res.data);
 
             setdata(res.data.data);
+            setsending(false);
             setloading(false);
 
         }).catch((err) => {
@@ -105,6 +193,31 @@ export default function RestorePassword() {
         }
     }, []);
 
+    const revokePassword = (id) => {
+        setsending(true);
+
+        axios(`${urlRevokePassword+id}`)
+        .then((res) => {
+            console.log(res.data);
+            if(res.data.result){
+                getList();
+                setalertSuccessMessage(res.data.message);
+
+                setTimeout(() => {
+                    setalertSuccessMessage("");
+                }, 10000);
+            }
+        }).catch((err) => {
+            let fetchError = err;
+
+            if(fetchError.response){
+                console.log(err.response);
+                setalertErrorMessage(err.response.data.message);
+                setsending(false);
+            }
+        });
+    }
+
     const columns = [
         // { field: 'id',          headerName: 'ID', width: 70 },
         { 
@@ -120,7 +233,7 @@ export default function RestorePassword() {
             sortable: false
         },
         { 
-            field: 'token',    
+            field: 'hashConfirm',    
             headerName: 'Token',
             sortable: false
         },
@@ -128,10 +241,10 @@ export default function RestorePassword() {
             field: 'id',    
             headerName: '',
             renderCell: (cellValues) => {
-                let dataId = cellValues;
-                return <Button variant="contained" color="primary">
+                let data = cellValues;
+                return  <LoadingButton loading={sending} onClick={() => revokePassword(data.row.id)} variant="contained" color="primary">
                             Revocar
-                        </Button>
+                        </LoadingButton>
             },
             sortable: false
         },
@@ -161,12 +274,12 @@ export default function RestorePassword() {
                 {!loading &&
                     <Card sx={{py: 3, px: 5}}>
 
-                        {data.length > 0 &&
-                            <div>
+                        <FormikProvider value={formik}>
+                            <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                                 <Grid container sx={{mb: 3}} columnSpacing={3}>
                                     <Grid item xs={12}>
                                         <Typography sx={{mb: 1}} variant="h6">
-                                            Filtrar
+                                            Buscar usuario
                                         </Typography>
                                     </Grid>
                                     <Grid sx={{pt: 0}} item xs={10}>
@@ -176,19 +289,40 @@ export default function RestorePassword() {
                                             id="outlined-basic" 
                                             label="Usuario/email" 
                                             variant="outlined" 
+                                            autoComplete="email"
+                                            {...getFieldProps('email')}
+                                            error={Boolean(touched.email && errors.email)}
+                                            helperText={touched.email && errors.email}
                                         />
                                     </Grid>
                                     <Grid item xs={2}>
-                                        <Button fullWidth sx={{px: 5, py: 1}} variant="outlined" color="primary">
+                                        <LoadingButton type="submit" loading={sending} fullWidth sx={{px: 5, py: 1}} variant="outlined" color="primary">
                                             Restaurar
-                                        </Button>
+                                        </LoadingButton>
                                     </Grid>
                                 </Grid>
+                            </Form>
+                        </FormikProvider>
 
+                        {alertSuccessMessage !== "" &&
+                            <Alert sx={{my: 3}} severity="success">
+                                {alertSuccessMessage}
+                            </Alert>
+                        }
+
+                        {alertErrorMessage !== "" &&
+                            <Alert sx={{my: 3}} severity="error">
+                                {alertErrorMessage}
+                            </Alert>
+                        }
+
+                        {data.length > 0 &&
+                            <div>
+                        
                                 <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>
                                     <DataGrid
                                         sx={{mb:3}}
-                                        rows={rows}
+                                        rows={data}
                                         columns={columns}
 
                                         // page={0}
@@ -206,11 +340,14 @@ export default function RestorePassword() {
                                     />
                                 </div>
 
-                                <div className="text-center">
-                                    <Button sx={{px: 5}} variant="contained" color="primary">
-                                        Restaurar
-                                    </Button>
-                                </div>
+                                {/* 
+                                    <div className="text-center">
+                                        <Button sx={{px: 5}} variant="contained" color="primary">
+                                            Restaurar
+                                        </Button>
+                                    </div>
+                                */}
+
                             </div>
                         }
 

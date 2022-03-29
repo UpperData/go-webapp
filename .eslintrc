@@ -70,6 +70,7 @@
     "react/jsx-key": 1,
     "jsx-boolean-value": 0,
     "react-hooks/rules-of-hooks": 2,
+    "no-plusplus": 0,
     "no-unused-vars": [
       1,
       {
