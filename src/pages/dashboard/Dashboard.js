@@ -18,6 +18,8 @@ import Permissions from './content/usuarios-y-permisos/Permissions';
 import CreateAccount from './content/usuarios-y-permisos/CreateAccount';
 import FichaPersonal from './content/rrhh/FichaPersonal';
 import InformeMedico from './content/citas/InformeMedico';
+import Asignacion from './content/inventario/Asignacion';
+import Inventario from './content/inventario/Inventario';
 
 
 function PrivateRoute({ children }) {
@@ -113,8 +115,8 @@ function Dashboard() {
                 <Route path="appointment/report"        element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
 
                 {/* inventario */}
-                <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                <Route path="InVeNTorY/assigment"       element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><Inventario /></PrivateRoute>}/>
+                <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
             </Route>
 
             <Route path="/login"  element={<Navigate to="/dashboard/app" replace />}/>

@@ -58,20 +58,26 @@ const MenuProps = {
 
 const dummyData = [
     {
-        id:     1,
-        name:   "Diclofenaco 10mg",
-        quantity:  5,
-        stock:  6000
+        id:             1,
+        name:           "Diclofenaco 10mg",
+        stock:          6000,
+        price:          200,
+        minimalStock:   100,
+        quantity:       150,
+        transito:       2000
     },
     {
-        id:     2,
-        name:   "Alcohol 30% 60ml",
-        quantity:  6,
-        stock:  3000
+        id:             2,
+        name:           "Alcohol 30% 60ml",
+        stock:          3000,
+        price:          200,
+        minimalStock:   100,
+        quantity:       150,
+        transito:       2000
     }
 ]
 
-function Asignacion() {
+function Inventario() {
 
     // const [data, setdata]               = useState(rows);
     const [count, setcount]             = useState(0);
@@ -240,7 +246,7 @@ function Asignacion() {
         { 
             field: 'name',     
             headerName: `Nombre`,
-            width: 300,
+            width: 200,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -251,14 +257,8 @@ function Asignacion() {
             }
         },
         { 
-            field: 'stock',     
-            headerName: `Existencia`,
-            width: 100,
-            sortable: false
-        },
-        { 
-            field: 'quantity',    
-            headerName: 'Cantidad',
+            field: 'stock',    
+            headerName: 'Existencia',
             sortable: false,
             width: 200,
             headerAlign: 'center',
@@ -295,19 +295,65 @@ function Asignacion() {
             }
         },
         { 
-            field: 'id',    
-            headerName: '',
+            field: 'price',    
+            headerName: 'Precio',
             sortable: false,
-            width: 200,
+            width: 120,
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let id   = data.row.id;
-                return  <Button type="button" size="small" sx={{py: 1, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
-                            Devolver a Almacén
-                        </Button>
+                let count = data.row.quantity;
+                return  <TextField
+                        hiddenLabel
+                        size='small'
+                        fullWidth
+                        autoComplete="lastname"
+                        type="number"
+                        label=""
+                        InputProps={{
+                            readOnly: true,
+                            style: {textAlign: 'center'}
+                        }}
+                        value={count}
+                    />
                             
             }
+        },
+        { 
+            field: 'minimalStock',    
+            headerName: 'Mínimo',
+            sortable: false,
+            width: 120,
+            headerAlign: 'center',
+            renderCell: (cellValues) => {
+                let data = cellValues;
+                let count = data.row.quantity;
+                return  <TextField
+                            hiddenLabel
+                            size='small'
+                            fullWidth
+                            autoComplete="lastname"
+                            type="number"
+                            label=""
+                            InputProps={{
+                                readOnly: true,
+                                style: {textAlign: 'center'}
+                            }}
+                            value={count}
+                        />
+            }
+        },
+        { 
+            field: 'quantity',     
+            headerName: `Almacén`,
+            width: 100,
+            sortable: false
+        },
+        { 
+            field: 'transito',     
+            headerName: `Transito`,
+            width: 100,
+            sortable: false
         }
     ];
 
@@ -383,7 +429,7 @@ function Asignacion() {
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">
-                    Asignación
+                    Inventario
                 </Typography>
             </Box>
 
@@ -423,7 +469,7 @@ function Asignacion() {
                             </Alert>
                         }
 
-                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 3}}>
+                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 5}}>
                             <Grid item lg={3}>
                                 <Button variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
                                     Nuevo Artículo
@@ -431,37 +477,13 @@ function Asignacion() {
                             </Grid>
                             <Grid item lg={4}>
                                 <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                    Descargar hoja asignación
+                                    Descargar Hoja de Inventario
                                 </Button>
-                            </Grid>
-                        </Grid>
-
-                        <Grid container columnSpacing={3} sx={{mb: 3}}>
-                            <Grid item lg={10}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="lastname"
-                                    type="text"
-                                    label="CI – Nombre - Apellido"
-                                />
-                            </Grid>
-                            <Grid item lg={2}>
-                                <ButtonGroup fullWidth aria-label="outlined button group">
-                                    <Button sx={{py: 1.5}} variant="outlined"><Icon icon={CaretUp} /></Button>
-                                    <Button sx={{py: 1.5}} variant="outlined"><Icon icon={CaretDown} /></Button>
-                                </ButtonGroup>
                             </Grid>
                         </Grid>
                     
                         {data !== null && data.length > 0 !== "" &&
                             <div>
-                                <Box sx={{textAlign: "right", mb: 3}}>
-                                    <Button type="button" size="small" sx={{py: 1, px: 5}} color="primary" variant="contained">
-                                        Devolver Todo
-                                    </Button>
-                                </Box>
-
                                 <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
                                     <DataGrid
                                         sx={{mb:4}}
@@ -482,6 +504,42 @@ function Asignacion() {
                                         // checkboxSelection
                                     />
                                 </div>
+
+                                <ul style={{listStyle: "none"}}>
+                                    <li>
+                                        <Typography variant="h6" color="success">
+                                            <i className="mdi mdi-checkbox-blank" />
+                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                    Satisfactorio:
+                                                </Typography> 
+                                                Articulo con alta solvencia.
+                                            </Typography>
+                                        </Typography>
+                                    </li>
+                                    <li>
+                                        <Typography variant="h6" color="warning">
+                                            <i className="mdi mdi-checkbox-blank" />
+                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                    Advertencia:
+                                                </Typography> 
+                                                Articulo cerca del stock mínimo.
+                                            </Typography>
+                                        </Typography>
+                                    </li>
+                                    <li>
+                                        <Typography variant="h6" color="primary">
+                                            <i className="mdi mdi-checkbox-blank" />
+                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                    Alerta:
+                                                </Typography> 
+                                                Articulo igual o por debajo del stock mínimo.
+                                            </Typography>
+                                        </Typography>
+                                    </li>
+                                </ul>
                             </div>
                         }
 
@@ -504,4 +562,4 @@ function Asignacion() {
 }
 
 
-export default Asignacion;
+export default Inventario;
