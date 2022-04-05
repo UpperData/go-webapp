@@ -167,10 +167,54 @@ header{
 .content-img-uploaded{
     min-height: 150px;
     background-color: #F4F6F8;
-    border: 2px solid #4C5863;
+    border: 2px solid #F4F6F8;
     border-radius: .4em;
+    position: relative;
 
     display: flex;
     align-items: center;
     justify-content: center;
+
+    .img-preview-data{
+        position: absolute;
+        display: block;
+        top:    0;
+        left:   0;
+        width:  100%;
+        height: 100%;
+
+        background-size: cover;
+        background-position: center center;
+    }
+}
+
+.img-fluid{
+    display: block;
+    width: 100%;
+}
+
+.button-label-to-uploader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0px;
+
+    input{
+        user-select: none;
+        display: none;
+    }
+}
+
+.input-file-absolute{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
 }

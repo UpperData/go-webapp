@@ -98,10 +98,10 @@ export default function AccountPopover() {
   }));
 
   const roleList = userData.role;
-  console.log(roleList);
+  // console.log(roleList);
 
   const changeRole = async (role) => {
-    console.log(role);
+    // console.log(role);
 
     setloadingRole(true);
     await dispatch(set_role(role));

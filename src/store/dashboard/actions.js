@@ -1,5 +1,5 @@
 import axios from '../../auth/fetch';
-import {SET_MENU, SET_ROLE} from '../types'
+import {SET_MENU, SET_ROLE, SET_CIVIL_STATUS_TYPES, SET_PHONE_TYPES_LIST, SET_PATIENT_TYPES} from '../types'
 
 export const set_menu = (role) => {
     let url = `/panel/mEnu/GeT/${role}`;
@@ -21,6 +21,7 @@ export const set_menu = (role) => {
     }
 }
 
+
 export const set_role = (role) => {
     let dataRole = role;
     localStorage.setItem("role", JSON.stringify(role));
@@ -31,5 +32,65 @@ export const set_role = (role) => {
             payload: dataRole
         })
             
+    }
+}
+
+export const set_phone_types_list = () => {
+    let url = `/phone/get/type/*`;
+
+    return async dispatch => {
+        await axios
+          .get(url)
+          .then(res => {
+            // console.log(res);
+
+            if(res){
+                dispatch({
+                    type: SET_PHONE_TYPES_LIST,
+                    payload: res
+                })
+            }
+          })
+          .catch(err => console.log(err + "action"))
+    }
+}
+
+export const set_civil_status_types_list = () => {
+    let url = `/civil/get/*`;
+
+    return async dispatch => {
+        await axios
+          .get(url)
+          .then(res => {
+            // console.log(res);
+
+            if(res){
+                dispatch({
+                    type: SET_CIVIL_STATUS_TYPES,
+                    payload: res
+                })
+            }
+          })
+          .catch(err => console.log(err + "action"))
+    }
+}
+
+export const set_patient_types = () => {
+    let url = `/pAtieNt/TYPE/geT/*`;
+
+    return async dispatch => {
+        await axios
+          .get(url)
+          .then(res => {
+            // console.log(res);
+
+            if(res){
+                dispatch({
+                    type: SET_PATIENT_TYPES,
+                    payload: res
+                })
+            }
+          })
+          .catch(err => console.log(err + "action"))
     }
 }

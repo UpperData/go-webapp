@@ -10,7 +10,7 @@ import Home from './content/Home';
 import InConstruction from '../InConstruction';
 
 import {useSelector, useDispatch} from "react-redux"
-import { set_menu, set_role } from '../../store/dashboard/actions';
+import { set_civil_status_types_list, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
 
 import RestorePassword from './content/usuarios-y-permisos/RestorePassword';
 import Security from './content/configuraciones/Security';
@@ -20,6 +20,7 @@ import FichaPersonal from './content/rrhh/FichaPersonal';
 import InformeMedico from './content/citas/InformeMedico';
 import Asignacion from './content/inventario/Asignacion';
 import Inventario from './content/inventario/Inventario';
+import AdministrarCita from './content/citas/Administrar';
 
 
 function PrivateRoute({ children }) {
@@ -65,6 +66,10 @@ function Dashboard() {
         // console.log(role);
 
         await dispatch(set_menu(role.id));
+        await dispatch(set_phone_types_list());
+        await dispatch(set_civil_status_types_list());
+        await dispatch(set_patient_types());
+
         setloaded(true);
     }
 
@@ -74,10 +79,9 @@ function Dashboard() {
                 if(searchData){
                     setsearchData(false);
                     // console.log(session.userData.data.role[0].id);
-    
                     getData();
                 }
-            }else if(dashboard.menu !== null){
+            }else if(dashboard.menu !== null && dashboard.civilStatusTypes !== null && dashboard.phoneTypesList !== null && dashboard.patientTypes !== null){
                 // console.log(dashboard);
                 setloading(false);
             }
@@ -103,7 +107,6 @@ function Dashboard() {
                 <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
                 <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
                     <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                
                     <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
                 
@@ -111,7 +114,7 @@ function Dashboard() {
                 <Route path="rRHH/EmPloyEE/FILE"        element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
             
                 {/* citas */}
-                <Route path="appointment/admin"         element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="appointment/admin"         element={<PrivateRoute><AdministrarCita /></PrivateRoute>}/>
                 <Route path="appointment/report"        element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
 
                 {/* inventario */}

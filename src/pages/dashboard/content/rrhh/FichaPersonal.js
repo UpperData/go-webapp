@@ -1,116 +1,386 @@
 import {useState} from "react"
 import * as Yup from 'yup';
 // material
-import { Radio, Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Radio, LinearProgress, Alert , Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { styled, alpha } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
-import SearchIcon from '@iconify/icons-ant-design/search';
+// import SearchIcon from '@iconify/icons-ant-design/search';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
 // components
 import Page from '../../../../components/Page';
-import {
-  AppTasks,
-  AppNewUsers,
-  AppBugReports,
-  AppItemOrders,
-  AppNewsUpdate,
-  AppWeeklySales,
-  AppOrderTimeline,
-  AppCurrentVisits,
-  AppWebsiteVisits,
-  AppTrafficBySite,
-  AppCurrentSubject,
-  AppConversionRates
-} from '../../../../components/_dashboard/app';
+import { useSelector } from "react-redux";
 
-const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(1),
-      width: 'auto',
-    },
-}));
+import Cargo from "./Components/Cargo";
+import ModalDirection from "./Components/ModalDirection";
+import UploaderImg from "./Components/UploaderImg";
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-}));
+import axios from "../../../../auth/fetch"
+import Loader from '../../../../components/Loader/Loader';
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-        width: '12ch',
-        '&:focus': {
-            width: '20ch',
-        },
-        },
-    },
-}));
+import { Icon } from '@iconify/react';
+import SearchIcon from "@iconify/icons-ic/search"
 
 export default function FichaPersonal() {
 
-    const [data, setdata]       = useState(null);
-    const [count, setcount]     = useState(0);
+    const [data, setdata]                   = useState(null);
+    const [count, setcount]                 = useState(0);
+    const [sending, setsending]             = useState(false);
 
-    const [typeDni, settypeDni]                         = useState("V");
+    const [selectedGender, setselectedGender]               = useState("");
+    const [selectedCivilStatus, setSelectedCivilStatus]     = useState("");
+
+    const [progress, setprogress] = useState(0);
+
+    const [selectedStatusAccount, setselectedStatusAccount] = useState(true);
+
+    const civilStatusTypesList  = useSelector(state => state.dashboard.civilStatusTypes.data.data);
+    const phoneTypesList        = useSelector(state => state.dashboard.phoneTypesList.data.data);
+
+    const [typePhone, setTypePhone]                         = useState("1");
+    const [typeDni, settypeDni]                             = useState("V");
+
+    const [showModalAddCargo,       setshowModalAddCargo]         = useState(false);
+    const [showModalAddDirection,   setshowModalAddDirection]     = useState(false);
+
+    const [cargo, setcargo]                                 = useState(null);
+    const [direction, setdirection]                         = useState(null);
+    const [photo, setphoto]                                 = useState(null);
+    const [photoCedula, setphotoCedula]                     = useState(null);
+
+    const [alertSuccessMessage, setalertSuccessMessage] = useState("");
+    const [alertErrorMessage,   setalertErrorMessage]   = useState("");
+
+    // SearchData
+    const [textSearchData, settextSearchData]   = useState("");
+    const [searchingData, setsearchingData]     = useState(false);
+    const [dataToEdit, setdataToEdit]           = useState(null);
+    const [idToEdit, setidToEdit]               = useState(null);
+    const [typeForm, settypeForm]               = useState("create");
+
+    const searchPersonalData = (setFieldValue) => {
+        let idSearch = textSearchData;
+        const urlSearchData = "/Admin/EMPLoyeeFILE/Get/";
+
+        setsearchingData(true);
+        setalertSuccessMessage("");
+        setalertErrorMessage("");
+
+        axios.get(urlSearchData+idSearch)
+        .then((res) => {
+            if(res.data.result){
+                console.log(res.data);
+                if(res.data.data !== null){
+                    let userData = res.data.data;
+                    setdataToEdit(userData);
+                    setsearchingData(false);
+                    settypeForm("edit");
+
+                    setselectedStatusAccount(userData.isActive);
+                    setFieldValue("name",           userData.fisrtName);
+                    setFieldValue("lastname",       userData.lastName);
+                    setFieldValue("email",          userData.email);
+
+                    setFieldValue("phoneNumber",    userData.phone[0].phoneNumber);
+                    setTypePhone(userData.phone[0].phoneType);
+                    
+                    setFieldValue("gender",           userData.documentId.gender);
+                    setFieldValue("birthday",         userData.documentId.birthday);
+                    setFieldValue("civilStatus",      userData.documentId.civilStatus.id);
+
+                    // let documentId = JSON.parse(userData.documentId);
+                    // console.log(documentId);civilStatus
+                    settypeDni(userData.documentId.nationality);
+                    setFieldValue("cedula", userData.documentId.number);
+
+                    setphoto(userData.photo);
+                    setphotoCedula(userData.digitalDoc);
+
+                    setcargo(userData.cargo);
+                    setdirection(userData.address);
+
+                    setidToEdit(idSearch);
+                    setFieldValue("observation",    userData.observation);
+                    settypeForm("edit");
+
+                }else{
+
+                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
+                    setsearchingData(false);
+                    setidToEdit(null);
+                    setdataToEdit(null);
+                    settypeForm("create");
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 15000);
+
+                }
+            }
+        }).catch((err) => {
+        
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+                setsearchingData(false);
+                setdataToEdit(null);
+                settypeForm("create");
+                setalertErrorMessage(err.response.data.data.message);
+            }
+
+        });
+    }
+
+
+    // console.log(civilStatusTypesList);
 
     const LoginSchema =     Yup.object().shape({
-        email:              Yup.string().required('Debe ingresar su email'),
-        gender:             Yup.string().required().oneOf(["M" , "H"], 'Debe seleccionar un género'),
-        cedula:             Yup.string().required('Ingrese la cedula de indentidad'),
 
+        gender:             Yup.string().required('Debe seleccionar un género'),
         name:               Yup.string().required('Debe ingresar un nombre'),
         lastname:           Yup.string().required('Debe ingresar su apellido'),
-        birthday:           Yup.date().nullable(),
 
-        membership:         Yup.string().required('Seleccione un tipo de membresia'),
+        civilStatus:        Yup.string().required('Debe seleccionar un estado civil'),
+        birthday:           Yup.date().required('Debe seleccionar su día de nacimiento'),
+
+        // ------
+        email:              Yup.string().required('Debe ingresar su email'),
+        phoneNumber:        Yup.string().required('Debe ingresar su teléfono'),
+        cedula:             Yup.string().required('Debe ingresar su cédula'),
     });
 
     const formik = useFormik({
         initialValues: {
-            email:      "",
-            gender:     "",
-            cedula:     "",
-            name:       "",
-            lastname:   "",
-            birthday:   null,
-            membership: ""
+            accountId       :null,
+            gender:         "",
+
+            name:           "",
+            lastname:       "",
+
+            civilStatus:    "",
+            birthday:       null,
+            email:          "",
+            phoneNumber:    "",
+            cedula:         "",
+            observation:    "",
+
+            // modales
+            address:        "",
+            cargo:          "",
+
+            // No se envian de momento
+            experiencia:    [],
+            cursos:         [],
+            academic:       [],
+            contacto:       []
         },
         validationSchema: LoginSchema,
-        onSubmit: async (values) => {
-          try {
-            // setformErrors("");
-            // await login(values.email, values.password);
-          } catch(e) {
-            // setformErrors(e);
-          }
+        onSubmit: async (values, {resetForm}) => {
+            try {
+
+                const urlSend = "/ADMin/eMPLoyEEFILE/ADd/";
+                const urlEdit = "/ADmin/emPLoyeeFiLE/EDiT/";
+
+                // civilStatusTypesList
+
+                let phoneList = [
+                    {
+                        phoneType:   typePhone,
+                        phoneNumber: values.phoneNumber
+                    }
+                ];
+
+                let getCivilStatus = civilStatusTypesList.find(item => item.id === values.civilStatus);
+                // console.log(getCivilStatus);
+
+                let data = {
+                    isActive: selectedStatusAccount,
+
+                    fisrtName:      values.name,
+                    lastName:       values.lastname,
+                    documentId:{
+                        nationality: typeDni,
+                        number:      values.cedula,
+                        birthday:    values.birthday,
+                        gender:      values.gender,
+                        civilStatus: getCivilStatus
+                    },
+
+                    // object
+                    address:        direction,
+                    cargo,  
+
+                    email:          values.email,
+
+                    accountId:      null,  
+                    experiencia:    [],
+                    cursos:         [],
+                    academic:       [],
+                    contacto:       [],
+
+                    phone:          phoneList,
+
+                    photo,
+                    digitalDoc:     photoCedula,
+
+                    observation:    values.observation
+                }
+
+                console.log(data);
+                setsending(true);
+
+                const config = {
+                    onUploadProgress: progressEvent => {
+                      let progressData = progress;
+                      progressData = (progressEvent.loaded / progressEvent.total) * 100;
+
+                      console.log(progressData);
+
+                      setprogress(progressData);
+                      setcount(count + progressData);
+                    }
+                }
+
+                if(typeForm === "create"){
+
+                    axios.post(
+                        urlSend,
+                        data,
+                        config
+                    ).then((res) => {
+
+                        console.log(res);
+                        setsending(false);
+
+                        if(res.data.result){
+                            setalertSuccessMessage(res.data.message);
+                            resetForm();
+
+                            setcargo(null);
+                            setdirection(null);
+                            setphoto(null);
+                            setphotoCedula(null);
+                            
+                            setprogress(0);
+                            setcount(0);
+
+                            setsearchingData(false);
+                            setidToEdit(null);
+                            setdataToEdit(null);
+                            settypeForm("create");
+
+                            setTimeout(() => {
+                                setalertSuccessMessage("");
+                            }, 20000);
+                        }
+
+                    }).catch((err) => {
+                        let fetchError = err;
+
+                        console.error(fetchError);
+                        if(fetchError.response){
+                            console.log(err.response);
+                            setalertErrorMessage(err.response.data.data.message);
+                            setTimeout(() => {
+                                setalertErrorMessage("");
+                            }, 20000);
+                            setsending(false);
+
+                            setsearchingData(false);
+                            setidToEdit(null);
+                            setdataToEdit(null);
+                            settypeForm("create");
+
+                            setprogress(0);
+                            setcount(0);
+                            // return Promise.reject(err.response.data.data);
+                        }
+                    });
+
+                }else if(typeForm === "edit"){
+
+                    data.id = idToEdit;
+
+                    axios.put(
+                        urlEdit,
+                        data,
+                        config
+                    ).then((res) => {
+
+                        console.log(res);
+                        setsending(false);
+
+                        if(res.data.result){
+                            setalertSuccessMessage(res.data.message);
+                            // resetForm();
+
+                            // setcargo(null);
+                            // setdirection(null);
+                            // setphoto(null);
+                            // setphotoCedula(null);
+                            
+                            setprogress(0);
+                            setcount(0);
+
+                            setTimeout(() => {
+                                setalertSuccessMessage("");
+                            }, 20000);
+                        }
+
+                    }).catch((err) => {
+                        let fetchError = err;
+
+                        console.error(fetchError);
+                        if(fetchError.response){
+                            console.log(err.response);
+                            setalertErrorMessage(err.response.data.data.message);
+                            setTimeout(() => {
+                                setalertErrorMessage("");
+                            }, 20000);
+                            setsending(false);
+
+                            setprogress(0);
+                            setcount(0);
+                            // return Promise.reject(err.response.data.data);
+                        }
+                    });
+
+                }
+                
+
+                // setformErrors("");
+                // await login(values.email, values.password);
+            } catch(e) {
+                // setformErrors(e);
+            }
         }
     });
 
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
+
+    const addCargo = (data) => {
+        setcargo(data);
+    }
+
+    const resetAllForm = () => {
+        resetForm();
+        setcargo(null);
+        setdirection(null);
+        setphoto(null);
+        setphotoCedula(null);
+
+        setsearchingData(false);
+        setidToEdit(null);
+        setdataToEdit(null);
+        settypeForm("create");
+        settextSearchData("");
+    }
+
+    // console.log(errors);
 
     return (
         <Page title="Ficha de empleado | Cema">
@@ -124,9 +394,22 @@ export default function FichaPersonal() {
                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                     <Grid sx={{ pb: 3 }} item xs={12}>
                         <Card sx={{py: 3, px: 5}}>
+
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
+
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
+
                             <Grid sx={{mb: 3}} container columnSpacing={3}>
                                 <Grid item lg={3}>
-                                    <Button variant="outlined" fullWidth>
+                                    <Button onClick={() => resetAllForm()} variant="outlined" fullWidth>
                                         Nuevo
                                     </Button>
                                 </Grid>
@@ -141,238 +424,417 @@ export default function FichaPersonal() {
                                     </Button>
                                 </Grid>
                                 <Grid item lg={3}>
-                                    <TextField
-                                        label="Buscar"
-                                        size="small"
-                                    />
+                                    <Grid container columnSpacing={1}>
+                                        <Grid item lg={9}>
+                                            <TextField
+                                                label="Buscar"
+                                                size="small"
+                                                value={textSearchData}
+                                                onChange={(e) => settextSearchData(e.target.value)}
+                                            />
+                                        </Grid>
+                                        <Grid item lg={3}>
+                                            <LoadingButton 
+                                                variant="contained" 
+                                                color="primary"
+                                                type="button"
+                                                sx={{ minWidth: "100%", width: "100%"}}
+                                                onClick={() => searchPersonalData(setFieldValue)}
+                                                loading={searchingData}
+                                                disabled={textSearchData === ""}
+                                            >
+                                                <i className="mdi mdi-magnify" />
+                                            </LoadingButton>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                             </Grid>
 
-                            <Grid container columnSpacing={3}>
-                                <Grid item lg={5}>
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <ButtonGroup fullWidth aria-label="outlined button group">
-                                            <Button sx={{py: .81}} variant="outlined">Hombre</Button>
-                                            <Button sx={{py: .81}} variant="outlined">Mujer</Button>
-                                        </ButtonGroup>
-                                    </Stack>
+                            {!searchingData &&
+                                <div>
+                                    <Grid container columnSpacing={3}>
+                                        <Grid item lg={5}>
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                <ButtonGroup fullWidth aria-label="outlined button group">
+                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "H")} variant={values.gender === "H"  ? "contained" : "outlined"}>Hombre</Button>
+                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "M")} variant={values.gender === "M"  ? "contained" : "outlined"}>Mujer</Button>
+                                                </ButtonGroup>
+                                            </Stack>
 
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                            <TextField
-                                                size='small'
-                                                fullWidth
-                                                autoComplete="name"
-                                                type="text"
-                                                label="Nombres"
-                                                {...getFieldProps('name')}
-                                                error={Boolean(touched.name && errors.name)}
-                                                helperText={touched.name && errors.name}
-                                            />         
-                                        </Stack>
+                                            {touched.gender && errors.gender &&
+                                                <Alert sx={{mb: 3}} severity="error">
+                                                    {errors.gender}
+                                                </Alert>
+                                            }
 
-                                        <Stack spacing={3} sx={{my: 2}}>
-                                            <TextField
-                                                size='small'
-                                                fullWidth
-                                                autoComplete="lastname"
-                                                type="text"
-                                                label="Apellidos"
-                                                {...getFieldProps('lastname')}
-                                                error={Boolean(touched.lastname && errors.lastname)}
-                                                helperText={touched.lastname && errors.lastname}
-                                            />
-                                        </Stack>
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                    <TextField
+                                                        size='small'
+                                                        fullWidth
+                                                        autoComplete="name"
+                                                        type="text"
+                                                        label="Nombres"
 
-                                        <Stack spacing={3} sx={{my: 2}}>
-                                            <ButtonGroup fullWidth aria-label="outlined button group">
-                                                <Button sx={{py: .81}} variant="outlined">Casado</Button>
-                                                <Button sx={{py: .81}} variant="outlined">Soltero</Button>
-                                                <Button sx={{py: .81}} variant="outlined">Divorciado</Button>
-                                                <Button sx={{py: .81}} variant="outlined">Viudo</Button>
-                                            </ButtonGroup>
-                                        </Stack>
+                                                        {...getFieldProps('name')}
+                                                        error={Boolean(touched.name && errors.name)}
+                                                        helperText={touched.name && errors.name}
+                                                    />         
+                                                </Stack>
 
-                                        <Stack spacing={3} sx={{my: 2}}>
-                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                <DatePicker
-                                                    label="Fecha Nacimiento"
-                                                    value={formik.values.birthday}
-                                                    onChange={(value) => {
-                                                        formik.setFieldValue('birthday', value);
-                                                    }}
-                                                    
-                                                    renderInput={
-                                                        (params) => <TextField 
-                                                                    fullWidth
-                                                                    size='small' 
-                                                                    {...getFieldProps('birthday')}
-                                                                    helperText={touched.birthday && errors.birthday} 
-                                                                    error={Boolean(touched.birthday && errors.birthday)} 
-                                                                    {...params} 
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <TextField
+                                                        size='small'
+                                                        fullWidth
+                                                        autoComplete="lastname"
+                                                        type="text"
+                                                        label="Apellidos"
+
+                                                        {...getFieldProps('lastname')}
+                                                        error={Boolean(touched.lastname && errors.lastname)}
+                                                        helperText={touched.lastname && errors.lastname}
+                                                    />
+                                                </Stack>
+
+                                                {civilStatusTypesList.length > 0 &&
+                                                    <Stack spacing={3} sx={{my: 2}}>
+                                                        <ButtonGroup fullWidth aria-label="outlined button group">
+                                                        
+                                                            {civilStatusTypesList.map((item, key) => {
+                                                                let datacivilstatusitem = item;
+                                                                return  <Button key={key} onClick={() => setFieldValue("civilStatus", item.id)} variant={values.civilStatus === item.id  ? "contained" : "outlined"} sx={{py: .81}}>
+                                                                            {datacivilstatusitem.name}
+                                                                        </Button>
+                                                            })}
+                                                            
+                                                        </ButtonGroup>
+                                                    </Stack>
+                                                }
+
+                                                {touched.civilStatus && errors.civilStatus &&
+                                                    <Alert sx={{mb: 3}} severity="error">
+                                                        {errors.civilStatus}
+                                                    </Alert>
+                                                }
+
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                        <DatePicker
+                                                            label="Fecha Nacimiento"
+                                                            value={formik.values.birthday}
+                                                            onChange={(value) => {
+                                                                formik.setFieldValue('birthday', value);
+                                                            }}
+                                                            
+                                                            renderInput={
+                                                                (params) => <TextField 
+                                                                            fullWidth
+                                                                            size='small' 
+                                                                            {...getFieldProps('birthday')}
+                                                                            helperText={touched.birthday && errors.birthday} 
+                                                                            error={Boolean(touched.birthday && errors.birthday)} 
+                                                                            {...params} 
+                                                                />
+                                                            }
                                                         />
-                                                    }
-                                                />
-                                            </LocalizationProvider>
-                                        </Stack>
-                                </Grid>
+                                                    </LocalizationProvider>
+                                                </Stack>
+                                        </Grid>
 
-                                <Grid item lg={4}>
-                                    <Stack spacing={3} sx={{my: 2}}>
+                                        <Grid item lg={4}>
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                <TextField
+                                                    size='small'
+                                                    fullWidth
+                                                    autoComplete="email"
+                                                    type="email"
+                                                    label="Email"
+                                                    {...getFieldProps('email')}
+                                                    error={Boolean(touched.email && errors.email)}
+                                                    helperText={touched.email && errors.email}
+                                                />
+                                            </Stack>
+
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                <Grid container columnSpacing={1}>
+                                                    <Grid item xs={9}>
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            autoComplete="phoneNumber"
+                                                            type="text"
+                                                            label="Teléfono"
+                                                            {...getFieldProps('phoneNumber')}
+                                                            error={Boolean(touched.phoneNumber && errors.phoneNumber)}
+                                                            helperText={touched.phoneNumber && errors.phoneNumber}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <Select
+                                                            size="small"
+                                                            fullWidth
+                                                            value={typePhone}
+                                                            onChange={(e) => setTypePhone(e.target.value)}
+                                                            displayEmpty
+                                                            inputProps={{ 'aria-label': 'Without label' }}
+                                                        >
+                                                            {phoneTypesList.map((item, key) => {
+                                                                let itemPhoneType = item;
+                                                                return  <MenuItem key={key} value={item.id}>
+                                                                            {item.name}
+                                                                        </MenuItem>
+                                                            })}
+                                                        </Select>
+                                                    </Grid>
+                                                </Grid>
+                                            </Stack>
+
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                <Grid container columnSpacing={1}>
+                                                    <Grid item xs={9}>
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            autoComplete="cedula"
+                                                            type="text"
+                                                            label="Cédula"
+                                                            {...getFieldProps('cedula')}
+                                                            error={Boolean(touched.cedula && errors.cedula)}
+                                                            helperText={touched.cedula && errors.cedula}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <Select
+                                                            size="small"
+                                                            fullWidth
+                                                            value={typeDni}
+                                                            onChange={(e) => settypeDni(e.target.value)}
+                                                            displayEmpty
+                                                            inputProps={{ 'aria-label': 'Without label' }}
+                                                        >
+                                                            <MenuItem value="V">V</MenuItem>
+                                                            <MenuItem value="E">E</MenuItem>
+                                                        </Select>
+                                                    </Grid>
+                                                </Grid>
+                                            </Stack>
+
+
+                                            <UploaderImg 
+                                                file={photoCedula}
+                                                id="uploader-foto-cedula" 
+                                                onChange={(data) => setphotoCedula(data)} 
+                                                showPreview 
+                                                returnFileType="base64" 
+                                                renderType="Linear" 
+                                                placeholder="Adjuntar cédula"
+                                            />
+
+
+                                            <Stack spacing={3} sx={{my: 2}}>
+                                                <ButtonGroup fullWidth aria-label="outlined button group">
+                                                    <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(true)}   variant={selectedStatusAccount ? "contained" : "outlined"}>Activo</Button>
+                                                    <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(false)} variant={!selectedStatusAccount ? "contained" : "outlined"}>Inactivo</Button>
+                                                </ButtonGroup>
+                                            </Stack>
+                                        </Grid>
+
+                                        <Grid item lg={3}>
+                                            <UploaderImg 
+                                                file={photo}
+                                                id="uploader-foto-ficha" 
+                                                onChange={(data) => setphoto(data)} 
+                                                showPreview 
+                                                returnFileType="base64" 
+                                                renderType="Stack" 
+                                                placeholder="Explorar"
+                                            />
+                                        </Grid>
+                                    </Grid>
+
+                                    <div id="content-list-data-user">
+                                        <Grid sx={{ my:3 }} container columnSpacing={3}>
+                                            <Grid lg={3} item>
+                                                {cargo === null &&
+                                                    <Button sx={{py: 1.5}} onClick={() => setshowModalAddCargo(true)} variant="contained" color="secondary" fullWidth>
+                                                        Agregar cargo
+                                                    </Button>
+                                                }
+
+                                                {cargo !== null &&
+                                                    <Button sx={{py: 1.5}} onClick={() => setcargo(null)} variant="contained" color="primary" fullWidth>
+                                                        Eliminar cargo
+                                                    </Button>
+                                                }
+                                            </Grid>
+                                            <Grid lg={9} item>
+                                                {cargo === null &&
+                                                    <div>
+                                                        <Alert severity="info">
+                                                            No se ha seleccionado un cargo
+                                                        </Alert>
+                                                    </div>
+                                                }
+
+                                                {cargo !== null &&
+                                                    <div>
+                                                        <Grid container columnSpacing={3}> 
+                                                            <Grid item lg={4}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Dirección
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {cargo.direccion.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item lg={4}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Departamento
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {cargo.departamento.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item lg={4}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Cargo
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {cargo.cargo.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </div>
+                                                }
+                                            </Grid>
+                                        </Grid>
+
+                                        <Grid sx={{ my:3 }} container columnSpacing={3}>
+                                            <Grid lg={3} item>
+                                                {direction === null &&
+                                                    <Button sx={{py: 1.5}} onClick={() => setshowModalAddDirection(true)} variant="contained" color="secondary" fullWidth>
+                                                        Agregar dirección
+                                                    </Button>
+                                                }
+
+                                                {direction !== null &&
+                                                    <Button sx={{py: 1.5}} onClick={() => setdirection(null)} variant="contained" color="primary" fullWidth>
+                                                        Eliminar dirección
+                                                    </Button>
+                                                }
+                                            </Grid>
+                                            <Grid lg={9} item>
+                                                {direction === null &&
+                                                    <div>
+                                                        <Alert severity="info">
+                                                            No se ha seleccionado una dirección
+                                                        </Alert>
+                                                    </div>
+                                                }
+
+                                                {direction !== null &&
+                                                    <div>
+                                                        <Grid container columnSpacing={3}> 
+                                                            <Grid item lg={2}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Estado
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {direction.estado.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item lg={3}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Municipio
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {direction.municipio.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item lg={3}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Parroquia
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {direction.parroquia.name}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item lg={3}>
+                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                    Dirección
+                                                                </Typography>
+                                                                <Typography>
+                                                                    {direction.address}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </div>
+                                                }
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+
+                                    <Stack spacing={3} sx={{mt: 3}}>
                                         <TextField
                                             size='small'
                                             fullWidth
-                                            autoComplete="email"
-                                            type="email"
-                                            label="Email"
-                                            {...getFieldProps('email')}
-                                            error={Boolean(touched.email && errors.email)}
-                                            helperText={touched.email && errors.email}
+                                            autoComplete="observation"
+                                            type="text"
+                                            label="Observación"
+                                            multiline
+                                            minRows={4}
+                                            maxRows={6}
+                                            {...getFieldProps('observation')}
+                                            error={Boolean(touched.observation && errors.observation)}
+                                            helperText={touched.observation && errors.observation}
                                         />
                                     </Stack>
 
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <Grid container columnSpacing={1}>
-                                            <Grid item xs={9}>
-                                                <TextField
-                                                    size='small'
-                                                    fullWidth
-                                                    autoComplete="cedula"
-                                                    type="text"
-                                                    label="Teléfono"
-                                                    {...getFieldProps('cedula')}
-                                                    error={Boolean(touched.cedula && errors.cedula)}
-                                                    helperText={touched.cedula && errors.cedula}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Select
-                                                    size="small"
-                                                    fullWidth
-                                                    value={typeDni}
-                                                    onChange={(val) => settypeDni(val)}
-                                                    displayEmpty
-                                                    inputProps={{ 'aria-label': 'Without label' }}
-                                                >
-                                                    <MenuItem value="V">V</MenuItem>
-                                                    <MenuItem value="E">E</MenuItem>
-                                                </Select>
-                                            </Grid>
-                                        </Grid>
-                                    </Stack>
+                                    {progress > 0 &&
+                                        <LinearProgress sx={{mt: 3}} color="success" variant="determinate" value={progress} />
+                                    }
 
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <Grid container columnSpacing={1}>
-                                            <Grid item xs={9}>
-                                                <TextField
-                                                    size='small'
-                                                    fullWidth
-                                                    autoComplete="cedula"
-                                                    type="text"
-                                                    label="Cédula"
-                                                    {...getFieldProps('cedula')}
-                                                    error={Boolean(touched.cedula && errors.cedula)}
-                                                    helperText={touched.cedula && errors.cedula}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Select
-                                                    size="small"
-                                                    fullWidth
-                                                    value={typeDni}
-                                                    onChange={(val) => settypeDni(val)}
-                                                    displayEmpty
-                                                    inputProps={{ 'aria-label': 'Without label' }}
-                                                >
-                                                    <MenuItem value="V">V</MenuItem>
-                                                    <MenuItem value="E">E</MenuItem>
-                                                </Select>
-                                            </Grid>
-                                        </Grid>
-                                    </Stack>
+                                    {typeForm === "create" &&
+                                        <LoadingButton
+                                            fullWidth
+                                            size="large"
+                                            type="submit"
+                                            variant="contained"
+                                            loading={sending}
+                                            color="primary"
+                                            sx={{mt: 3}}
+                                        >
+                                            Guardar
+                                        </LoadingButton>
+                                    }
 
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <Grid container alignItems="center" columnSpacing={0}>
-                                            <Grid item xs={6}>
-                                                <TextField
-                                                    size='small'
-                                                    fullWidth
-                                                    autoComplete="cedula"
-                                                    type="text"
-                                                    label="Adjunta Cédula"
-                                                    {...getFieldProps('cedula')}
-                                                    error={Boolean(touched.cedula && errors.cedula)}
-                                                    helperText={touched.cedula && errors.cedula}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Button fullWidth sx={{py: .81}} variant="outlined">
-                                                    ...
-                                                </Button>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Button fullWidth sx={{py: .81}} variant="contained" color="secondary">
-                                                    Ver
-                                                </Button>
-                                            </Grid>
-                                        </Grid>
-                                    </Stack>
+                                    {typeForm === "edit" &&
+                                        <LoadingButton
+                                            fullWidth
+                                            size="large"
+                                            type="submit"
+                                            variant="contained"
+                                            loading={sending}
+                                            color="secondary"
+                                            sx={{mt: 3}}
+                                        >
+                                            Editar
+                                        </LoadingButton>
+                                    }
 
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <ButtonGroup fullWidth aria-label="outlined button group">
-                                            <Button sx={{py: .81}} variant="outlined">Activo</Button>
-                                            <Button sx={{py: .81}} variant="outlined">Inactivo</Button>
-                                        </ButtonGroup>
-                                    </Stack>
-                                </Grid>
+                                </div>
+                            }
 
-                                <Grid item lg={3}>
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <div className="content-img-uploaded">
-                                            Foto de perfil
-                                        </div>
-                                    </Stack>
-                                    <Stack spacing={3} sx={{my: 2}}>
-                                        <label className="content-upload-label" htmlFor="contained-button-file">
-                                            <Input accept="image/*" id="contained-button-file" multiple type="file" />
-                                            <Button fullWidth variant="contained" component="span">
-                                                Explorar
-                                            </Button>
-                                        </label>
-                                    </Stack>
-                                </Grid>
-                            </Grid>
-
-                            <Stack spacing={3} sx={{mt: 3}}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="lastname"
-                                    type="text"
-                                    label="Apellidos"
-                                    multiline
-                                    rows={4}
-                                    maxRows={6}
-                                    {...getFieldProps('lastname')}
-                                    error={Boolean(touched.lastname && errors.lastname)}
-                                    helperText={touched.lastname && errors.lastname}
-                                />
-                            </Stack>
-
-                            <LoadingButton
-                                fullWidth
-                                size="large"
-                                type="submit"
-                                variant="contained"
-                                loading={isSubmitting}
-                                color="primary"
-                                sx={{mt: 3}}
-                            >
-                                Guardar
-                            </LoadingButton>
+                            {searchingData &&
+                                <Loader />
+                            }
                         </Card>
                     </Grid>
                 </Form>
             </FormikProvider>
+
+            <Cargo save={(data) => addCargo(data)} show={showModalAddCargo} hide={() => setshowModalAddCargo(false)} />
+            <ModalDirection save={(data) => setdirection(data)} show={showModalAddDirection} hide={() => setshowModalAddDirection(false)} />
+
         </Container>
         </Page>
     );

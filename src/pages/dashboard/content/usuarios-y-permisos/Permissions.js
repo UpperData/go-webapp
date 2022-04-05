@@ -122,6 +122,7 @@ function Permissions() {
                 axios.get(urlGetPermissions)
                 .then((res) => {
 
+                    console.log(res.data);
                     let permissionsList = res.data.data;
 
                     for (let j = 0; j < permissionsList.length; j++) {
