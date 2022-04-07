@@ -1,15 +1,16 @@
 import {useState, useEffect} from "react"
 import * as Yup from 'yup';
 // material
-import { Radio, Alert, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Radio, Alert, ButtonGroup, LinearProgress, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { styled, alpha } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import SearchIcon from '@iconify/icons-ant-design/search';
 import { useFormik, Form, FormikProvider } from 'formik';
-import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
+import { LoadingButton, DatePicker, LocalizationProvider, TimePicker  } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+
 
 import { useSelector } from "react-redux";
 
@@ -18,13 +19,14 @@ import CaretDown from "@iconify/icons-ant-design/caret-down"
 import CaretUp from "@iconify/icons-ant-design/caret-up"
 import CaretRight from "@iconify/icons-ant-design/caret-right"
 import CaretLeft from "@iconify/icons-ant-design/caret-left"
+import Scrollbar from "../../../../components/Scrollbar";
 
 import axios from "../../../../auth/fetch"
 import Loader from '../../../../components/Loader/Loader';
 
 // components
 import Page from '../../../../components/Page';
-import ModalDirection from "../rrhh/Components/ModalDirection";
+import ModalDirection from "./ModalDirection";
 
 export default function AdministrarCita() {
 
@@ -33,6 +35,11 @@ export default function AdministrarCita() {
     const [data, setdata]                               = useState(null);
     const [count, setcount]                             = useState(0);
     const [examsSelected,       setexamsSelected]       = useState([]);
+
+    const [sending, setsending] = useState(false);
+    const [progress, setprogress] = useState(0);
+    const [alertSuccessMessage, setalertSuccessMessage] = useState("");
+    const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
     const phoneTypesList        = useSelector(state => state.dashboard.phoneTypesList.data.data);
     const patientTypesList      = useSelector(state => state.dashboard.patientTypes.data);
@@ -43,22 +50,170 @@ export default function AdministrarCita() {
     const [showModalAddDirection,   setshowModalAddDirection]       = useState(false);
     const [direction, setdirection]                                 = useState(null);
 
-    const [withExams, setwithExams]                     = useState(false);
-    const [withMedicine, setwithMedicine]               = useState(false);
+    const [withExams,       setwithExams]               = useState(false);
+    const [withMedicine,    setwithMedicine]            = useState(false);
+
+    const [doctors, setdoctors]                         = useState(null);
+    const [nurses, setnurses]                           = useState(null);
+    const [personalTypes, setpersonalTypes]             = useState(null);
+    const [appointmentTypes, setappointmentTypes]       = useState(null);
+
+    const [doctorsSelected, setdoctorsSelected]         = useState([]);
+    const [nursesSelected, setnursesSelected]           = useState([]);
 
     const [selectedGender, setselectedGender]           = useState("");
 
-    const urlGetPersonal    = "/EMplOyeFIle/BYGRoUP/get/?grp=1&grp=2";
+    // SearchData
+    const [textSearchData, settextSearchData]   = useState("");
+    const [searchingData, setsearchingData]     = useState(false);
+    const [dataToEdit, setdataToEdit]           = useState(null);
+    const [idToEdit, setidToEdit]               = useState(null);
+    const [typeForm, settypeForm]               = useState("create");
 
-    const getPersonal = () => {
-        axios.get(urlGetPersonal)
+    const urlGetPersonal            = "/EMplOyeFIle/BYGRoUP/get/?grp=7&grp=6";
+    const urlGetPatientType         = "/pAtieNt/TYPE/geT/*";
+    const urlGetAppointmentTypes    = "/APpOINtMENt/typE/*"; 
+
+    const toggleValueToList = async (value, list, setter) => {
+        let newList = list;
+        // console.log(newList);
+        let verify  = newList.find(item => item === value);
+
+        if(verify){
+            // delete
+            newList = newList.filter(item => item !== value);
+            await setter(newList);
+        }else{
+            // add
+            newList.push(value);
+            await setter(newList);
+        }
+
+        await setcount(count + 5);
+        console.log(newList);
+    }
+
+    const searchDataToEdit = (setFieldValue) => {
+        let idSearch = textSearchData;
+        const urlSearchData = "/APPOINtMent/get/";
+
+        setsearchingData(true);
+        setalertSuccessMessage("");
+        setalertErrorMessage("");
+
+        axios.get(urlSearchData+idSearch)
         .then((res) => {
-
-            console.log("-----");
-
             if(res.data.result){
                 console.log(res.data);
-                setloading(false);
+                if(res.data.data !== null){
+                    let dataToEdit = res.data.data;
+
+                    setdirection(dataToEdit.address);
+
+                    setFieldValue("appointmentTypeId",   dataToEdit.appointmentTypeId);
+                    setFieldValue("foreignId",           dataToEdit.foreignId);
+                    setFieldValue("siniestroId",         dataToEdit.siniestroId);
+
+                    setFieldValue("dateAppointment",     dataToEdit.dateAppointment);
+                    setFieldValue("hourAppointment",     dataToEdit.hourAppointment);
+
+                    setFieldValue("name",                dataToEdit.patient.nombre);
+                    setFieldValue("lastname",            dataToEdit.patient.apellido);
+                    setFieldValue("birthday",            dataToEdit.patient.edad);
+                    setFieldValue("patientTypeId",       dataToEdit.patient.patientTypeId);
+
+                    setFieldValue("gender",              dataToEdit.patient.document.gender);
+                    setFieldValue("cedula",              dataToEdit.patient.document.number);
+
+                    setFieldValue("direction",           dataToEdit.address.address);
+
+                    setTypePhone(dataToEdit.patient.phone[0].phoneType);
+                    setFieldValue("phoneNumber",         dataToEdit.patient.phone[0].phoneNumber);
+                    
+                    setidToEdit(idSearch);
+                    setdataToEdit(dataToEdit);
+                    settypeForm("edit");
+                    setsearchingData(false);
+
+
+                    let newListNurses   = [];
+                    let newListDoctors  = [];
+                    newListNurses.push(dataToEdit.medialPersonal.nurses.employeeId);
+                    newListDoctors.push(dataToEdit.medialPersonal.doctor.employeeId);
+
+                    setnursesSelected(newListNurses);
+                    setdoctorsSelected(newListDoctors);
+
+                }else{
+
+                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
+                    setsearchingData(false);
+                    setidToEdit(null);
+                    setdataToEdit(null);
+                    settypeForm("create");
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 15000);
+
+                }
+            }
+        }).catch((err) => {
+        
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+                setsearchingData(false);
+                setdataToEdit(null);
+                settypeForm("create");
+                setalertErrorMessage(err.response.data.data.message);
+            }
+
+        });
+    }
+
+    const getData = () => {
+        // Empleados (medico, enfermera)
+        axios.get(urlGetPersonal)
+        .then((res) => {
+            console.log(res.data);
+            let dataList = res.data.data;
+
+            if(dataList.length > 0){
+
+                setdoctors(dataList[0].accountRoles);
+                setnurses(dataList[1].accountRoles);
+
+                // Tipo de paciente
+                axios.get(urlGetPatientType)
+                .then((res) => {
+
+                    console.log("-----");
+
+                    if(res.data.result){
+                        setpersonalTypes(res.data.data);
+
+                        // Tipo de cita
+                        axios.get(urlGetAppointmentTypes)
+                        .then((res) => {
+
+                            console.log("-----");
+
+                            if(res.data.result){
+                                setappointmentTypes(res.data.data);
+                                console.log(res.data);
+                                setloading(false);
+                            }
+
+                        }).catch((err) => {
+                            console.error(err);
+                        });
+                    }
+
+                }).catch((err) => {
+                    console.error(err);
+                });
+
             }
 
         }).catch((err) => {
@@ -69,36 +224,157 @@ export default function AdministrarCita() {
     useEffect(async () => {
         if(loading){
             if(search){
-                getPersonal();
+                getData();
             }
         }
      }, []);
 
     const LoginSchema =     Yup.object().shape({
-        email:              Yup.string().required('Debe ingresar su email'),
-        gender:             Yup.string().required().oneOf(["M" , "H"], 'Debe seleccionar un género'),
-        cedula:             Yup.string().required('Ingrese la cedula de indentidad'),
+        appointmentTypeId:  Yup.string().required('Debe seleccionar el tipo de cita'),
+        foreignId:          Yup.string().required('Debe ingresar el id de la cita'),
+        siniestroId:        Yup.string().required('Debe ingresar el número siniestro'),
 
+        dateAppointment:    Yup.date().required('Día de la cita').nullable(),
+        hourAppointment:    Yup.date().required('Hora de la cita').nullable(),
+
+        direction:          Yup.string().required('Debe ingresar su dirección'),
+
+        gender:             Yup.string().required('Debe seleccionar un género'),
+        cedula:             Yup.string().required('Debe ingresar su cédula'),
         name:               Yup.string().required('Debe ingresar un nombre'),
         lastname:           Yup.string().required('Debe ingresar su apellido'),
-        birthday:           Yup.date().nullable(),
 
-        membership:         Yup.string().required('Seleccione un tipo de membresia'),
+        birthday:           Yup.date().required('Debe seleccionar su día de nacimiento').nullable(),
+        patientTypeId:      Yup.string().required('Debe seleccionar el tipo de paciente'),
+        phoneNumber:        Yup.string().required('Debe ingresar su teléfono')
     });
 
     const formik = useFormik({
         initialValues: {
-            email:      "",
-            gender:     "",
-            cedula:     "",
-            name:       "",
-            lastname:   "",
-            birthday:   null,
-            membership: ""
+            appointmentTypeId: "1",
+            foreignId: "",
+            siniestroId: "",
+            dateAppointment: null,
+            hourAppointment: null,
+
+            direction: "",
+
+            gender: "H",
+            cedula: "",
+            name: "",
+            lastname: "",
+            birthday: null,
+            patientTypeId: "1",
+            phoneNumber: "",
         },
         validationSchema: LoginSchema,
-        onSubmit: async (values) => {
+        onSubmit: async (values, {resetForm}) => {
           try {
+
+            let dataAddress     = direction;
+            dataAddress.address = values.direction;
+
+            let data = {
+                dateAppointment:    values.appointmentTypeId,
+                hourAppointment:    values.hourAppointment,
+                foreignId:          values.foreignId,
+                siniestroId:        values.siniestroId,
+
+                address:            dataAddress,
+                isOpened:           true,
+
+                // cambiar a medical
+                medialPersonal:     {
+                    nurses: {employeeId: nursesSelected[0]},
+                    doctor: {employeeId: doctorsSelected[0]}
+                },
+
+                appointmentTypeId:  values.appointmentTypeId,
+                
+                birthdate:          values.birthday,
+                firstName:          values.name,
+                lastName:           values.lastname,
+                cedula:             values.cedula,
+                nationality:        typeDni,
+                gender:             values.gender,
+                patientTypeId:      values.patientTypeId,
+
+                phone:              [{ phoneType: typePhone, phoneNumber: values.phoneNumber }]
+            }
+
+            console.log(data);
+
+            if(typeForm === "create"){
+                const urlCreate = "/APpOINtMeNt/NEW/";
+
+                setsending(true);
+                axios.post(urlCreate, data).then((res) => {
+                    if(res.data.result){
+                        setalertSuccessMessage(res.data.message);
+                        setsending(false);
+                        resetForm();
+
+                        setTypePhone("1");
+                        settypeDni("V");
+
+                        setdoctorsSelected([]);
+                        setnursesSelected([]);
+
+                        setdirection(null);
+
+                        settextSearchData("");
+                        setsearchingData(false);
+                        setdataToEdit(null);
+                        setidToEdit(null);
+                        settypeForm("create");
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
+                    }
+                }).catch((err) => {
+                    let fetchError = err;
+                    console.error(fetchError);
+
+                    if(fetchError.response){
+                        setalertErrorMessage(err.response.data.data.message);
+                        setTimeout(() => {
+                            setalertErrorMessage("");
+                        }, 20000);
+
+                        setsending(false);
+                    }
+                });
+            }else{
+                const urlEdit = "/APpOINtMeNt/NEW/";
+                data.id         = idToEdit;
+                data.patientId  = dataToEdit.patientId;
+
+                setsending(true);
+                axios.put(urlEdit, data).then((res) => {
+                    if(res.data.result){
+                        setalertSuccessMessage(res.data.message);
+                        setsending(false);
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
+                    }
+                }).catch((err) => {
+                    let fetchError = err;
+                    console.error(fetchError);
+
+                    if(fetchError.response){
+                        setalertErrorMessage(err.response.data.data.message);
+                        setTimeout(() => {
+                            setalertErrorMessage("");
+                        }, 20000);
+
+                        setsending(false);
+                    }
+                });
+            }
+
             // setformErrors("");
             // await login(values.email, values.password);
           } catch(e) {
@@ -107,26 +383,8 @@ export default function AdministrarCita() {
         }
     });
 
-    const toggleValueToExams = async (value) => {
-        let newList = examsSelected;
-        // console.log(newList);
-        let verify  = newList.find(item => item === value);
 
-        if(verify){
-            // delete
-            newList = newList.filter(item => item !== value);
-            await setexamsSelected(newList);
-        }else{
-            // add
-            newList.push(value);
-            await setexamsSelected(newList);
-        }
-
-        await setcount(count + 5);
-        console.log(newList);
-    }
-
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
     const changeWithMedicine = (showMedicine) => {
         setwithMedicine(showMedicine);
@@ -136,6 +394,30 @@ export default function AdministrarCita() {
         setwithExams(showWithExams);
     }
 
+    // console.log(doctors);
+
+    const reset = () => {
+        setsending(false);
+        setprogress(0);
+        setalertSuccessMessage("");
+        setalertErrorMessage("");
+
+        setTypePhone("1");
+        settypeDni("V");
+
+        setdoctorsSelected([]);
+        setnursesSelected([]);
+
+        setdirection(null);
+
+        settextSearchData("");
+        setsearchingData(false);
+        setdataToEdit(null);
+        setidToEdit(null);
+        settypeForm("create");
+
+        resetForm();
+    }
 
     return (
         <Page title="Ficha de empleado | Cema">
@@ -149,11 +431,24 @@ export default function AdministrarCita() {
                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                     <Grid sx={{ pb: 3 }} item xs={12}>
                         <Card sx={{py: 3, px: 5}}>
+
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
+
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
+
                             {!loading &&
                                 <Box>
                                     <Grid sx={{mb: 3}} container columnSpacing={3}>
                                         <Grid item lg={3}>
-                                            <Button variant="outlined" fullWidth>
+                                            <Button onClick={() => reset()} variant="outlined" fullWidth>
                                                 Nuevo
                                             </Button>
                                         </Grid>
@@ -168,12 +463,132 @@ export default function AdministrarCita() {
                                             </Button>
                                         </Grid>
                                         <Grid item lg={3}>
-                                            <TextField
-                                                label="Buscar cita"
-                                                size="small"
-                                            />
+                                            <Grid container columnSpacing={1}>
+                                                <Grid item lg={9}>
+                                                    <TextField
+                                                        label="Buscar"
+                                                        size="small"
+                                                        value={textSearchData}
+                                                        onChange={(e) => settextSearchData(e.target.value)}
+                                                    />
+                                                </Grid>
+                                                <Grid item lg={3}>
+                                                    <LoadingButton 
+                                                        variant="contained" 
+                                                        color="primary"
+                                                        type="button"
+                                                        sx={{ minWidth: "100%", width: "100%"}}
+                                                        onClick={() => searchDataToEdit(setFieldValue)}
+                                                        loading={searchingData}
+                                                        disabled={textSearchData === ""}
+                                                    >
+                                                        <i className="mdi mdi-magnify" />
+                                                    </LoadingButton>
+                                                </Grid>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
+
+                                    {/* 
+                                    <Typography variant="h4" sx={{mb: 3}}>
+                                        {typeForm === "create" ? "Generar cita" : "Editar cita"}
+                                    </Typography>
+                                    */}
+
+                                    <div>
+                                        <Grid container columnSpacing={3}>
+                                            <Grid item lg={3}>
+                                                {appointmentTypes.length > 0 &&
+                                                    <Stack spacing={3}>
+                                                        <ButtonGroup fullWidth aria-label="outlined button group">
+                                                        
+                                                            {appointmentTypes.map((item, key) => {
+                                                                let appointmentTypesitem = item;
+                                                                return  <Button 
+                                                                            key={key} 
+                                                                            onClick={() => setFieldValue("appointmentTypeId", appointmentTypesitem.id)} 
+                                                                            variant={values.appointmentTypeId.toString() === appointmentTypesitem.id.toString()  ? "contained" : "outlined"} 
+                                                                            sx={{py: .81}}
+                                                                        >
+                                                                            {appointmentTypesitem.name}
+                                                                        </Button>
+                                                            })}
+                                                            
+                                                        </ButtonGroup>
+                                                    </Stack>
+                                                }
+
+                                                {
+                                                    /*
+                                                    touched.patientTypeId && errors.patientTypeId &&
+                                                    <Alert sx={{mb: 3}} severity="error">
+                                                        {errors.patientTypeId}
+                                                    </Alert>
+                                                    */
+                                                }
+                                            </Grid>
+                                            <Grid item lg={2}>
+                                                <TextField
+                                                    label="Id"
+                                                    size="small"
+
+                                                    {...getFieldProps('foreignId')}
+                                                    error={Boolean(touched.foreignId && errors.foreignId)}
+                                                    helperText={touched.foreignId && errors.foreignId}
+                                                />
+                                            </Grid>
+                                            <Grid item lg={2}>
+                                                <TextField
+                                                    label="Núm. Siniestro"
+                                                    size="small"
+
+                                                    {...getFieldProps('siniestroId')}
+                                                    error={Boolean(touched.siniestroId && errors.siniestroId)}
+                                                    helperText={touched.siniestroId && errors.siniestroId}
+                                                />
+                                            </Grid>
+                                            <Grid item lg={3}>
+                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                    <DatePicker
+                                                        label="Fecha Cita"
+                                                        value={values.dateAppointment}
+                                                        onChange={(value) => {
+                                                            formik.setFieldValue('dateAppointment', value);
+                                                        }}
+                                                        
+                                                        renderInput={
+                                                            (params) => <TextField 
+                                                                        fullWidth
+                                                                        size='small' 
+                                                                        {...getFieldProps('dateAppointment')}
+                                                                        helperText={touched.dateAppointment && errors.dateAppointment} 
+                                                                        error={Boolean(touched.dateAppointment && errors.dateAppointment)} 
+                                                                        {...params} 
+                                                            />
+                                                        }
+                                                    />
+                                                </LocalizationProvider>
+                                            </Grid>
+                                            <Grid item lg={2}>
+                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                    <TimePicker
+                                                        label="Hora"
+                                                        value={values.hourAppointment}
+                                                        onChange={(value) => {
+                                                            formik.setFieldValue('hourAppointment', value);
+                                                        }}
+                                                        renderInput={(params) => <TextField 
+                                                                                {...params} 
+                                                                                size='small' 
+                                                                                {...getFieldProps('hourAppointment')}
+                                                                                helperText={touched.hourAppointment && errors.hourAppointment} 
+                                                                                error={Boolean(touched.hourAppointment && errors.hourAppointment)} 
+                                                        />}
+                                                    />
+                                                </LocalizationProvider>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
 
                                     <div>
                                         <Grid sx={{ my:3 }} container columnSpacing={3}>
@@ -210,7 +625,7 @@ export default function AdministrarCita() {
                                                                     {direction.estado.name}
                                                                 </Typography>
                                                             </Grid>
-                                                            <Grid item lg={3}>
+                                                            <Grid item lg={4}>
                                                                 <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                     Municipio
                                                                 </Typography>
@@ -218,20 +633,22 @@ export default function AdministrarCita() {
                                                                     {direction.municipio.name}
                                                                 </Typography>
                                                             </Grid>
+                                                            {direction.ciudad &&
+                                                                <Grid item lg={3}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Ciudad
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {direction.ciudad.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            }
                                                             <Grid item lg={3}>
                                                                 <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                     Parroquia
                                                                 </Typography>
                                                                 <Typography>
                                                                     {direction.parroquia.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={3}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Dirección
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {direction.address}
                                                                 </Typography>
                                                             </Grid>
                                                         </Grid>
@@ -251,9 +668,9 @@ export default function AdministrarCita() {
                                             multiline
                                             minRows={4}
                                             maxRows={6}
-                                            {...getFieldProps('address')}
-                                            error={Boolean(touched.address && errors.address)}
-                                            helperText={touched.address && errors.address}
+                                            {...getFieldProps('direction')}
+                                            error={Boolean(touched.direction && errors.direction)}
+                                            helperText={touched.direction && errors.direction}
                                         />
                                     </Stack>
 
@@ -266,10 +683,16 @@ export default function AdministrarCita() {
 
                                             <Stack spacing={3} sx={{my: 2}}>
                                                 <ButtonGroup fullWidth aria-label="outlined button group">
-                                                    <Button sx={{py: .81}} onClick={() => setselectedGender("H")} variant={selectedGender === "H"  ? "contained" : "outlined"}>Hombre</Button>
-                                                    <Button sx={{py: .81}} onClick={() => setselectedGender("M")} variant={selectedGender === "M"  ? "contained" : "outlined"}>Mujer</Button>
+                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "H")} variant={values.gender === "H"  ? "contained" : "outlined"}>Hombre</Button>
+                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "M")} variant={values.gender === "M"  ? "contained" : "outlined"}>Mujer</Button>
                                                 </ButtonGroup>
                                             </Stack>
+
+                                            {touched.gender && errors.gender &&
+                                                <Alert sx={{mb: 3}} severity="error">
+                                                    {errors.gender}
+                                                </Alert>
+                                            }
 
                                             <Stack spacing={3} sx={{my: 2}}>
                                                 <Grid container columnSpacing={1}>
@@ -331,12 +754,40 @@ export default function AdministrarCita() {
 
                                         </Grid>
                                         <Grid item lg={6}>
-                                            
+
                                             <Stack spacing={3} sx={{my: 2}}>
+                                                {personalTypes.length > 0 &&
+                                                    <Stack spacing={3}>
+                                                        <ButtonGroup fullWidth aria-label="outlined button group">
+                                                        
+                                                            {personalTypes.map((item, key) => {
+                                                                let personalTypesitem = item;
+                                                                return  <Button 
+                                                                            key={key} 
+                                                                            onClick={() => setFieldValue("patientTypeId", personalTypesitem.id)} 
+                                                                            variant={values.patientTypeId.toString() === personalTypesitem.id.toString()  ? "contained" : "outlined"} 
+                                                                            sx={{py: .81}}
+                                                                        >
+                                                                            {personalTypesitem.name}
+                                                                        </Button>
+                                                            })}
+                                                            
+                                                        </ButtonGroup>
+                                                    </Stack>
+                                                }
+
+                                                {touched.patientTypeId && errors.patientTypeId &&
+                                                    <Alert sx={{mb: 3}} severity="error">
+                                                        {errors.patientTypeId}
+                                                    </Alert>
+                                                }
+                                            </Stack>
+                                            
+                                            <Stack spacing={3} sx={{mb: 2}}>
                                                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                     <DatePicker
                                                         label="Fecha Nacimiento"
-                                                        value={formik.values.birthday}
+                                                        value={values.birthday}
                                                         onChange={(value) => {
                                                             formik.setFieldValue('birthday', value);
                                                         }}
@@ -347,7 +798,7 @@ export default function AdministrarCita() {
                                                                         size='small' 
                                                                         {...getFieldProps('birthday')}
                                                                         helperText={touched.birthday && errors.birthday} 
-                                                                        error={Boolean(touched.birthday && errors.birthday)} 
+                                                                        error={Boolean(touched.phoneNumber && errors.phoneNumber)} 
                                                                         {...params} 
                                                             />
                                                         }
@@ -391,36 +842,126 @@ export default function AdministrarCita() {
                                         </Grid>
                                     </Grid>
 
-                                    <Typography variant="h5" sx={{mb: 1}}>
+                                    <Typography variant="h5" sx={{mb: 3}}>
                                         Personal Asignado
                                     </Typography>
 
-                                    <Grid container>
+                                    <Grid container columnSpacing={3}>
                                         <Grid item lg={6}>
-                                            <Typography variant="h5">
-                                                Médico
-                                            </Typography>
+                                            <Card sx={{p: 3}}>
+                                                <Typography sx={{mb: 3}} align="center" variant="h6">
+                                                    Seleccionar Médico
+                                                </Typography>
+
+                                                <List>
+                                                    {doctors.length > 0 &&
+                                                        
+                                                            <Scrollbar
+                                                                sx={{
+                                                                    height: "auto",
+                                                                    maxHeight: 320,
+                                                                    '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                }}
+                                                            >
+                                                            {doctors.map((doctor, key) => {
+                                                                let item = doctor;
+                                                                return <ListItem 
+                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                        disablePadding
+                                                                        key={key}
+                                                                    >
+                                                                        <ListItemButton 
+                                                                            selected={doctorsSelected.includes(item.account.accountId)} 
+                                                                            onClick={() => toggleValueToList(item.account.accountId, doctorsSelected, setdoctorsSelected)}
+                                                                        >
+                                                                            <Typography color="primary" component="span" sx={{mr: 2}}>
+                                                                                <i className='mdi mdi-checkbox-blank-circle' />
+                                                                            </Typography>
+                                                                            <ListItemText primary={item.account.name} />
+                                                                        </ListItemButton>
+                                                                    </ListItem>
+                                                            })}
+                                                            </Scrollbar>
+                                                        
+                                                    }
+                                                </List>
+                                            </Card>
                                         </Grid>
                                         <Grid item lg={6}>
-                                            <Typography variant="h5">
-                                                Enfermera
-                                            </Typography>
+                                            <Card sx={{p: 3}}>
+                                                <Typography sx={{mb: 3}} align="center" variant="h6">
+                                                    Enfermera
+                                                </Typography>
+
+                                                <List>
+                                                    {nurses.length > 0 &&
+                                                        
+                                                            <Scrollbar
+                                                                sx={{
+                                                                    height: "auto",
+                                                                    maxHeight: 320,
+                                                                    '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                }}
+                                                            >
+                                                            {nurses.map((nurse, key) => {
+                                                                let item = nurse;
+                                                                return <ListItem 
+                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                        disablePadding
+                                                                        key={key}
+                                                                    >
+                                                                        <ListItemButton 
+                                                                            selected={nursesSelected.includes(item.account.accountId)} 
+                                                                            onClick={() => toggleValueToList(item.account.accountId, nursesSelected, setnursesSelected)}
+                                                                        >
+                                                                            <Typography color="primary" component="span" sx={{mr: 2}}>
+                                                                                <i className='mdi mdi-checkbox-blank-circle' />
+                                                                            </Typography>
+                                                                            <ListItemText primary={item.account.name} />
+                                                                        </ListItemButton>
+                                                                    </ListItem>
+                                                            })}
+                                                            </Scrollbar>
+                                                        
+                                                    }
+                                                </List>
+                                            </Card>
                                         </Grid>
                                     </Grid>
 
-                                    <LoadingButton
-                                        fullWidth
-                                        size="large"
-                                        type="submit"
-                                        variant="contained"
-                                        loading={isSubmitting}
-                                        color="primary"
-                                        sx={{mt: 4}}
-                                    >
-                                        Guardar
-                                    </LoadingButton>
+                                    {progress > 0 &&
+                                        <LinearProgress sx={{mt: 3}} color="success" variant="determinate" value={progress} />
+                                    }
 
-                                    <ModalDirection save={(data) => setdirection(data)} show={showModalAddDirection} hide={() => setshowModalAddDirection(false)} />
+                                    {typeForm === "create" &&
+                                        <LoadingButton
+                                            fullWidth
+                                            size="large"
+                                            type="submit"
+                                            variant="contained"
+                                            loading={sending}
+                                            color="primary"
+                                            sx={{mt: 3}}
+                                        >
+                                            Guardar
+                                        </LoadingButton>
+                                    }
+
+                                    {typeForm === "edit" &&
+                                        <LoadingButton
+                                            fullWidth
+                                            size="large"
+                                            type="submit"
+                                            variant="contained"
+                                            loading={sending}
+                                            color="secondary"
+                                            sx={{mt: 3}}
+                                        >
+                                            Editar
+                                        </LoadingButton>
+                                    }
+
+                                    <ModalDirection withoutDirection save={(data) => setdirection(data)} show={showModalAddDirection} hide={() => setshowModalAddDirection(false)} />
                                 </Box>
                             }
 

@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import * as Yup from 'yup';
 import { styled, alpha } from '@mui/material/styles';
 import { Radio, Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
-import axios from "../../../../../auth/fetch"
+import axios from "../../../../auth/fetch"
 import { useFormik, Form, FormikProvider } from 'formik';
 
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -38,18 +38,18 @@ function ModalDirection(props) {
     const [parroquias,  setparroquias]              = useState([]);
 
     const LoginSchema =     Yup.object().shape({
-        estado:             Yup.string().required("Debe seleccionar un estado"),
-        municipio:          Yup.string().required("Debe seleccionar un municipio"),
+        estado:             Yup.string().required("Debe seleccionar un  estado"),
+        municipio:          Yup.string().required("Debe seleccionar un  municipio"),
+        ciudad:             Yup.string().required("Debe seleccionar una ciudad"),
         parroquia:          Yup.string().required("Debe seleccionar una parroquia"),
-        address:            Yup.string(),
     });
 
     const formik = useFormik({
         initialValues: {
             estado:      "",
             municipio:   "",
+            ciudad:      "",
             parroquia:   "",
-            address:     ""
         },
         validationSchema: LoginSchema,
         onSubmit: async (values, {resetForm}) => {
@@ -58,12 +58,13 @@ function ModalDirection(props) {
             let estado          = getDataFromList(estados,      'id', Number(values.estado));
             let municipio       = getDataFromList(municipios,   'id', Number(values.municipio));
             let parroquia       = getDataFromList(parroquias,   'id', Number(values.parroquia));
+            let ciudad          = getDataFromList(ciudades,     'id', Number(values.ciudad));
 
             let data = {
                 estado,
                 municipio,
                 parroquia,
-                address: values.address
+                ciudad
             }
 
             // console.log(data);
@@ -128,9 +129,10 @@ function ModalDirection(props) {
 
     const changeState = (setFieldValue, value) =>{
 
-        setFieldValue('estado', value);
-        setFieldValue("municipio", "");
-        setFieldValue("parroquia", "");
+        setFieldValue('estado',     value);
+        setFieldValue("municipio",  "");
+        setFieldValue("ciudad",     "");
+        setFieldValue("parroquia",  "");
 
         axios.get(urlGetMunicipios+value)
         .then((res) => {
@@ -141,6 +143,21 @@ function ModalDirection(props) {
                 let data = res.data.data;
                 // console.log(res.data.data);
                 setmunicipios(data);
+
+                axios.get(urlGetCiudades+value)
+                .then((res) => {
+
+                    // console.log("-----");
+                    // console.log(res.data);
+                    if(res.data.result){
+                        let data = res.data.data;
+                        // console.log(res.data.data);
+                        setciudades(data);
+                    }
+                }).catch((err) => {
+                    let error = err.response; 
+                });
+
             }
 
         }).catch((err) => {
@@ -248,6 +265,36 @@ function ModalDirection(props) {
                                 <Grid sx={{my:1}} item lg={6}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
+                                            Ciudad
+                                        </InputLabel>
+                                        <Select
+                                            fullWidth
+                                            labelId="demo-simple-select-autowidth-label"
+                                            id="demo-simple-select-autowidth"
+                                            defaultValue=""
+                                            value={values.ciudad}
+                                            onChange={(e) => setFieldValue("ciudad", `${e.target.value}`)}
+                                            label="Ciudad"
+                                            MenuProps={MenuProps}
+                                            disabled={ciudades.length === 0}
+
+                                            // {...getFieldProps('departamento')}
+                                            error={Boolean(touched.ciudad && errors.ciudad)}
+                                            // helperText={touched.departamento && errors.departamento}
+                                        >
+                                            {ciudades.map((item, key) => {
+                                                let dataItem = item;
+                                                return <MenuItem key={key} value={dataItem.id.toString()}>
+                                                            {dataItem.name}
+                                                        </MenuItem>
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                <Grid sx={{my:1}} item lg={6}>
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel id="demo-simple-select-autowidth-label">
                                             Municipio
                                         </InputLabel>
                                         <Select
@@ -275,7 +322,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={12}>
+                                <Grid sx={{my:1}} item lg={6}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Parroquia
@@ -304,28 +351,11 @@ function ModalDirection(props) {
                                             })}
                                         </Select>
                                     </FormControl>
-                                </Grid>
-
-                                
-                                <Grid sx={{my:1}} item lg={12}>
-                                    
-                                    <TextField
-                                        size='small'
-                                        fullWidth
-                                        type="text"
-                                        label="Dirección"
-                                        {...getFieldProps('address')}
-                                        error={Boolean(touched.address && errors.address)}
-                                        helperText={touched.address && errors.address}
-                                    />
-                                
-                                </Grid>
-                                
-                                
+                                </Grid>         
                             </Grid>
 
                             <Box sx={{mt: 3}}>
-                                <LoadingButton type="submit" loading={isSubmitting} disabled={(values.address === "" || values.parroquia === "" || parroquias.length === 0)} sx={{px:3, mx:2}} color="primary" variant="contained" size="large">
+                                <LoadingButton type="submit" loading={isSubmitting} disabled={(values.address === "" || values.parroquia === "" || parroquias.length === 0 || values.ciuciudades === "" ||ciudades.length === 0)} sx={{px:3, mx:2}} color="primary" variant="contained" size="large">
                                     Agregar
                                 </LoadingButton>
                                 <Button onClick={() => hideModal()} sx={{px:3, mx:2}} size="large">
