@@ -154,6 +154,7 @@ export default function FichaPersonal() {
     });
 
     const formik = useFormik({
+        validateOnChange: false,
         initialValues: {
             accountId       :null,
             gender:         "",

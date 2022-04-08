@@ -81,11 +81,53 @@ function Cargo(props) {
         });
     }
 
+    const LoginSchema =     Yup.object().shape({
+        direccion:          Yup.string().required("Debe seleccionar una direccion"),
+        departamento:       Yup.string().required("Debe seleccionar un departamento"),
+        cargo:              Yup.string().required("Debe seleccionar un cargo")
+    });
+
+    const formik = useFormik({
+        initialValues: {
+            direccion:      "",
+            departamento:   "",
+            cargo:          ""
+        },
+        validationSchema: LoginSchema,
+        onSubmit: async (values, {resetForm}) => {
+          try {
+            // console.log(values);
+            
+            let direccion = getDataFromList(departmentList, 'id', Number(values.direccion));
+            let departamento = getDataFromList(subDepartmentList, 'id', Number(values.departamento));
+            let cargo = getDataFromList(cargoList, 'id', Number(values.cargo));
+
+            let data = {
+                direccion,
+                departamento,
+                cargo
+            }
+
+            // console.log("Add cargo:", data);
+            await props.save(data);
+            hideModal();
+            // setformErrors("");
+            // await login(values.email, values.password);
+
+          } catch(e) {
+            // setformErrors(e);
+          }
+        }
+    });
+
+    const { errors, resetForm ,touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue } = formik;
+
+
     const changeSubDepartment = (setFieldValue, value) => {
         setFieldValue('departamento', value);
         setFieldValue('cargo',        "");
         
-        axios.get(urlGetCargo+value)
+        axios.get(urlGetCargo+values.direccion)
         .then((res) => {
 
             // console.log("-----");
@@ -128,47 +170,6 @@ function Cargo(props) {
             }
         }
     }, []);
-
-    const LoginSchema =     Yup.object().shape({
-        direccion:          Yup.string().required("Debe seleccionar una direccion"),
-        departamento:       Yup.string().required("Debe seleccionar un departamento"),
-        cargo:              Yup.string().required("Debe seleccionar un cargo")
-    });
-
-    const formik = useFormik({
-        initialValues: {
-            direccion:      "",
-            departamento:   "",
-            cargo:          ""
-        },
-        validationSchema: LoginSchema,
-        onSubmit: async (values, {resetForm}) => {
-          try {
-            // console.log(values);
-            
-            let direccion = getDataFromList(departmentList, 'id', Number(values.direccion));
-            let departamento = getDataFromList(subDepartmentList, 'id', Number(values.departamento));
-            let cargo = getDataFromList(cargoList, 'id', Number(values.cargo));
-
-            let data = {
-                direccion,
-                departamento,
-                cargo
-            }
-
-            // console.log("Add cargo:", data);
-            await props.save(data);
-            hideModal();
-            // setformErrors("");
-            // await login(values.email, values.password);
-
-          } catch(e) {
-            // setformErrors(e);
-          }
-        }
-    });
-
-    const { errors, resetForm ,touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue } = formik;
 
     const hideModal = () => {
         props.hide();

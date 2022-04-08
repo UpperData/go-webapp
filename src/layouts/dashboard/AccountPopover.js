@@ -92,7 +92,7 @@ export default function AccountPopover() {
   const BtnRoleStyle = styled(Button)(({ theme }) => ({
     boxShadow: 'none',
     textAlign: 'center',
-    padding: theme.spacing(5, 5),
+    padding: theme.spacing(3, 3),
     margin: "auto",
     // backgroundColor: "#fff"
   }));
@@ -152,7 +152,13 @@ export default function AccountPopover() {
                       let data = item;
                       if(item.id !== dashboard.role.id){
                         return (
-                          <BtnRoleStyle onClick={() => changeRole(item)} variant="outlined" color="secondary" sx={{mt: 3}} key={key}>
+                          <BtnRoleStyle 
+                            onClick={() => changeRole(item)} 
+                            // variant="outlined" 
+                            color="primary" 
+                            sx={{mt: 3, mx: 1}} 
+                            key={key}
+                          >
                             {data.name}
                           </BtnRoleStyle>
                         )
