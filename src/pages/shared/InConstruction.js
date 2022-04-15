@@ -4,10 +4,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, Card, Button, Typography, Container } from '@mui/material';
 // components
-import { MotionContainer, varBounceIn } from '../components/animate';
-import Page from '../components/Page';
+import { MotionContainer, varBounceIn } from '../../components/animate';
+import Page from '../../components/Page';
 
-import DashboardLayout from '../layouts/dashboard';
+import DashboardLayout from '../../layouts/dashboard';
 // ----------------------------------------------------------------------
 
 const RootStyle = styled(Page)(({ theme }) => ({
@@ -22,7 +22,7 @@ const RootStyle = styled(Page)(({ theme }) => ({
 
 export default function InConstruction() {
   return (
-    <RootStyle title="404 Page Not Found | Minimal-UI">
+    <RootStyle title="CEMA">
         <Container>
             <Card sx={{ margin: 'auto', textAlign: 'center', py: 5 }}>
                 <motion.div variants={varBounceIn}>

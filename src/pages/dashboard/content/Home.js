@@ -49,7 +49,7 @@ const IconWrapperStyle = styled('div')(({ theme }) => ({
 
 export default function Home() {
   return (
-    <Page title="Dashboard | Minimal-UI">
+    <Page title="Dashboard | CEMA">
       <Container maxWidth="xl">
         <Box sx={{ pb: 3 }}>
           <Typography variant="h4">CEMA online - Dashboard</Typography>

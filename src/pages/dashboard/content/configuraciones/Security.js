@@ -42,7 +42,7 @@ export default function Security() {
     };
 
     return (
-        <Page title="Dashboard | Minimal-UI">
+        <Page title="Seguridad | CEMA">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

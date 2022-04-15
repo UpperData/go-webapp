@@ -872,21 +872,25 @@ export default function AdministrarCita() {
                                                                 >
                                                                 {doctors.map((doctor, key) => {
                                                                     let item = doctor;
-                                                                    return <ListItem 
-                                                                            // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                            disablePadding
-                                                                            key={key}
-                                                                        >
-                                                                            <ListItemButton 
-                                                                                selected={doctorsSelected.includes(item.account.employeeFiles[0].id)} 
-                                                                                onClick={() => toggleValueToList(item.account.employeeFiles[0].id, doctorsSelected, setdoctorsSelected)}
+                                                                    if(item.account.employeeFiles.length > 0){
+                                                                        return <ListItem 
+                                                                                // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                disablePadding
+                                                                                key={key}
                                                                             >
-                                                                                <Typography color="primary" component="span" sx={{mr: 2}}>
-                                                                                    <i className='mdi mdi-checkbox-blank-circle' />
-                                                                                </Typography>
-                                                                                <ListItemText primary={item.account.name} />
-                                                                            </ListItemButton>
-                                                                        </ListItem>
+                                                                                <ListItemButton 
+                                                                                    selected={doctorsSelected.includes(item.account.employeeFiles[0].id)} 
+                                                                                    onClick={() => toggleValueToList(item.account.employeeFiles[0].id, doctorsSelected, setdoctorsSelected)}
+                                                                                >
+                                                                                    <Typography color="primary" component="span" sx={{mr: 2}}>
+                                                                                        <i className='mdi mdi-checkbox-blank-circle' />
+                                                                                    </Typography>
+                                                                                    <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`}  />
+                                                                                </ListItemButton>
+                                                                            </ListItem>
+                                                                    }
+
+                                                                    return ""
                                                                 })}
                                                                 </Scrollbar>
                                                             
@@ -912,6 +916,7 @@ export default function AdministrarCita() {
                                                                 >
                                                                 {nurses.map((nurse, key) => {
                                                                     let item = nurse;
+                                                                    if(item.account.employeeFiles.length > 0){
                                                                     return <ListItem 
                                                                             // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
                                                                             disablePadding
@@ -924,9 +929,12 @@ export default function AdministrarCita() {
                                                                                 <Typography color="primary" component="span" sx={{mr: 2}}>
                                                                                     <i className='mdi mdi-checkbox-blank-circle' />
                                                                                 </Typography>
-                                                                                <ListItemText primary={item.account.name} />
+                                                                                <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`} />
                                                                             </ListItemButton>
                                                                         </ListItem>
+                                                                    }
+
+                                                                    return ""
                                                                 })}
                                                                 </Scrollbar>
                                                             

@@ -11,7 +11,9 @@ import Loader from '../../../../../components/Loader/Loader';
 
 function Info() {
 
-    const [formErrors, setformErrors]     = useState("");
+    const [sending, setsending]                         = useState(false);
+
+    const [formErrors, setformErrors]                   = useState("");
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
@@ -45,6 +47,7 @@ function Info() {
             // setformErrors("");
             // await login(values.email, values.password);
 
+            setsending(true);
             setalertSuccessMessage("");
             setalertErrorMessage("");
 
@@ -59,7 +62,8 @@ function Info() {
                 console.log(res.data);
 
                 if(res.data.result){
-                    setalertSuccessMessage(res.data.data.message);
+                    setalertSuccessMessage(res.data.message);
+                    setsending(false);
                     resetForm();
 
                     setTimeout(() => {
@@ -73,7 +77,13 @@ function Info() {
                 console.error(fetchError);
                 if(fetchError.response){
                     console.log(err.response);
-                    setalertErrorMessage(err.response.data.data.message);
+                    setalertErrorMessage(err.response.data.message);
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 20000);
+
+                    setsending(false);
                     // return Promise.reject(err.response.data.data);
                 }
             });
@@ -157,7 +167,7 @@ function Info() {
                                     size="large"
                                     type="submit"
                                     variant="contained"
-                                    loading={isSubmitting}
+                                    loading={sending}
                                     color="primary"
                                     sx={{mt: 5}}
                                 >

@@ -379,7 +379,7 @@ function Asignacion() {
     }
 
     return (
-        <Page title="Dashboard | Minimal-UI">
+        <Page title="Roles | CEMA">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

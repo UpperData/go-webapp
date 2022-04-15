@@ -27,12 +27,13 @@ export default function LogoOnlyLayout() {
       <HeaderStyle>
         <Grid container>
           <Grid item xs={6} md={4}>
-            <RouterLink to="/">
-              <img src="/static/isotipo.png" width="100px" alt="logo" />
-            </RouterLink>
+            
+              <RouterLink to="/">
+                <img src="/static/isotipo.png" width="100px" alt="logo" />
+              </RouterLink>
+            
           </Grid>
         </Grid>
-        
       </HeaderStyle>
       <Outlet />
     </>

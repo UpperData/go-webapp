@@ -140,7 +140,7 @@ export default function CreateAccount() {
                 console.error(fetchError);
                 if(fetchError.response){
                     console.log(err.response);
-                    setalertErrorMessage(err.response.data.message);
+                    setalertErrorMessage(err.response.data.message || err.response.data.data.message);
                     setsending(false);
                     // return Promise.reject(err.response.data.data);
                 }
@@ -177,7 +177,7 @@ export default function CreateAccount() {
     }
 
     return (
-        <Page title="Dashboard | Minimal-UI">
+        <Page title="Crear cuenta | CEMA">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

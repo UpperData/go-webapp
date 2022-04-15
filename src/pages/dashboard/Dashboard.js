@@ -7,7 +7,8 @@ import Loader from "../../components/Loader/Loader"
 import DashboardLayout from '../../layouts/dashboard';
 
 import Home from './content/Home';
-import InConstruction from '../InConstruction';
+import InConstruction from '../shared/InConstruction';
+import Page404 from '../shared/Page404';
 
 import {useSelector, useDispatch} from "react-redux"
 import { set_civil_status_types_list, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
@@ -21,6 +22,9 @@ import InformeMedico from './content/citas/InformeMedico';
 import Asignacion from './content/inventario/Asignacion';
 import Inventario from './content/inventario/Inventario';
 import AdministrarCita from './content/citas/Administrar';
+import TokenExpired from '../shared/TokenExpired';
+import VerifyEmail from '../shared/verifyEmail';
+import Perfil from './content/configuraciones/Perfil';
 
 
 function PrivateRoute({ children }) {
@@ -94,6 +98,7 @@ function Dashboard() {
 
     return (
         <Routes>
+
             <Route path="/dashboard" element={<DashboardLayout />} >
                 {/* dashboard */}
                 <Route path="app"    element={<PrivateRoute><Home /></PrivateRoute>}/>
@@ -101,7 +106,7 @@ function Dashboard() {
 
                 {/* config */}
                 <Route path="ACcoUNt/securE"    element={<PrivateRoute><Security /></PrivateRoute>}/>
-                <Route path="ACcoUNt/prOfile"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="ACcoUNt/prOfile"    element={<PrivateRoute><Perfil /></PrivateRoute>}/>
 
                 {/* users */}
                 <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
@@ -122,6 +127,9 @@ function Dashboard() {
                 <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
             </Route>
 
+            <Route path="*"       element={<Page404 />} />
+            <Route path="/verify/email" element={<VerifyEmail />} />
+            <Route path="/session-expired" element={<TokenExpired />} />
             <Route path="/login"  element={<Navigate to="/dashboard/app" replace />}/>
             <Route path="/"       element={<Navigate to="/dashboard/app" replace />}/>
         </Routes>

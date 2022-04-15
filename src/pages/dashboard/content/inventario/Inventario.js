@@ -425,7 +425,7 @@ function Inventario() {
     }
 
     return (
-        <Page title="Dashboard | Minimal-UI">
+        <Page title="Inventario | CEMA">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup';
-import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField, Button } from '@mui/material';
+import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField, Button, Modal } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
 
 import {useSelector, useDispatch} from "react-redux"
@@ -15,6 +15,8 @@ function Email() {
     const [formErrors, setformErrors]       = useState("");
     const [isVerify, setisVerify]           = useState(false);
     const [isVerifyMsg, setisVerifyMsg]     = useState("");
+
+    const [showModalConfirm, setshowModalConfirm] = useState(false);
 
     const [sending, setsending] = useState(false);
 
@@ -79,6 +81,16 @@ function Email() {
         })
     });
 
+    const style = {
+        width: "95%",
+        margin: "auto",
+        maxWidth: "600px",
+        backgroundColor: "#fff",
+        userSelect: "none",
+        boxShadow: 'none',
+        textAlign: 'center',
+    };
+
     const formik = useFormik({
         initialValues: {
           password:             '',
@@ -113,10 +125,12 @@ function Email() {
                 if(res.data.result){
                     setalertSuccessMessage(res.data.message);
                     resetForm();
+                    verifyEmail();
+                    setshowModalConfirm(false);
 
                     setTimeout(() => {
                         setalertSuccessMessage("");
-                    }, 20000);
+                    }, 30000);
                 }
 
             }).catch((err) => {
@@ -125,8 +139,9 @@ function Email() {
                 console.error(fetchError);
                 if(fetchError.response){
                     console.log(err.response);
-                    setalertErrorMessage(err.response.data.message);
+                    setalertErrorMessage(err.response.data.data.message);
                     setsending(false);
+                    setshowModalConfirm(false);
                     // return Promise.reject(err.response.data.data);
                 }
             });
@@ -216,17 +231,51 @@ function Email() {
                                         />
                                     </Stack>
 
-                                    <LoadingButton
+                                    <Button
                                         fullWidth
                                         size="large"
-                                        type="submit"
+                                        type="button"
                                         variant="contained"
                                         loading={sending}
-                                        color="primary"
                                         sx={{mt: 5}}
+                                        onClick={() => (values.password !== "" && values.newEmail !== "" && values.repeatNewEmail !== "") ? setshowModalConfirm(true) : handleSubmit()}
                                     >
                                         Actualizar Email
-                                    </LoadingButton>
+                                    </Button>
+
+                                    <Modal
+                                        open={showModalConfirm}
+                                        onClose={() => setshowModalConfirm(false)}
+                                        aria-labelledby="modal-modal-title"
+                                        aria-describedby="modal-modal-description"
+                                        style={{ 
+                                            display:'flex', 
+                                            alignItems:'center', 
+                                            justifyContent:'center' 
+                                        }}
+                                    >
+                                        <Box sx={{...style, p: 5, borderRadius: 2}}>
+                                            <Typography variant="h5" alignItems="center" sx={{mb: 3}}>
+                                                ¿Desea actualizar su email?
+                                            </Typography>
+                                            <div>
+                                                <LoadingButton
+                                                    size="large"
+                                                    variant="contained"
+                                                    loading={sending}
+                                                    color="primary" 
+                                                    onClick={() => handleSubmit()}
+                                                    sx={{mx: 1}}
+                                                >
+                                                    Actualizar Email
+                                                </LoadingButton>
+                                                <Button size="large" sx={{mx: 1}} onClick={() => setshowModalConfirm(false)}>
+                                                    Cancelar
+                                                </Button>
+                                            </div>
+                                        </Box>
+                                    </Modal>
+
                                 </Form>
                             </FormikProvider>
                         </Grid>

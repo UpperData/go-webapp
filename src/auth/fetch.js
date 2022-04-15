@@ -12,10 +12,11 @@ const service = axios.create({
 })
 
 // config
-const ENTRY_ROUTE 			= '/'
-const TOKEN_PAYLOAD_KEY 	= 'authorization'
-const PUBLIC_REQUEST_KEY 	= 'public-request'
-const AUTH_TOKEN 			= 'authTkn'
+const ENTRY_ROUTE 					= '/';
+const SESSION_EXPIRED_ROUTE 		= '/session-expired';
+const TOKEN_PAYLOAD_KEY 	= 'authorization';
+const PUBLIC_REQUEST_KEY 	= 'public-request';
+const AUTH_TOKEN 			= 'authTkn';
 
 // API Request interceptor
 service.interceptors.request.use(config => {
@@ -57,7 +58,7 @@ service.interceptors.response.use( (response) => response.data, (error) => {
 		notificationParam.description 	= 'Please login again';
 
 		localStorage.removeItem(AUTH_TOKEN)
-		// history.push(ENTRY_ROUTE)
+		history.push(SESSION_EXPIRED_ROUTE)
 		window.location.reload();
 	}
 

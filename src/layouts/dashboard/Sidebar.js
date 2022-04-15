@@ -63,6 +63,8 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+
+  console.log(userData);
   const renderContent = (
     <Scrollbar
       sx={{
@@ -83,7 +85,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
             <Box sx={{ ml: 2 }}>
 
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {userData.people.firstName+' '+userData.people.lastName}
+                {userData.people.firstName ? (userData.people.firstName+' '+userData.people.lastName) : userData.account.name}
               </Typography>
               
               <Typography variant="body2" sx={{ fontSize: 10, fontWeight: 800 }}>
