@@ -17,6 +17,7 @@ import axios from "../../../../auth/fetch"
 import Page from '../../../../components/Page';
 import Loader from "../../../../components/Loader/Loader";
 import Scrollbar from "../../../../components/Scrollbar";
+import { useSelector } from "react-redux";
 
 export default function CreateAccount() {
 
@@ -36,6 +37,8 @@ export default function CreateAccount() {
 
     let urlGetRoleList      = "/front/Role/get/*";
     let urlCreateAccount    = "/accOunT/RegisTER";
+
+    let MenuPermissionList = useSelector(state => state.dashboard.menu);
 
     const getRoleList = () => {
         axios.get(urlGetRoleList)

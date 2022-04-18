@@ -5,7 +5,6 @@ import { Radio, LinearProgress, Alert , Input, ButtonGroup, RadioGroup, FormCont
 import { DataGrid } from '@mui/x-data-grid';
 
 import { styled, alpha } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
 // import SearchIcon from '@iconify/icons-ant-design/search';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
@@ -24,6 +23,9 @@ import Loader from '../../../../components/Loader/Loader';
 
 import { Icon } from '@iconify/react';
 import SearchIcon from "@iconify/icons-ic/search"
+
+import { matchRoutes, useLocation } from "react-router-dom"
+import { getPermissions } from "../../../../utils/getPermissions";
 
 export default function FichaPersonal() {
 
@@ -135,8 +137,12 @@ export default function FichaPersonal() {
         });
     }
 
+    // Permissions
+    const location                              = useLocation();
+    let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
+    let permissions                             = getPermissions(location, MenuPermissionList);
 
-    // console.log(civilStatusTypesList);
+    console.log("Permissions:", permissions);
 
     const LoginSchema =     Yup.object().shape({
 
