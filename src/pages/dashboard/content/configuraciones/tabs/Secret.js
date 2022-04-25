@@ -36,6 +36,9 @@ function Secret() {
                 console.log(res.data);
                 setsecretQuestions(res.data.data);
                 setloading(false);
+            }else if(!res.data.result){
+                setsecretQuestions(null);
+                setloading(false);
             }
 
         }).catch((err) => {
@@ -44,6 +47,10 @@ function Secret() {
             if(error){
                 if(error.data){
                     setloading(true);
+                    if(error.data.data){
+                        setsecretQuestions(null);
+                        setloading(false);
+                    }
                 }
             }
             
@@ -258,88 +265,124 @@ function Secret() {
                     </Alert>
                 }
 
+                {alertErrorMessage !== "" && alertSuccessMessage !== "" && secretQuestions !== null &&
+                    <Alert sx={{mb:3}} severity='info'>
+                        Información importante
+                    </Alert>
+                }
+
                 <Grid sx={{ pb: 3 }} item xs={12}>
                     <Grid container alignItems="end" justifyContent="space-between" columnSpacing={3}>
-                        <Grid item md={6} xs={12}>
-                            <FormikProvider value={formik}>
-                                <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-                                    {formErrors !== "" &&
-                                        <div>
-                                            <Alert sx={{mb: 3}} severity="error">
-                                                {formErrors.message}
-                                            </Alert>
-                                        </div>
-                                    }
-                                    
-                                    <Stack spacing={3} sx={{mt: 2, mb: 5}}>
-                                        <TextField
-                                            size='small'
-                                            fullWidth
-                                            autoComplete="password"
-                                            type="password"
-                                            label="Ingrese su password"
-                                            // {...getFieldProps('password')}
-                                            // error={Boolean(touched.password && errors.password)}
-                                            // helperText={touched.password && errors.password}
-                                            onChange={(e) => setpassword(e.target.value)}
-                                            value={password}
-                                        />
-                                    </Stack>                               
+                        {secretQuestions !== null &&
+                            <>
+                                <Grid item md={6} xs={12}>
+                                    <FormikProvider value={formik}>
+                                        <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+                                            {formErrors !== "" &&
+                                                <div>
+                                                    <Alert sx={{mb: 3}} severity="error">
+                                                        {formErrors.message}
+                                                    </Alert>
+                                                </div>
+                                            }
+                                            
+                                            <Stack spacing={3} sx={{mt: 2, mb: 5}}>
+                                                <TextField
+                                                    size='small'
+                                                    fullWidth
+                                                    autoComplete="password"
+                                                    type="password"
+                                                    label="Ingrese su password"
+                                                    // {...getFieldProps('password')}
+                                                    // error={Boolean(touched.password && errors.password)}
+                                                    // helperText={touched.password && errors.password}
+                                                    onChange={(e) => setpassword(e.target.value)}
+                                                    value={password}
+                                                />
+                                            </Stack>                               
 
-                                    <Box sx={{mb: 4}}>
-                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
-                                            - {secretQuestions[0]}
-                                        </Typography>
-                                        <TextField
-                                            sx={{mt:0, pt:0}}
-                                            size='small'
-                                            fullWidth
-                                            autoComplete="responseOne"
-                                            type="text"
-                                            label="Respuesta"
-                                            {...getFieldProps('responseOne')}
-                                            error={Boolean(touched.responseOne && errors.responseOne)}
-                                            helperText={touched.responseOne && errors.responseOne}
-                                        />
-                                    </Box>
+                                            <Box sx={{mb: 4}}>
+                                                <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
+                                                    - {secretQuestions[0]}
+                                                </Typography>
+                                                <TextField
+                                                    sx={{mt:0, pt:0}}
+                                                    size='small'
+                                                    fullWidth
+                                                    autoComplete="responseOne"
+                                                    type="text"
+                                                    label="Respuesta"
+                                                    {...getFieldProps('responseOne')}
+                                                    error={Boolean(touched.responseOne && errors.responseOne)}
+                                                    helperText={touched.responseOne && errors.responseOne}
+                                                />
+                                            </Box>
 
-                                    <Box>
-                                        <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
-                                            - {secretQuestions[1]}
-                                        </Typography>
-                                        <TextField
-                                            sx={{mt:0, pt:0}}
-                                            size='small'
-                                            fullWidth
-                                            autoComplete="responseTwo"
-                                            type="text"
-                                            label="Respuesta"
-                                            {...getFieldProps('responseTwo')}
-                                            error={Boolean(touched.responseTwo && errors.responseTwo)}
-                                            helperText={touched.responseTwo && errors.responseTwo}
-                                        />
-                                    </Box>
+                                            <Box>
+                                                <Typography sx={{fontWeight: "bold", my: 2}} component="h5">
+                                                    - {secretQuestions[1]}
+                                                </Typography>
+                                                <TextField
+                                                    sx={{mt:0, pt:0}}
+                                                    size='small'
+                                                    fullWidth
+                                                    autoComplete="responseTwo"
+                                                    type="text"
+                                                    label="Respuesta"
+                                                    {...getFieldProps('responseTwo')}
+                                                    error={Boolean(touched.responseTwo && errors.responseTwo)}
+                                                    helperText={touched.responseTwo && errors.responseTwo}
+                                                />
+                                            </Box>
 
-                                    <LoadingButton
-                                        fullWidth
-                                        size="large"
-                                        type="submit"
-                                        variant="contained"
-                                        loading={sending}
-                                        color="primary"
-                                        sx={{mt: 5}}
-                                    >
-                                        Actualizar Respuestas
-                                    </LoadingButton>
-                                </Form>
-                            </FormikProvider>
-                        </Grid>
-                        
-                        <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                        
-                        <Grid item md={5} alignItems="end" xs={12}>
+                                            <LoadingButton
+                                                fullWidth
+                                                size="large"
+                                                type="submit"
+                                                variant="contained"
+                                                loading={sending}
+                                                color="primary"
+                                                sx={{mt: 5}}
+                                            >
+                                                Actualizar Respuestas
+                                            </LoadingButton>
+                                        </Form>
+                                    </FormikProvider>
+                                </Grid>
+                                
+                                <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
+                            </>
+                        }
+
+                        <Grid item md={secretQuestions !== null ? 5 : 12} alignItems="end" xs={12}>
+
+                            {secretQuestions === null &&
+                                <Alert sx={{mb:3}} severity='info'>
+                                    Ingrese sus preguntas de seguridad
+                                </Alert>
+                            }
+
                             <FormikProvider value={formik1}>
                                 <Form autoComplete="off" noValidate onSubmit={handleSubmit1}>
+
+                                    {secretQuestions === null &&
+                                        <Stack spacing={3} sx={{mt: 2, mb: 5}}>
+                                            <TextField
+                                                size='small'
+                                                fullWidth
+                                                autoComplete="password"
+                                                type="password"
+                                                label="Ingrese su password"
+                                                // {...getFieldProps('password')}
+                                                // error={Boolean(touched.password && errors.password)}
+                                                // helperText={touched.password && errors.password}
+                                                onChange={(e) => setpassword(e.target.value)}
+                                                value={password}
+                                            />
+                                        </Stack> 
+                                    }
+
+
                                     <Stack spacing={2} sx={{mb: 4}}>
                                         <TextField
                                             size='small'
@@ -395,9 +438,11 @@ function Secret() {
                                         color="secondary"
                                         sx={{mt: 5}}
                                     >
-                                        Renovar Preguntas
+                                        {secretQuestions !== null ? "Renovar Preguntas" : "Guardar Preguntas"}
                                     </LoadingButton>
                                 </Form>
+                            
+                            
                             </FormikProvider>  
                         </Grid>
                     </Grid>

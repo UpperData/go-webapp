@@ -111,6 +111,15 @@ export default function AccountPopover() {
     setloadingRole(false);
   }
 
+  let photoURL = "";
+  if(userData.people.photo !== null && userData.people.photo !== ""){
+    photoURL = `data:image/png;base64, ${userData.people.photo}`;
+  }else if(userData.people.document.gender === "H"){
+    photoURL = "/static/usermen.png";
+  }else if(userData.people.document.gender === "M"){
+    photoURL = "/static/userwomen.png";
+  }
+
   return (
     <>
       <Modal
@@ -198,7 +207,7 @@ export default function AccountPopover() {
           })
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar src={photoURL} alt="photoURL" />
       </IconButton>
 
       <MenuPopover

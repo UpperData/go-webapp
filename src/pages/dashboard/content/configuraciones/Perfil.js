@@ -1,6 +1,6 @@
 // material
 import {useState} from "react"
-import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Tab, Divider, List, ListItemText, ListItem } from '@mui/material';
+import { Box, Grid, Container, Avatar, Typography, Card, Button, Modal, TextField, Tab, Divider, List, ListItemText, ListItem } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import TabContext from '@mui/lab/TabContext';
@@ -16,9 +16,18 @@ import { useSelector } from "react-redux";
 
 export default function Perfil() {
 
-    const UserData = useSelector(state => state.session.userData.data);
-    let dataPeople = UserData.people;
-    console.log(UserData);
+    const userData = useSelector(state => state.session.userData.data);
+    let dataPeople = userData.people;
+    console.log(userData);
+
+    let photoURL = "";
+    if(userData.people.photo !== null && userData.people.photo !== ""){
+        photoURL = `data:image/png;base64, ${userData.people.photo}`;
+    }else if(userData.people.document.gender === "H"){
+        photoURL = "/static/usermen.png";
+    }else if(userData.people.document.gender === "M"){
+        photoURL = "/static/userwomen.png";
+    }
 
     return (
         <Page title="Perfil | CEMA">
@@ -32,7 +41,11 @@ export default function Perfil() {
             <Grid container columnSpacing={3}>
                 <Grid sx={{ pb: 3 }} item xs={4}>
                     <Card sx={{py: 3, px: 5}}>
-                        Foto de perfil: ...
+                        <Avatar
+                            alt={dataPeople.firstName+" "+dataPeople.lastName}
+                            src={photoURL}
+                            sx={{ width: 200, height: 200, margin: "auto" }}
+                        />
                     </Card>
                 </Grid>
 
@@ -45,7 +58,7 @@ export default function Perfil() {
                         <Typography variant="h6" color="text.secondary" sx={{mb: 0}}>
                             <Typography color="primary" variant="span" sx={{mr: 1}}>
                             <i className="mdi mdi-email" />
-                           </Typography> ({UserData.account.email})
+                           </Typography> ({userData.account.email})
                         </Typography>
 
                         <Box sx={{py: 1}} />
@@ -86,7 +99,7 @@ export default function Perfil() {
                         </Typography>
 
                         <List>
-                            {UserData.role.map((role, key) => <ListItem color="primary" key={key} >
+                            {userData.role.map((role, key) => <ListItem color="primary" key={key} >
                                     <ListItemText color="primary" primary={"- "+role.name} />
                                 </ListItem>
                             )}

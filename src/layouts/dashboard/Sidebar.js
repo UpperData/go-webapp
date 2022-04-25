@@ -12,8 +12,6 @@ import NavSection from '../../components/NavSection';
 import { MHidden } from '../../components/@material-extend';
 //
 import sidebarConfig from './SidebarConfig';
-import account from '../../_mocks_/account';
-
 import {useSelector} from "react-redux"
 
 // ----------------------------------------------------------------------
@@ -65,6 +63,16 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
 
 
   console.log(userData);
+
+  let photoURL = "";
+  if(userData.people.photo !== null && userData.people.photo !== ""){
+    photoURL = `data:image/png;base64, ${userData.people.photo}`;
+  }else if(userData.people.document.gender === "H"){
+    photoURL = "/static/usermen.png";
+  }else if(userData.people.document.gender === "M"){
+    photoURL = "/static/userwomen.png";
+  }
+
   const renderContent = (
     <Scrollbar
       sx={{
@@ -81,7 +89,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
       <Box sx={{ mb: 5, mx: 2.5 }}>
         <Link underline="none" component={RouterLink} to="#">
           <AccountStyle>
-            <Avatar src={account.photoURL} alt="photoURL" />
+            <Avatar src={photoURL} alt="photoURL" />
             <Box sx={{ ml: 2 }}>
 
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>

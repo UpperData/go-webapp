@@ -46,6 +46,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const loginByToken = async (token) => {
+        // localStorage.removeItem(AUTH_TOKEN);
+        // delete axios.defaults.headers.common["Authorization"];
+        
+        
         await axios({
             method: "get",
             url: `/login/${token}`
@@ -60,10 +64,14 @@ export const AuthProvider = ({ children }) => {
             // console.log(err);
             throw err;
         });
+        
+        
     };
 
     const logout = async () => {
         localStorage.removeItem(AUTH_TOKEN);
+        delete axios.defaults.headers.common["Authorization"];
+
         await dispatch(handleLogout());
     };
 

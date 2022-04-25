@@ -1,7 +1,9 @@
 import * as Yup from 'yup';
 import { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, Navigate } from 'react-router-dom';
 import { useFormik, Form, FormikProvider } from 'formik';
+import ReCAPTCHA from "react-google-recaptcha";
+
 import { Icon } from '@iconify/react';
 
 import eyeFill from '@iconify/icons-eva/eye-fill';
@@ -15,6 +17,7 @@ import {
   IconButton,
   InputAdornment,
   FormControlLabel,
+  Box,
   Alert,
   Grid,
   Button,
@@ -29,21 +32,34 @@ import axios from '../../../auth/fetch'
 // ----------------------------------------------------------------------
 
 export default function RestorePassForm() {
-  const navigate                        = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const {login} = useAuth();
 
-  // const [email, setemail]               = useState("");
+  const [showPassword, setShowPassword]               = useState(false);
 
-  const [verify, setverify]                   = useState(false);
-  const [validEmail, setvalidEmail]           = useState(false);
+  // const [email, setemail]                          = useState("");
 
-  const [formErrors, setformErrors]           = useState("");
+  const [success, setsuccess]                         = useState(false);
+  const [sending, setsending]                         = useState(false);
 
-  const [secretQuestions, setsecretQuestions] = useState(null);
+  const [verify, setverify]                           = useState(false);
+  const [validEmail, setvalidEmail]                   = useState(false);
+
+  const [formErrors, setformErrors]                   = useState("");
+
+  const [secretQuestions, setsecretQuestions]         = useState(null);
 
   const [alertSuccessMessage, setalertSuccessMessage] = useState("");
   const [alertErrorMessage,   setalertErrorMessage]   = useState("");
+
+  const [captchaTkn, setcaptchaTkn]                   = useState("");
+
+  const urlChangePassword                             = "/PASSwORD/RestarRT";
+
+  function onChangeCaptcha(value) {
+    console.log("Captcha value:", value);
+    if(value !== undefined && value !== null){
+      setcaptchaTkn(value);
+    }
+  }
 
   const validateEmail = (email) => {
     let url = `/accoUnt/EmAIl/VALIDAtor/${email}`;
@@ -90,7 +106,7 @@ export default function RestorePassForm() {
   const LoginSchema = Yup.object().shape({
     email:    Yup.string().email('Verifique el formato de su email').required('Su email es requerido'),
     token:    Yup.string().required('Ingrese su token de seguridad'),
-    password: Yup.string().required('Ingrese su nuevo password'),
+    newpassword: Yup.string().required('Ingrese su nuevo password'),
 
     firstResponse: Yup.string().required('Responda a la pregunta de seguridad'),
     secondResponse: Yup.string().required('Responda a la pregunta de seguridad'),
@@ -105,10 +121,45 @@ export default function RestorePassForm() {
       secondResponse: ''
     },
     validationSchema: LoginSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, {resetForm}) => {
       try {
         setformErrors("");
-        await login(values.email, values.password);
+        setsending(true);
+        setsuccess(false);
+
+        axios({
+          method: "POST",
+          url: urlChangePassword,
+          data: {
+            email:        values.email,
+            newPassword:  values.newpassword,
+            secret:[
+              values.firstResponse, 
+              values.secondResponse
+            ],
+            token:        values.token
+          }
+        }).then((res) => {
+
+            setsending(false);
+            if(res.data.data !== null){
+              if(res.data.data.result){
+                setalertSuccessMessage(res.data.data.message);
+                setsuccess(true);
+              }
+            }
+
+        }).catch((err) => {
+
+            setsending(false);
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+              setalertErrorMessage(err.response.data.data.message);
+            }
+
+        });
+
       } catch(e) {
         setformErrors(e);
       }
@@ -126,31 +177,79 @@ export default function RestorePassForm() {
     setvalidEmail(false);
   }
 
-  return (
-    <FormikProvider value={formik}>
-      <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-        {formErrors !== "" &&
+  const changeCaptcha = (val) => {
+
+  }
+
+  if(!success){
+    return (
+      <FormikProvider value={formik}>
+        <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+          {formErrors !== "" &&
+            <div>
+              <Alert sx={{mb: 3}} severity="error">
+                {formErrors.message}
+              </Alert>
+            </div>
+          }
+
+          {alertSuccessMessage !== "" &&
+              <Alert sx={{mb: 3}} severity="success">
+                  {alertSuccessMessage}
+              </Alert>
+          }
+
+          {alertErrorMessage !== "" &&
+              <Alert sx={{mb: 3}} severity="error">
+                  {alertErrorMessage}
+              </Alert>
+          }
+
           <div>
-            <Alert sx={{mb: 3}} severity="error">
-              {formErrors.message}
-            </Alert>
-          </div>
-        }
+            {!validEmail &&
+                <Grid container columnSpacing={3}>
+                  <Grid item md={9}>
+                    <TextField
+                      fullWidth
+                      autoComplete="username"
+                      type="email"
+                      label="Email"
 
-        {alertSuccessMessage !== "" &&
-            <Alert sx={{mb: 3}} severity="success">
-                {alertSuccessMessage}
-            </Alert>
-        }
+                      // value={email}
+                      // onChange={(e) => setemail(e.target.value)}
 
-        {alertErrorMessage !== "" &&
-            <Alert sx={{mb: 3}} severity="error">
-                {alertErrorMessage}
-            </Alert>
-        }
+                      {...getFieldProps('email')}
+                      error={Boolean(touched.email && errors.email)}
+                      helperText={touched.email && errors.email}
+                    />
+                  </Grid>
+                  <Grid item md={3}>
+                    <LoadingButton 
+                      sx={{py: 3.5}} 
+                      size='large' 
+                      variant='contained' 
+                      color="primary"
+                      onClick={() => validateEmail(values.email)}
+                      type="button"
+                      loading={verify}
+                      disabled={captchaTkn === ""}
+                    >
+                      Validar
+                    </LoadingButton>
+                  </Grid>
+                </Grid>
+            }
 
-        <div>
-          {!validEmail &&
+            <Box sx={{mt:3}}>
+              {!validEmail &&
+                <ReCAPTCHA
+                  sitekey={process.env.REACT_APP_GOOGLE_KEY_CAPTCHA}
+                  onChange={(value) => onChangeCaptcha(value)}
+                />     
+              }
+            </Box>
+
+            {validEmail &&
               <Grid container columnSpacing={3}>
                 <Grid item md={9}>
                   <TextField
@@ -158,164 +257,136 @@ export default function RestorePassForm() {
                     autoComplete="username"
                     type="email"
                     label="Email"
-
+                    color="success"
+                    focused 
                     // value={email}
                     // onChange={(e) => setemail(e.target.value)}
-
+                    InputProps={{
+                      readOnly: true,
+                    }}
                     {...getFieldProps('email')}
                     error={Boolean(touched.email && errors.email)}
                     helperText={touched.email && errors.email}
                   />
                 </Grid>
                 <Grid item md={3}>
-                  <LoadingButton 
+                  <Button 
                     sx={{py: 3.5}} 
                     size='large' 
                     variant='contained' 
-                    color="primary"
-                    onClick={() => validateEmail(values.email)}
+                    color="secondary"
+                    onClick={() => changeEmail()}
                     type="button"
-                    loading={verify}
                   >
-                    Validar
-                  </LoadingButton>
+                    Cambiar
+                  </Button>
                 </Grid>
               </Grid>
+            }
+          </div>
+
+          {/* FORMULARIO */}
+
+          {validEmail &&
+            <div>
+              <Stack spacing={3} sx={{mt: 3}}>
+                  <TextField
+                    fullWidth
+                    autoComplete="token"
+                    type="text"
+                    label="Token"
+                    {...getFieldProps('token')}
+                    error={Boolean(touched.token && errors.token)}
+                    helperText={touched.token && errors.token}
+                  />
+              </Stack>
+
+              <Stack spacing={3} sx={{mt: 3}}>
+                  <TextField
+                    fullWidth
+                    autoComplete="newpassword"
+                    type="password"
+                    label="Nuevo Password"
+                    {...getFieldProps('newpassword')}
+                    error={Boolean(touched.newpassword && errors.newpassword)}
+                    helperText={touched.newpassword && errors.newpassword}
+                  />
+              </Stack>
+            </div>
           }
 
           {validEmail &&
-            <Grid container columnSpacing={3}>
-              <Grid item md={9}>
-                <TextField
-                  fullWidth
-                  autoComplete="username"
-                  type="email"
-                  label="Email"
-                  color="success"
-                  focused 
-                  // value={email}
-                  // onChange={(e) => setemail(e.target.value)}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  {...getFieldProps('email')}
-                  error={Boolean(touched.email && errors.email)}
-                  helperText={touched.email && errors.email}
-                />
-              </Grid>
-              <Grid item md={3}>
-                <Button 
-                  sx={{py: 3.5}} 
-                  size='large' 
-                  variant='contained' 
-                  color="secondary"
-                  onClick={() => changeEmail()}
-                  type="button"
-                >
-                  Cambiar
-                </Button>
-              </Grid>
-            </Grid>
-          }
-        </div>
+            <div>
+              <Divider sx={{mt: 3}} />
 
-        {/* FORMULARIO */}
-
-        {validEmail &&
-          <div>
-            <Stack spacing={3} sx={{mt: 3}}>
-                <TextField
-                  fullWidth
-                  autoComplete="token"
-                  type="text"
-                  label="Token"
-                  {...getFieldProps('token')}
-                  error={Boolean(touched.token && errors.token)}
-                  helperText={touched.token && errors.token}
-                />
-            </Stack>
-
-            <Stack spacing={3} sx={{mt: 3}}>
-                <TextField
-                  fullWidth
-                  autoComplete="newpassword"
-                  type="password"
-                  label="Nuevo Password"
-                  {...getFieldProps('newpassword')}
-                  error={Boolean(touched.newpassword && errors.newpassword)}
-                  helperText={touched.newpassword && errors.newpassword}
-                />
-            </Stack>
-          </div>
-        }
-
-        {validEmail &&
-          <div>
-            <Divider sx={{mt: 3}} />
-
-            <Typography variant="h5" sx={{ py: 3, fontWeight: "bold" }}>
-              Preguntas de seguridad
-            </Typography>
-
-            <Stack spacing={1}>
-                <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
-                  {secretQuestions[0]}
-                </Typography>
-                <TextField
-                  fullWidth
-                  autoComplete="firstResponse"
-                  type="text"
-                  label="Respuesta"
-                  {...getFieldProps('firstResponse')}
-                  error={Boolean(touched.firstResponse && errors.firstResponse)}
-                  helperText={touched.firstResponse && errors.firstResponse}
-                />
-            </Stack>
-
-            <Stack spacing={1} sx={{mt: 3}}>
-              <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
-                {secretQuestions[1]}
+              <Typography variant="h5" sx={{ py: 3, fontWeight: "bold" }}>
+                Preguntas de seguridad
               </Typography>
-                <TextField
-                  fullWidth
-                  autoComplete="secondResponse"
-                  type="text"
-                  label="Respuesta"
-                  {...getFieldProps('secondResponse')}
-                  error={Boolean(touched.secondResponse && errors.secondResponse)}
-                  helperText={touched.secondResponse && errors.secondResponse}
-                />
-            </Stack>
-          </div>
-        }
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
-          <Typography>
-            Si ha recuperado su contraseña puede probar
-            <Link component={RouterLink} variant="subtitle2" sx={{ml:1}} 
-            // color="" 
-            to="/login"
+              <Stack spacing={1}>
+                  <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
+                    {secretQuestions[0]}
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    autoComplete="firstResponse"
+                    type="text"
+                    label="Respuesta"
+                    {...getFieldProps('firstResponse')}
+                    error={Boolean(touched.firstResponse && errors.firstResponse)}
+                    helperText={touched.firstResponse && errors.firstResponse}
+                  />
+              </Stack>
+
+              <Stack spacing={1} sx={{mt: 3}}>
+                <Typography variant="p" sx={{ fontWeight: "normal", m:0, p:0 }}>
+                  {secretQuestions[1]}
+                </Typography>
+                  <TextField
+                    fullWidth
+                    autoComplete="secondResponse"
+                    type="text"
+                    label="Respuesta"
+                    {...getFieldProps('secondResponse')}
+                    error={Boolean(touched.secondResponse && errors.secondResponse)}
+                    helperText={touched.secondResponse && errors.secondResponse}
+                  />
+              </Stack>
+            </div>
+          }
+
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 3 }}>
+            <Typography>
+              Si ha recuperado su contraseña puede probar
+              <Link component={RouterLink} variant="subtitle2" sx={{ml:1}} 
+              // color="" 
+              to="/login"
+              >
+                Iniciar sesion
+              </Link>
+            </Typography>
+          </Stack>
+
+          {validEmail &&
+            <LoadingButton
+              fullWidth
+              size="large"
+              type="submit"
+              variant="contained"
+              loading={sending}
+              color="secondary"
+              sx={{mt: 5}}
+              // disabled={!validEmail}
             >
-              Iniciar sesion
-            </Link>
-          </Typography>
-        </Stack>
+              Restaurar Password
+            </LoadingButton>
+          }
+        </Form>
+      </FormikProvider>
+    );
+  }
 
-        <LoadingButton
-          fullWidth
-          size="large"
-          type="submit"
-          variant="contained"
-          loading={isSubmitting}
-          color="secondary"
-          sx={{mt: 5}}
-          // disabled={!validEmail}
-
-          disabled
-        >
-          Restaurar Password
-        </LoadingButton>
-      </Form>
-    </FormikProvider>
-  );
+  return (
+    <Navigate to="/restore-password/success" replace />
+  )
 }

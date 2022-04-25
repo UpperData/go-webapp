@@ -7,6 +7,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 import { AuthProvider } from './auth/AuthProvider'
 
+import { GoogleReCaptchaProvider} from 'react-google-recaptcha-v3';
+
 import './styles/app.scss'
 
 // store
@@ -24,6 +26,7 @@ ReactDOM.render(
     <AuthProvider>
       <HelmetProvider>
         <BrowserRouter>
+
           <App />
         </BrowserRouter>
       </HelmetProvider>
