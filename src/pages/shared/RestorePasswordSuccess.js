@@ -31,16 +31,16 @@ export default function RestorePassSuccess() {
             <Box
               component="img"
               src="/static/logo.png"
-              sx={{ mb: 3, maxWidth: 300 }}
+              sx={{ maxWidth: 300, margin: "auto" }}
             />
-            <Box sx={{ maxWidth: 800, margin: 'auto', textAlign: 'center' }}>
+            <Box sx={{ maxWidth: 800, margin: 'auto', textAlign: 'center', pt: 2 }}>
               <motion.div variants={varBounceIn}>
                 <Typography variant="h3">
                   ¡Su password ha sido modificada exitosamente!
                 </Typography>
               </motion.div>
               <Typography sx={{ color: 'text.secondary' }}>
-                Ahora puede iniciar sesión utilizando su nuevo password.
+                ¡Ahora puede iniciar sesión utilizando su nuevo password!.
               </Typography>
 
               <motion.div variants={varBounceIn}>
@@ -51,7 +51,7 @@ export default function RestorePassSuccess() {
                 />
               </motion.div>
 
-              <Button to="/login" size="large" variant="outlined" component={RouterLink}>
+              <Button to="/login" size="large" variant="contained" component={RouterLink}>
                 Iniciar sesión
               </Button>
             </Box>

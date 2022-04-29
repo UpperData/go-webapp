@@ -64,79 +64,6 @@ export default function FichaPersonal() {
     const [idToEdit, setidToEdit]               = useState(null);
     const [typeForm, settypeForm]               = useState("create");
 
-    const searchPersonalData = (setFieldValue) => {
-        let idSearch = textSearchData;
-        const urlSearchData = "/Admin/EMPLoyeeFILE/Get/";
-
-        setsearchingData(true);
-        setalertSuccessMessage("");
-        setalertErrorMessage("");
-
-        axios.get(urlSearchData+idSearch)
-        .then((res) => {
-            if(res.data.result){
-                console.log(res.data);
-                if(res.data.data !== null){
-                    let userData = res.data.data;
-                    setdataToEdit(userData);
-                    setsearchingData(false);
-                    settypeForm("edit");
-
-                    setselectedStatusAccount(userData.isActive);
-                    setFieldValue("name",           userData.fisrtName);
-                    setFieldValue("lastname",       userData.lastName);
-                    setFieldValue("email",          userData.email);
-
-                    setFieldValue("phoneNumber",    userData.phone[0].phoneNumber);
-                    setTypePhone(userData.phone[0].phoneType);
-                    
-                    setFieldValue("gender",           userData.documentId.gender);
-                    setFieldValue("birthday",         userData.documentId.birthday);
-                    setFieldValue("civilStatus",      userData.documentId.civilStatus.id);
-
-                    // let documentId = JSON.parse(userData.documentId);
-                    // console.log(documentId);civilStatus
-                    settypeDni(userData.documentId.nationality);
-                    setFieldValue("cedula", userData.documentId.number);
-
-                    setphoto(userData.photo);
-                    setphotoCedula(userData.digitalDoc);
-
-                    setcargo(userData.cargo);
-                    setdirection(userData.address);
-
-                    setidToEdit(idSearch);
-                    setFieldValue("observation",    userData.observation);
-                    settypeForm("edit");
-
-                }else{
-
-                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
-                    setsearchingData(false);
-                    setidToEdit(null);
-                    setdataToEdit(null);
-                    settypeForm("create");
-
-                    setTimeout(() => {
-                        setalertErrorMessage("");
-                    }, 15000);
-
-                }
-            }
-        }).catch((err) => {
-        
-            let fetchError = err;
-            console.error(fetchError);
-            if(fetchError.response){
-                setsearchingData(false);
-                setdataToEdit(null);
-                settypeForm("create");
-                setalertErrorMessage(err.response.data.data.message);
-            }
-
-        });
-    }
-
     // Permissions
     const location                              = useLocation();
     let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
@@ -367,7 +294,98 @@ export default function FichaPersonal() {
         }
     });
 
+    console.log("ID PARA EDITAR", idToEdit);
+
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
+
+    const searchPersonalData = (setFieldValue) => {
+        let idSearch = textSearchData;
+        const urlSearchData = "/Admin/EMPLoyeeFILE/Get/";
+
+        resetForm();
+        setcargo(null);
+        setdirection(null);
+        setphoto(null);
+        setphotoCedula(null);
+        
+        setprogress(0);
+        setcount(0);
+
+        setsearchingData(false);
+        // setidToEdit(idSearch);
+        setdataToEdit(null);
+
+        setsearchingData(true);
+        setalertSuccessMessage("");
+        setalertErrorMessage("");
+
+        axios.get(urlSearchData+idSearch)
+        .then((res) => {
+            if(res.data.result){
+                console.log(res.data);
+                if(res.data.data !== null){
+                    let userData = res.data.data;
+
+                    setidToEdit(Number(textSearchData.trim()));
+
+                    setdataToEdit(userData);
+                    setsearchingData(false);
+                    settypeForm("edit");
+
+                    setselectedStatusAccount(userData.isActive);
+                    setFieldValue("name",           userData.fisrtName);
+                    setFieldValue("lastname",       userData.lastName);
+                    setFieldValue("email",          userData.email);
+
+                    setFieldValue("phoneNumber",    userData.phone[0].phoneNumber);
+                    setTypePhone(userData.phone[0].phoneType);
+                    
+                    setFieldValue("gender",           userData.documentId.gender);
+                    setFieldValue("birthday",         userData.documentId.birthday);
+                    setFieldValue("civilStatus",      userData.documentId.civilStatus.id);
+
+                    // let documentId = JSON.parse(userData.documentId);
+                    // console.log(documentId);civilStatus
+                    settypeDni(userData.documentId.nationality);
+                    setFieldValue("cedula", userData.documentId.number);
+
+                    setphoto(userData.photo);
+                    setphotoCedula(userData.digitalDoc);
+
+                    setcargo(userData.cargo);
+                    setdirection(userData.address);
+
+                    setFieldValue("observation",    userData.observation);
+                    settypeForm("edit");
+
+                }else{
+
+                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
+                    setsearchingData(false);
+                    setidToEdit(null);
+                    setdataToEdit(null);
+                    settypeForm("create");
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 15000);
+
+                }
+            }
+        }).catch((err) => {
+        
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+                setsearchingData(false);
+                setdataToEdit(null);
+                settypeForm("create");
+                setalertErrorMessage(err.response.data.data.message);
+            }
+
+        });
+    }
+
 
     const addCargo = (data) => {
         setcargo(data);
@@ -387,7 +405,7 @@ export default function FichaPersonal() {
         settextSearchData("");
     }
 
-    // console.log(errors);
+    console.log(errors);
 
     return (
         <Page title="Ficha de empleado | Cema">

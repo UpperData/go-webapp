@@ -66,9 +66,9 @@ export default function VerifyEmail() {
             <Box
               component="img"
               src="/static/logo.png"
-              sx={{ mb: 3, maxWidth: 300 }}
+              sx={{ maxWidth: 300, margin: "auto" }}
             />
-            <Box sx={{ maxWidth: 800, margin: 'auto', textAlign: 'center' }}>
+            <Box sx={{ maxWidth: 800, margin: 'auto', textAlign: 'center', pt: 2 }}>
               <motion.div variants={varBounceIn}>
                 <Typography variant="h3">
                   ¡Su email ha sido verificado exitosamente!

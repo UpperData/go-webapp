@@ -21,8 +21,8 @@ import { useSelector } from "react-redux";
 
 export default function CreateAccount() {
 
-    const [formErrors,  setformErrors]                   = useState("");
-    const [typeDni,     settypeDni]                      = useState("V");
+    const [formErrors,  setformErrors]                  = useState("");
+    const [typeDni,     settypeDni]                     = useState("V");
 
     const [loading,     setloading]                     = useState(true);
     const [search,      setsearch]                      = useState(true);

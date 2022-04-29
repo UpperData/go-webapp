@@ -143,9 +143,11 @@ export default function RestorePassForm() {
 
             setsending(false);
             if(res.data.data !== null){
-              if(res.data.data.result){
+              if(res.data.result){
+
                 setalertSuccessMessage(res.data.data.message);
                 setsuccess(true);
+
               }
             }
 
@@ -155,7 +157,9 @@ export default function RestorePassForm() {
             let fetchError = err;
             console.error(fetchError);
             if(fetchError.response){
+
               setalertErrorMessage(err.response.data.data.message);
+
             }
 
         });
