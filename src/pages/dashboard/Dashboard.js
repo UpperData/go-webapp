@@ -6,13 +6,12 @@ import Loader from "../../components/Loader/Loader"
 
 import DashboardLayout from '../../layouts/dashboard';
 
+import {useSelector, useDispatch} from "react-redux"
+import { set_appointment_types, set_civil_status_types_list, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
+
 import Home from './content/Home';
 import InConstruction from '../shared/InConstruction';
 import Page404 from '../shared/Page404';
-
-import {useSelector, useDispatch} from "react-redux"
-import { set_civil_status_types_list, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
-
 import RestorePassword from './content/usuarios-y-permisos/RestorePassword';
 import Security from './content/configuraciones/Security';
 import Permissions from './content/usuarios-y-permisos/Permissions';
@@ -25,7 +24,8 @@ import AdministrarCita from './content/citas/Administrar';
 import TokenExpired from '../shared/TokenExpired';
 import VerifyEmail from '../shared/verifyEmail';
 import Perfil from './content/configuraciones/Perfil';
-
+import Agenda from './content/Agenda';
+import PatientHistory from './content/citas/PatientHistory';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -73,6 +73,7 @@ function Dashboard() {
         await dispatch(set_phone_types_list());
         await dispatch(set_civil_status_types_list());
         await dispatch(set_patient_types());
+        await dispatch(set_appointment_types());
 
         setloaded(true);
     }
@@ -85,7 +86,7 @@ function Dashboard() {
                     // console.log(session.userData.data.role[0].id);
                     getData();
                 }
-            }else if(dashboard.menu !== null && dashboard.civilStatusTypes !== null && dashboard.phoneTypesList !== null && dashboard.patientTypes !== null){
+            }else if(dashboard.menu !== null && dashboard.appointmentTypes !== null && dashboard.civilStatusTypes !== null && dashboard.phoneTypesList !== null && dashboard.patientTypes !== null){
                 // console.log(dashboard);
                 setloading(false);
             }
@@ -116,17 +117,19 @@ function Dashboard() {
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
                 
                 {/* rrhh */}
-                <Route path="rRHH/EmPloyEE/FILE"        element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
-            
+                <Route path="rRHH/EmPloyEE/FILE"            element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
+
                 {/* citas */}
-                <Route path="appointment/admin"         element={<PrivateRoute><AdministrarCita /></PrivateRoute>}/>
-                <Route path="appointment/report"        element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
+                <Route path="appointment/admin"                 element={<PrivateRoute><AdministrarCita /></PrivateRoute>}/>
+                <Route path="appointment/report"                element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
+                <Route path="CITaS/AgEnt"                       element={<PrivateRoute><Agenda /></PrivateRoute>}/>
+                <Route path="CITaS/historyByPatient/:id"  element={<PrivateRoute><PatientHistory /></PrivateRoute>}/>
 
                 {/* inventario */}
                 <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><Inventario /></PrivateRoute>}/>
                 <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
             </Route>
-
+            
             <Route path="*"       element={<Page404 />} />
             <Route path="/verify/email" element={<VerifyEmail />} />
             <Route path="/session-expired" element={<TokenExpired />} />

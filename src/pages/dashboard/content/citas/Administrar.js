@@ -2,23 +2,11 @@ import {useState, useEffect} from "react"
 import * as Yup from 'yup';
 // material
 import { Radio, Alert, ButtonGroup, LinearProgress, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
 
-import { styled, alpha } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
-import SearchIcon from '@iconify/icons-ant-design/search';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton, DatePicker, LocalizationProvider, TimePicker  } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
-
-import { useSelector } from "react-redux";
-
-import { Icon } from '@iconify/react';
-import CaretDown from "@iconify/icons-ant-design/caret-down"
-import CaretUp from "@iconify/icons-ant-design/caret-up"
-import CaretRight from "@iconify/icons-ant-design/caret-right"
-import CaretLeft from "@iconify/icons-ant-design/caret-left"
 import Scrollbar from "../../../../components/Scrollbar";
 
 import axios from "../../../../auth/fetch"
@@ -27,6 +15,9 @@ import Loader from '../../../../components/Loader/Loader';
 // components
 import Page from '../../../../components/Page';
 import ModalDirection from "./ModalDirection";
+import { useSelector } from "react-redux";
+import { getPermissions } from "../../../../utils/getPermissions";
+import { matchRoutes, useLocation } from "react-router-dom"
 
 export default function AdministrarCita() {
 
@@ -55,6 +46,7 @@ export default function AdministrarCita() {
 
     const [doctors, setdoctors]                         = useState(null);
     const [nurses, setnurses]                           = useState(null);
+    
     const [personalTypes, setpersonalTypes]             = useState(null);
     const [appointmentTypes, setappointmentTypes]       = useState(null);
 
@@ -73,6 +65,171 @@ export default function AdministrarCita() {
     const urlGetPersonal            = "/EMplOyeFIle/BYGRoUP/get/?grp=7&grp=6";
     const urlGetPatientType         = "/pAtieNt/TYPE/geT/*";
     const urlGetAppointmentTypes    = "/APpOINtMENt/typE/*"; 
+
+    // Permissions
+    const location                              = useLocation();
+    let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
+    let permissions                             = getPermissions(location, MenuPermissionList);
+    console.log(permissions);
+
+
+    const LoginSchema =     Yup.object().shape({
+        appointmentTypeId:  Yup.string().required('Debe seleccionar el tipo de cita'),
+        foreignId:          Yup.string().required('Debe ingresar el id de la cita'),
+        siniestroId:        Yup.string().required('Debe ingresar el número siniestro'),
+
+        dateAppointment:    Yup.date().required('Día de la cita').nullable(),
+        hourAppointment:    Yup.date().required('Hora de la cita').nullable(),
+
+        direction:          Yup.string().required('Debe ingresar su dirección'),
+
+        gender:             Yup.string().required('Debe seleccionar un género'),
+        cedula:             Yup.string().required('Debe ingresar su cédula'),
+        name:               Yup.string().required('Debe ingresar un nombre'),
+        lastname:           Yup.string().required('Debe ingresar su apellido'),
+
+        birthday:           Yup.date().required('Debe seleccionar su día de nacimiento').nullable(),
+        patientTypeId:      Yup.string().required('Debe seleccionar el tipo de paciente'),
+        phoneNumber:        Yup.string().required('Debe ingresar su teléfono')
+    });
+
+    const formik = useFormik({
+        validateOnChange: false,
+        initialValues: {
+            appointmentTypeId: "1",
+            foreignId: "",
+            siniestroId: "",
+            dateAppointment: null,
+            hourAppointment: null,
+
+            direction: "",
+
+            gender: "H",
+            cedula: "",
+            name: "",
+            lastname: "",
+            birthday: null,
+            patientTypeId: "1",
+            phoneNumber: "",
+        },
+        validationSchema: LoginSchema,
+        onSubmit: async (values, {resetForm}) => {
+          try {
+
+            let dataAddress     = direction;
+            dataAddress.address = values.direction;
+
+            let data = {
+                dateAppointment:    values.dateAppointment,
+                hourAppointment:    values.hourAppointment,
+                
+                foreignId:          values.foreignId,
+                siniestroId:        values.siniestroId,
+
+                address:            dataAddress,
+                isOpened:           true,
+
+                // cambiar a medical
+                medialPersonal:     {
+                    nurses: {employeeId: nursesSelected[0]},
+                    doctor: {employeeId: doctorsSelected[0]}
+                },
+
+                appointmentTypeId:  values.appointmentTypeId,
+                
+                birthdate:          values.birthday,
+                firstName:          values.name,
+                lastName:           values.lastname,
+                cedula:             values.cedula,
+                nationality:        typeDni,
+                gender:             values.gender,
+                patientTypeId:      values.patientTypeId,
+
+                phone:              [{ phoneType: typePhone, phoneNumber: values.phoneNumber }]
+            }
+
+            console.log(data);
+
+            if(typeForm === "create"){
+                const urlCreate = "/APpOINtMeNt/NEW/";
+
+                setsending(true);
+                axios.post(urlCreate, data).then((res) => {
+                    if(res.data.result){
+                        setalertSuccessMessage(res.data.message);
+                        setsending(false);
+                        resetForm();
+
+                        setTypePhone("1");
+                        settypeDni("V");
+
+                        setdoctorsSelected([]);
+                        setnursesSelected([]);
+
+                        setdirection(null);
+
+                        settextSearchData("");
+                        setsearchingData(false);
+                        setdataToEdit(null);
+                        setidToEdit(null);
+                        settypeForm("create");
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
+                    }
+                }).catch((err) => {
+                    let fetchError = err;
+                    console.error(fetchError);
+
+                    if(fetchError.response){
+                        setalertErrorMessage(err.response.data.data.message);
+                        setTimeout(() => {
+                            setalertErrorMessage("");
+                        }, 20000);
+
+                        setsending(false);
+                    }
+                });
+            }else{
+                const urlEdit = "/APpOINtMeNt/edit/";
+                data.id         = idToEdit;
+                data.patientId  = dataToEdit.patientId;
+
+                setsending(true);
+                axios.put(urlEdit, data).then((res) => {
+                    if(res.data.result){
+                        setalertSuccessMessage(res.data.message);
+                        setsending(false);
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
+                    }
+                }).catch((err) => {
+                    let fetchError = err;
+                    console.error(fetchError);
+
+                    if(fetchError.response){
+                        setalertErrorMessage(err.response.data.data.message);
+                        setTimeout(() => {
+                            setalertErrorMessage("");
+                        }, 20000);
+
+                        setsending(false);
+                    }
+                });
+            }
+
+            // setformErrors("");
+            // await login(values.email, values.password);
+          } catch(e) {
+            // setformErrors(e);
+          }
+        }
+    });
+
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
     const toggleValueToList = async (value, list, setter) => {
         let newList = list;
@@ -230,165 +387,8 @@ export default function AdministrarCita() {
                 getData();
             }
         }
-     }, []);
+    }, []);
 
-    const LoginSchema =     Yup.object().shape({
-        appointmentTypeId:  Yup.string().required('Debe seleccionar el tipo de cita'),
-        foreignId:          Yup.string().required('Debe ingresar el id de la cita'),
-        siniestroId:        Yup.string().required('Debe ingresar el número siniestro'),
-
-        dateAppointment:    Yup.date().required('Día de la cita').nullable(),
-        hourAppointment:    Yup.date().required('Hora de la cita').nullable(),
-
-        direction:          Yup.string().required('Debe ingresar su dirección'),
-
-        gender:             Yup.string().required('Debe seleccionar un género'),
-        cedula:             Yup.string().required('Debe ingresar su cédula'),
-        name:               Yup.string().required('Debe ingresar un nombre'),
-        lastname:           Yup.string().required('Debe ingresar su apellido'),
-
-        birthday:           Yup.date().required('Debe seleccionar su día de nacimiento').nullable(),
-        patientTypeId:      Yup.string().required('Debe seleccionar el tipo de paciente'),
-        phoneNumber:        Yup.string().required('Debe ingresar su teléfono')
-    });
-
-    const formik = useFormik({
-        initialValues: {
-            appointmentTypeId: "1",
-            foreignId: "",
-            siniestroId: "",
-            dateAppointment: null,
-            hourAppointment: null,
-
-            direction: "",
-
-            gender: "H",
-            cedula: "",
-            name: "",
-            lastname: "",
-            birthday: null,
-            patientTypeId: "1",
-            phoneNumber: "",
-        },
-        validationSchema: LoginSchema,
-        onSubmit: async (values, {resetForm}) => {
-          try {
-
-            let dataAddress     = direction;
-            dataAddress.address = values.direction;
-
-            let data = {
-                dateAppointment:    values.dateAppointment,
-                hourAppointment:    values.hourAppointment,
-                
-                foreignId:          values.foreignId,
-                siniestroId:        values.siniestroId,
-
-                address:            dataAddress,
-                isOpened:           true,
-
-                // cambiar a medical
-                medialPersonal:     {
-                    nurses: {employeeId: nursesSelected[0]},
-                    doctor: {employeeId: doctorsSelected[0]}
-                },
-
-                appointmentTypeId:  values.appointmentTypeId,
-                
-                birthdate:          values.birthday,
-                firstName:          values.name,
-                lastName:           values.lastname,
-                cedula:             values.cedula,
-                nationality:        typeDni,
-                gender:             values.gender,
-                patientTypeId:      values.patientTypeId,
-
-                phone:              [{ phoneType: typePhone, phoneNumber: values.phoneNumber }]
-            }
-
-            console.log(data);
-
-            if(typeForm === "create"){
-                const urlCreate = "/APpOINtMeNt/NEW/";
-
-                setsending(true);
-                axios.post(urlCreate, data).then((res) => {
-                    if(res.data.result){
-                        setalertSuccessMessage(res.data.message);
-                        setsending(false);
-                        resetForm();
-
-                        setTypePhone("1");
-                        settypeDni("V");
-
-                        setdoctorsSelected([]);
-                        setnursesSelected([]);
-
-                        setdirection(null);
-
-                        settextSearchData("");
-                        setsearchingData(false);
-                        setdataToEdit(null);
-                        setidToEdit(null);
-                        settypeForm("create");
-
-                        setTimeout(() => {
-                            setalertSuccessMessage("");
-                        }, 20000);
-                    }
-                }).catch((err) => {
-                    let fetchError = err;
-                    console.error(fetchError);
-
-                    if(fetchError.response){
-                        setalertErrorMessage(err.response.data.data.message);
-                        setTimeout(() => {
-                            setalertErrorMessage("");
-                        }, 20000);
-
-                        setsending(false);
-                    }
-                });
-            }else{
-                const urlEdit = "/APpOINtMeNt/edit/";
-                data.id         = idToEdit;
-                data.patientId  = dataToEdit.patientId;
-
-                setsending(true);
-                axios.put(urlEdit, data).then((res) => {
-                    if(res.data.result){
-                        setalertSuccessMessage(res.data.message);
-                        setsending(false);
-
-                        setTimeout(() => {
-                            setalertSuccessMessage("");
-                        }, 20000);
-                    }
-                }).catch((err) => {
-                    let fetchError = err;
-                    console.error(fetchError);
-
-                    if(fetchError.response){
-                        setalertErrorMessage(err.response.data.data.message);
-                        setTimeout(() => {
-                            setalertErrorMessage("");
-                        }, 20000);
-
-                        setsending(false);
-                    }
-                });
-            }
-
-            // setformErrors("");
-            // await login(values.email, values.password);
-          } catch(e) {
-            // setformErrors(e);
-          }
-        }
-    });
-
-
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
     const changeWithMedicine = (showMedicine) => {
         setwithMedicine(showMedicine);
@@ -447,7 +447,6 @@ export default function AdministrarCita() {
                                     {alertErrorMessage}
                                 </Alert>
                             }
-
                             
                             <Box>
                                 <Grid sx={{mb: 3}} container columnSpacing={3}>
@@ -457,12 +456,12 @@ export default function AdministrarCita() {
                                         </Button>
                                     </Grid>
                                     <Grid item lg={3}>
-                                        <Button variant="contained" fullWidth>
+                                        <Button disabled={!permissions.imprime || typeForm === "create"} variant="contained" fullWidth>
                                             Imprimir
                                         </Button>
                                     </Grid>
                                     <Grid item lg={3}>
-                                        <Button variant="contained" color="secondary" fullWidth>
+                                        <Button disabled={!permissions.imprime || typeForm === "create"} variant="contained" color="secondary" fullWidth>
                                             Descargar
                                         </Button>
                                     </Grid>
@@ -474,6 +473,7 @@ export default function AdministrarCita() {
                                                     size="small"
                                                     value={textSearchData}
                                                     onChange={(e) => settextSearchData(e.target.value)}
+                                                    disabled={!permissions.consulta}
                                                 />
                                             </Grid>
                                             <Grid item lg={3}>
@@ -484,7 +484,7 @@ export default function AdministrarCita() {
                                                     sx={{ minWidth: "100%", width: "100%"}}
                                                     onClick={() => searchDataToEdit(setFieldValue)}
                                                     loading={searchingData}
-                                                    disabled={textSearchData === ""}
+                                                    disabled={textSearchData === "" || !permissions.consulta}
                                                 >
                                                     <i className="mdi mdi-magnify" />
                                                 </LoadingButton>
@@ -957,6 +957,7 @@ export default function AdministrarCita() {
                                                 loading={sending}
                                                 color="primary"
                                                 sx={{mt: 3}}
+                                                disabled={!permissions.crea}
                                             >
                                                 Guardar
                                             </LoadingButton>
@@ -971,6 +972,7 @@ export default function AdministrarCita() {
                                                 loading={sending}
                                                 color="secondary"
                                                 sx={{mt: 3}}
+                                                disabled={!permissions.edita}
                                             >
                                                 Editar
                                             </LoadingButton>

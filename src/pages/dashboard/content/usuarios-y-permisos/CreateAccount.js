@@ -3,11 +3,6 @@ import * as Yup from 'yup';
 
 // material
 import { Box, Grid, Stack, Container, Typography, Card, Alert, Button, Modal, Radio, RadioGroup, FormControlLabel, FormControl, FormGroup, FormLabel, TextField, Checkbox, Select, MenuItem, InputLabel, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-
-import { alpha, styled } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
-
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -18,6 +13,8 @@ import Page from '../../../../components/Page';
 import Loader from "../../../../components/Loader/Loader";
 import Scrollbar from "../../../../components/Scrollbar";
 import { useSelector } from "react-redux";
+import { getPermissions } from "../../../../utils/getPermissions";
+import { matchRoutes, useLocation } from "react-router-dom"
 
 export default function CreateAccount() {
 
@@ -38,24 +35,11 @@ export default function CreateAccount() {
     let urlGetRoleList      = "/front/Role/get/*";
     let urlCreateAccount    = "/accOunT/RegisTER";
 
-    let MenuPermissionList = useSelector(state => state.dashboard.menu);
-
-    const getRoleList = () => {
-        axios.get(urlGetRoleList)
-        .then((res) => {
-
-            console.log("-----");
-
-            if(res.data.result){
-                console.log(res.data.data);
-                setroleList(res.data.data);
-                setloading(false);
-            }
-
-        }).catch((err) => {
-            console.error(err);
-        });
-    }
+    // Permissions
+    const location                              = useLocation();
+    let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
+    let permissions                             = getPermissions(location, MenuPermissionList);
+    console.log(permissions);
 
     useEffect(async () => {
         if(loading){
@@ -63,7 +47,7 @@ export default function CreateAccount() {
                 getRoleList();
             }
         }
-     }, []);
+    }, []);
 
     const LoginSchema =     Yup.object().shape({
         email:              Yup.string().required('Debe ingresar su email'),
@@ -159,6 +143,23 @@ export default function CreateAccount() {
     });
 
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
+
+    const getRoleList = () => {
+        axios.get(urlGetRoleList)
+        .then((res) => {
+
+            console.log("-----");
+
+            if(res.data.result){
+                console.log(res.data.data);
+                setroleList(res.data.data);
+                setloading(false);
+            }
+
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
 
     const toggleValueToMemberships = async (value) => {
         let newList = membershipsSelected;
@@ -373,6 +374,7 @@ export default function CreateAccount() {
                                             loading={sending}
                                             color="primary"
                                             sx={{mt: 3}}
+                                            disabled={!permissions.crea}
                                         >
                                             Crear Cuenta
                                         </LoadingButton>

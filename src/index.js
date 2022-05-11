@@ -28,6 +28,7 @@ ReactDOM.render(
         <BrowserRouter>
 
           <App />
+          
         </BrowserRouter>
       </HelmetProvider>
     </AuthProvider>

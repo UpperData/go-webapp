@@ -10,3 +10,5 @@ export const SET_ROLE                   = 'SET_ROLE';
 export const SET_CIVIL_STATUS_TYPES     = 'SET_CIVIL_STATUS_TYPES';
 export const SET_PHONE_TYPES_LIST       = 'SET_PHONE_TYPES_LIST';
 export const SET_PATIENT_TYPES          = 'SET_PATIENT_TYPES';
+export const SET_PERSONAL_TYPES         = 'SET_PERSONAL_TYPES';
+export const SET_APPOINTMENT_TYPES      = 'SET_APPOINTMENT_TYPES';

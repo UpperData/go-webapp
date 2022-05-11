@@ -1,5 +1,5 @@
 import axios from '../../auth/fetch';
-import {SET_MENU, SET_ROLE, SET_CIVIL_STATUS_TYPES, SET_PHONE_TYPES_LIST, SET_PATIENT_TYPES} from '../types'
+import {SET_MENU, SET_ROLE, SET_CIVIL_STATUS_TYPES, SET_PHONE_TYPES_LIST, SET_PATIENT_TYPES, SET_PERSONAL_TYPES, SET_APPOINTMENT_TYPES} from '../types'
 
 export const set_menu = (role) => {
     let url = `/panel/mEnu/GeT/${role}`;
@@ -87,6 +87,46 @@ export const set_patient_types = () => {
             if(res){
                 dispatch({
                     type: SET_PATIENT_TYPES,
+                    payload: res
+                })
+            }
+          })
+          .catch(err => console.log(err + "action"))
+    }
+}
+
+export const set_personal_types = () => {
+    let url = `/pAtieNt/TYPE/geT/*`;
+
+    return async dispatch => {
+        await axios
+          .get(url)
+          .then(res => {
+            // console.log(res);
+
+            if(res){
+                dispatch({
+                    type: SET_PERSONAL_TYPES,
+                    payload: res
+                })
+            }
+          })
+          .catch(err => console.log(err + "action"))
+    }
+}
+
+export const set_appointment_types = () => {
+    let url = `/APpOINtMENt/typE/*`;
+
+    return async dispatch => {
+        await axios
+          .get(url)
+          .then(res => {
+            // console.log(res);
+
+            if(res){
+                dispatch({
+                    type: SET_APPOINTMENT_TYPES,
                     payload: res
                 })
             }

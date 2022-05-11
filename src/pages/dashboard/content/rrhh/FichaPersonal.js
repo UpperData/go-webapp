@@ -27,6 +27,10 @@ import SearchIcon from "@iconify/icons-ic/search"
 import { matchRoutes, useLocation } from "react-router-dom"
 import { getPermissions } from "../../../../utils/getPermissions";
 
+import { FichaPersonalPrint } from "./FichaPersonalPrint";
+import { PDFDownloadLink, renderToString, renderToFile, usePDF, BlobProvider } from "@react-pdf/renderer";
+import printJS from 'print-js'
+
 export default function FichaPersonal() {
 
     const [data, setdata]                   = useState(null);
@@ -64,78 +68,8 @@ export default function FichaPersonal() {
     const [idToEdit, setidToEdit]               = useState(null);
     const [typeForm, settypeForm]               = useState("create");
 
-    const searchPersonalData = (setFieldValue) => {
-        let idSearch = textSearchData;
-        const urlSearchData = "/Admin/EMPLoyeeFILE/Get/";
-
-        setsearchingData(true);
-        setalertSuccessMessage("");
-        setalertErrorMessage("");
-
-        axios.get(urlSearchData+idSearch)
-        .then((res) => {
-            if(res.data.result){
-                console.log(res.data);
-                if(res.data.data !== null){
-                    let userData = res.data.data;
-                    setdataToEdit(userData);
-                    setsearchingData(false);
-                    settypeForm("edit");
-
-                    setselectedStatusAccount(userData.isActive);
-                    setFieldValue("name",           userData.fisrtName);
-                    setFieldValue("lastname",       userData.lastName);
-                    setFieldValue("email",          userData.email);
-
-                    setFieldValue("phoneNumber",    userData.phone[0].phoneNumber);
-                    setTypePhone(userData.phone[0].phoneType);
-                    
-                    setFieldValue("gender",           userData.documentId.gender);
-                    setFieldValue("birthday",         userData.documentId.birthday);
-                    setFieldValue("civilStatus",      userData.documentId.civilStatus.id);
-
-                    // let documentId = JSON.parse(userData.documentId);
-                    // console.log(documentId);civilStatus
-                    settypeDni(userData.documentId.nationality);
-                    setFieldValue("cedula", userData.documentId.number);
-
-                    setphoto(userData.photo);
-                    setphotoCedula(userData.digitalDoc);
-
-                    setcargo(userData.cargo);
-                    setdirection(userData.address);
-
-                    setidToEdit(idSearch);
-                    setFieldValue("observation",    userData.observation);
-                    settypeForm("edit");
-
-                }else{
-
-                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
-                    setsearchingData(false);
-                    setidToEdit(null);
-                    setdataToEdit(null);
-                    settypeForm("create");
-
-                    setTimeout(() => {
-                        setalertErrorMessage("");
-                    }, 15000);
-
-                }
-            }
-        }).catch((err) => {
-        
-            let fetchError = err;
-            console.error(fetchError);
-            if(fetchError.response){
-                setsearchingData(false);
-                setdataToEdit(null);
-                settypeForm("create");
-                setalertErrorMessage(err.response.data.data.message);
-            }
-
-        });
-    }
+    // pdf
+    const [pdf, updatepdf] = usePDF({ document: <FichaPersonalPrint data={dataToEdit} /> });
 
     // Permissions
     const location                              = useLocation();
@@ -368,6 +302,95 @@ export default function FichaPersonal() {
     });
 
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
+    // console.log(errors);
+    console.log(permissions);
+
+    // ---------------------------------------- formik ----------------------------------
+
+    const searchPersonalData = async (setFieldValue) => {
+        let idSearch = textSearchData;
+        const urlSearchData = "/Admin/EMPLoyeeFILE/Get/";
+
+        await setsearchingData(true);
+        await setalertSuccessMessage("");
+        await setalertErrorMessage("");
+        await setdataToEdit(null);
+
+        await resetForm();
+        await setcargo(null);
+        await setdirection(null);
+        await setphoto(null);
+        await setphotoCedula(null);
+
+        axios.get(urlSearchData+idSearch)
+        .then((res) => {
+            if(res.data.result){
+                console.log(res.data);
+                if(res.data.data !== null){
+                    let userData = res.data.data;
+
+                    setdataToEdit(userData);
+                    updatepdf({ document: <FichaPersonalPrint data={userData} /> });
+
+                    setsearchingData(false);
+                    settypeForm("edit");
+
+                    setselectedStatusAccount(userData.isActive);
+                    setFieldValue("name",           userData.fisrtName);
+                    setFieldValue("lastname",       userData.lastName);
+                    setFieldValue("email",          userData.email);
+
+                    setFieldValue("phoneNumber",    userData.phone[0].phoneNumber);
+                    setTypePhone(userData.phone[0].phoneType);
+                    
+                    setFieldValue("gender",           userData.documentId.gender);
+                    setFieldValue("birthday",         userData.documentId.birthday);
+                    setFieldValue("civilStatus",      userData.documentId.civilStatus.id);
+
+                    // let documentId = JSON.parse(userData.documentId);
+                    // console.log(documentId);civilStatus
+                    settypeDni(userData.documentId.nationality);
+                    setFieldValue("cedula", userData.documentId.number);
+
+                    setphoto(userData.photo);
+                    setphotoCedula(userData.digitalDoc);
+
+                    setcargo(userData.cargo);
+                    setdirection(userData.address);
+
+                    setidToEdit(idSearch);
+                    setFieldValue("observation",    userData.observation);
+                    settypeForm("edit");
+                    
+                    setcount(count * 25);
+
+                }else{
+
+                    setalertErrorMessage("No hay coincidencias para la ficha #"+textSearchData);
+                    setsearchingData(false);
+                    setidToEdit(null);
+                    setdataToEdit(null);
+                    settypeForm("create");
+
+                    setTimeout(() => {
+                        setalertErrorMessage("");
+                    }, 15000);
+
+                }
+            }
+        }).catch((err) => {
+        
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+                setsearchingData(false);
+                setdataToEdit(null);
+                settypeForm("create");
+                setalertErrorMessage(err.response.data.data.message);
+            }
+
+        });
+    }
 
     const addCargo = (data) => {
         setcargo(data);
@@ -387,7 +410,11 @@ export default function FichaPersonal() {
         settextSearchData("");
     }
 
-    // console.log(errors);
+    const printFile = async (blob) => {
+        let pdfUrl    = await window.URL.createObjectURL(blob);
+        await printJS(pdfUrl);
+        window.URL.revokeObjectURL(pdfUrl);
+    }
 
     return (
         <Page title="Ficha de empleado | Cema">
@@ -416,18 +443,58 @@ export default function FichaPersonal() {
 
                             <Grid sx={{mb: 3}} container columnSpacing={3}>
                                 <Grid item lg={3}>
-                                    <Button onClick={() => resetAllForm()} variant="outlined" fullWidth>
+                                    <Button 
+                                        onClick={() => resetAllForm()} 
+                                        variant="outlined" 
+                                        fullWidth
+                                    >
                                         Nuevo
                                     </Button>
                                 </Grid>
                                 <Grid item lg={3}>
-                                    <Button variant="contained" fullWidth>
-                                        Imprimir
-                                    </Button>
+                                    {dataToEdit !== null ?
+                                        <BlobProvider 
+                                            document={<FichaPersonalPrint data={dataToEdit} />}
+                                        >
+                                            {({ blob, url, loading, error }) => {
+                                                console.log(blob);
+                                                // Do whatever you need with blob here
+                                                return <Button 
+                                                    onClick={() => printFile(blob)} 
+                                                    disabled={!permissions.imprime || typeForm === "create"} 
+                                                    variant="contained" fullWidth
+                                                >
+                                                    Imprimir
+                                                </Button>
+                                            }}
+                                        </BlobProvider>
+                                    :
+                                        <Button 
+                                            disabled={!permissions.imprime || typeForm === "create"} 
+                                            variant="contained" fullWidth
+                                        >
+                                            Imprimir
+                                        </Button>
+                                    }
                                 </Grid>
                                 <Grid item lg={3}>
-                                    <Button variant="contained" color="secondary" fullWidth>
-                                        Descargar
+                                    <Button 
+                                        disabled={!permissions.imprime || typeForm === "create"} 
+                                        variant="contained" 
+                                        color="secondary" 
+                                        fullWidth    
+                                        className={dataToEdit !== null ? "pdf-download-link" : ""}
+                                    >   
+                                        {dataToEdit !== null ?
+                                            <PDFDownloadLink
+                                                document={<FichaPersonalPrint data={dataToEdit} />}
+                                                fileName="ficha-personal.pdf"
+                                            >
+                                                Descargar
+                                            </PDFDownloadLink>
+                                            :
+                                            "Descargar"
+                                        }
                                     </Button>
                                 </Grid>
                                 <Grid item lg={3}>
@@ -438,6 +505,7 @@ export default function FichaPersonal() {
                                                 size="small"
                                                 value={textSearchData}
                                                 onChange={(e) => settextSearchData(e.target.value)}
+                                                disabled={!permissions.consulta}
                                             />
                                         </Grid>
                                         <Grid item lg={3}>
@@ -448,7 +516,7 @@ export default function FichaPersonal() {
                                                 sx={{ minWidth: "100%", width: "100%"}}
                                                 onClick={() => searchPersonalData(setFieldValue)}
                                                 loading={searchingData}
-                                                disabled={textSearchData === ""}
+                                                disabled={textSearchData === "" || !permissions.consulta}
                                             >
                                                 <i className="mdi mdi-magnify" />
                                             </LoadingButton>
@@ -809,6 +877,7 @@ export default function FichaPersonal() {
                                             loading={sending}
                                             color="primary"
                                             sx={{mt: 3}}
+                                            disabled={!permissions.crea}
                                         >
                                             Guardar
                                         </LoadingButton>
@@ -823,6 +892,7 @@ export default function FichaPersonal() {
                                             loading={sending}
                                             color="secondary"
                                             sx={{mt: 3}}
+                                            disabled={!permissions.edita}
                                         >
                                             Editar
                                         </LoadingButton>
