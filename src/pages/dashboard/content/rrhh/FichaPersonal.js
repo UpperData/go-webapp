@@ -27,8 +27,8 @@ import SearchIcon from "@iconify/icons-ic/search"
 import { matchRoutes, useLocation } from "react-router-dom"
 import { getPermissions } from "../../../../utils/getPermissions";
 
-import { FichaPersonalPrint } from "./FichaPersonalPrint";
-import { PDFDownloadLink, renderToString, renderToFile, usePDF, BlobProvider } from "@react-pdf/renderer";
+import { FichaPersonalPrint } from "./pdf/FichaPersonalPrint";
+import { PDFDownloadLink, BlobProvider } from "@react-pdf/renderer";
 import printJS from 'print-js'
 
 export default function FichaPersonal() {
@@ -67,9 +67,6 @@ export default function FichaPersonal() {
     const [dataToEdit, setdataToEdit]           = useState(null);
     const [idToEdit, setidToEdit]               = useState(null);
     const [typeForm, settypeForm]               = useState("create");
-
-    // pdf
-    const [pdf, updatepdf] = usePDF({ document: <FichaPersonalPrint data={dataToEdit} /> });
 
     // Permissions
     const location                              = useLocation();
@@ -330,7 +327,6 @@ export default function FichaPersonal() {
                     let userData = res.data.data;
 
                     setdataToEdit(userData);
-                    updatepdf({ document: <FichaPersonalPrint data={userData} /> });
 
                     setsearchingData(false);
                     settypeForm("edit");

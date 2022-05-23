@@ -24,7 +24,7 @@ import AdministrarCita from './content/citas/Administrar';
 import TokenExpired from '../shared/TokenExpired';
 import VerifyEmail from '../shared/verifyEmail';
 import Perfil from './content/configuraciones/Perfil';
-import Agenda from './content/Agenda';
+import Agenda from './content/citas/Agenda';
 import PatientHistory from './content/citas/PatientHistory';
 
 function PrivateRoute({ children }) {

@@ -1,27 +1,16 @@
 import {useState, useEffect} from "react"
+import * as Yup from 'yup';
+import { useFormik, Form, FormikProvider } from 'formik';
+
 // material
-import { Box, Grid, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Box, Grid, Stack, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 // components
 import Page from '../../../../components/Page';
-import {
-  AppTasks,
-  AppNewUsers,
-  AppBugReports,
-  AppItemOrders,
-  AppNewsUpdate,
-  AppWeeklySales,
-  AppOrderTimeline,
-  AppCurrentVisits,
-  AppWebsiteVisits,
-  AppTrafficBySite,
-  AppCurrentSubject,
-  AppConversionRates
-} from '../../../../components/_dashboard/app';
 
 import axios from "../../../../auth/fetch"
 import Loader from '../../../../components/Loader/Loader';
@@ -31,6 +20,8 @@ import CaretDown from "@iconify/icons-ant-design/caret-down"
 import CaretUp from "@iconify/icons-ant-design/caret-up"
 import CaretRight from "@iconify/icons-ant-design/caret-right"
 import CaretLeft from "@iconify/icons-ant-design/caret-left"
+import { getPermissions } from "../../../../utils/getPermissions";
+import { useSelector } from "react-redux";
 
 // ----------------------------------------------------------------------
 
@@ -46,205 +37,169 @@ const RootStyle = styled(Card)(({ theme }) => ({
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-
-const dummyData = [
-    {
-        id:             1,
-        name:           "Diclofenaco 10mg",
-        stock:          6000,
-        price:          200,
-        minimalStock:   100,
-        quantity:       150,
-        transito:       2000
-    },
-    {
-        id:             2,
-        name:           "Alcohol 30% 60ml",
-        stock:          3000,
-        price:          200,
-        minimalStock:   100,
-        quantity:       150,
-        transito:       2000
-    }
-]
 
 function Inventario() {
 
-    // const [data, setdata]               = useState(rows);
-    const [count, setcount]             = useState(0);
+    // const [data, setdata]                            = useState(rows);
+    const [count, setcount]                             = useState(0);
 
-    const [loading, setloading]         = useState(true);
-    const [search, setsearch]           = useState(true);
-    const [data, setdata]               = useState(dummyData);
+    const [loading, setloading]                         = useState(true);
+    const [search, setsearch]                           = useState(true);
+    const [data, setdata]                               = useState(null);
 
-    const [modules, setmodules]         = useState(null);
-    const [groups, setgroups]           = useState(null);
+    const [openSaveChanges, setopenSaveChanges]         = useState(false);
+    const [sending, setsending]                         = useState(false);
 
-    const [module, setmodule]           = useState("");
-    const [group,  setgroup]            = useState("");
-
-    const [tasks, settasks]             = useState(null);
-    const [searchTasks, setsearchTasks] = useState(false);
-
-    const [openSaveChanges, setopenSaveChanges] = useState(false);
-    const [sending, setsending]                 = useState(false);
+    const [openModalAddItem, setopenModalAddItem]       = useState(false);
 
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
-    const urlGetModules     = "/froNT/ModUle/GeT/*";
-    const urlGetGroups      = "/front/Role/get/*";
-    const urlGetTasks       = "/aDmIn/MoDuLe/submodUle/";
+    const urlGetData    = "/InveTorY/get/ALL";
+    const urlNewItem    = "/INVETOry/aricle/new";
 
-    function changePermission (id, permission, isChecked) {
-        
-        // console.log(id,permission, isChecked);
-        
-        let thisGroup = data.find(item => item.id === id);
-        let index     = data.indexOf(thisGroup);
-        thisGroup.permissions[permission].active = isChecked;
+    // Permissions
+    const location                              = useLocation();
+    let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
+    let permissions                             = getPermissions(location, MenuPermissionList);
 
-        let newTable    =  [...data];
-        newTable[index] = thisGroup;
+    const LoginSchema =     Yup.object().shape({
+        name:               Yup.string().required('Debe ingresar un nombre'),  
+        description:        Yup.string().required('Debe ingresar una descripción'),
+        existence:          Yup.string().required('Ingrese stock'),
+    });
 
-        console.log(thisGroup);
+    const formik = useFormik({
+        validateOnChange: false,
+        initialValues: {
+            name:             "",
+            description:      "",
+            existence:        "",
+        },
+        validationSchema: LoginSchema,
+        onSubmit: async (values, {resetForm}) => {
+            try {
 
-        setdata(data);
-        setcount(count + 1);
-    }
+                let data = {
+                    name:               values.name,
+                    description:        values.description,
+                    existence:          values.existence,
+                }
 
-    const changeModule = async (idModule) => {
-        setmodule(idModule);
-        settasks(null);
-        setsearchTasks(true);
-       
-        axios.get(urlGetTasks+idModule)
-        .then(async (res) => {
+                console.log(data);
+                setsending(true);
 
-            let dataTasks = res.data.data;
-            console.log(dataTasks);
+                /*
+                    const config = {
+                        onUploadProgress: progressEvent => {
+                        let progressData = progress;
+                        progressData = (progressEvent.loaded / progressEvent.total) * 100;
 
-            settasks(dataTasks);
-            let subModules = dataTasks[0].subModules;
-            let dataItems = [];
+                        console.log(progressData);
 
-            for (let i = 0; i < subModules.length; i++) {
-                const subModule = subModules[i];
-
-                let newModule           = {};
-                newModule.id            = subModule.subModuleId;
-                newModule.name          = subModule.name;
-                newModule.permissions   = {};
-                // newModule.permissions   = [];
-
-                let urlGetPermissions = `/admin/PERMISSION/end/${group}/${idModule}/${subModule.subModuleId}`;
-                axios.get(urlGetPermissions)
-                .then((res) => {
-
-                    let permissionsList = res.data.data;
-
-                    for (let j = 0; j < permissionsList.length; j++) {
-                        const permission            = permissionsList[j];
-                        let formatPermission        = {};
-
-                        formatPermission.id         = permission.permissionId;
-                        formatPermission.name       = permission.permission.operation.name;
-                        formatPermission.active     = permission.isActived;
-
-                        newModule.permissions[formatPermission.name.toLowerCase()] = formatPermission;
-                    
+                        setprogress(progressData);
+                        setcount(count + progressData);
+                        }
                     }
+                */
 
-                    dataItems.push(newModule);
+                axios.post(
+                    urlNewItem,
+                    data,
+                    // config
+                ).then((res) => {
 
-                    if(dataItems.length === subModules.length){
-                        console.log(dataItems);
-                        setdata(dataItems);
-                        setsearchTasks(false);
+                    console.log(res);
+                    setsending(false);
+
+                    if(res.data.result){
+                        setalertSuccessMessage(res.data.message);
+                        resetForm();
+                        setopenModalAddItem(false);
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
                     }
 
                 }).catch((err) => {
-                    let error = err.response; 
-                });  
+                    let fetchError = err;
+
+                    console.error(fetchError);
+                    if(fetchError.response){
+                        console.log(err.response);
+                        setalertErrorMessage(err.response.data.data.message);
+                        setTimeout(() => {
+                            setalertErrorMessage("");
+                        }, 20000);
+                        setsending(false);
+                    }
+                });
+
+            } catch(e) {
+                // setformErrors(e);
             }
-        }).catch((err) => {
-            let error = err.response; 
-        });
-    }
+        }
+    });
 
-    const changeGroup = (idGroup) => {
-        setgroup(idGroup);
-        setmodule("");
-        settasks(null);
-        setdata(null);
-    }
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
+    
 
-    const getSelects = async () => {
-        axios.get(urlGetGroups)
+    const getList = async () => {
+
+        setsearch(true);
+        axios.get(urlGetData)
         .then((res) => {
 
-            // console.log("-----");
-            // console.log(res.data.data);
-            let dataGroups = res.data.data;
+            console.log("---Data---");
+            console.log(res);
 
-            if(res.data.result){
-                axios.get(urlGetModules)
-                .then((res) => {
-        
-                    // console.log("-----");
-                    // console.log(res.data.data);
-
-                    setgroups(dataGroups);
-                    setmodules(res.data.data);
-                    setloading(false);
-        
-                }).catch((err) => {
-                    let error = err.response; 
-                });
-            }
+            setdata(res);
+            setloading(false);
 
         }).catch((err) => {
-            let error = err.response; 
+
+            let error = err.response;
+            if(error){
+                if(error.data){
+                    setloading(true);
+                }
+            }
+            
         });
+        
     }
 
     useEffect(async () => {
         if(loading){
             if(search){
-                // await getSelects();
-                setloading(false);
+                await getList();
             }
         }
     });
 
-    let moduleName  = "";
-    let groupName   = "";
+    const changeStock = (id, newCount) => {
+        if(newCount >= 0){
+            let list        = [...data];
+            let item        = list.find(item => item.id === id);
+            let index       = list.indexOf(item);
+            
+            // console.log(list);
+            // console.log(index);
+            // console.log(list[index]);
 
-    if(module !== "" && modules.length > 0){
-        let getModule = modules.find(item => Number(item.id) === Number(module));
-        // console.log(getModule);
-        moduleName = getModule.name;
-    }
+            item.existence  = newCount;
+            list[index]     = item;
 
-    if(group !== "" && groups.length > 0){
-        let getGroup = groups.find(item => Number(item.id) === Number(group));
-        // console.log(getGroup);
-        groupName = getGroup.name;
+            setdata(list);
+            setcount(count * 20);
+        }
     }
 
     let columns = [
         // { field: 'id',          headerName: 'ID', width: 70 },
         { 
-            field: 'name',     
+            field: 'articleId',     
             headerName: `Nombre`,
             width: 200,
             sortable: false,
@@ -252,7 +207,7 @@ function Inventario() {
                 let data = cellValues;
                 // console.log(data);
                 return <Typography sx={{fontWeight: 'bold', mb:0}} variant="body">
-                    {data.row.name}
+                    {data.row.article.name}
                 </Typography>
             }
         },
@@ -264,14 +219,14 @@ function Inventario() {
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let count = data.row.quantity;
+                let count = data.row.existence;
                 return  <Grid container alignItems="center">
-                            <Grid xs={4} sx={{px: .5}}>
-                                <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                            <Grid xs={4} item sx={{px: .5}}>
+                                <Button onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
                                     <Icon icon={CaretLeft} />
                                 </Button>
                             </Grid>
-                            <Grid xs={4}>
+                            <Grid xs={4} item>
                                 <TextField
                                     hiddenLabel
                                     size='small'
@@ -286,8 +241,8 @@ function Inventario() {
                                     value={count}
                                 />
                             </Grid>
-                            <Grid xs={4} sx={{px: .5}}>
-                                <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                            <Grid xs={4} item sx={{px: .5}}>
+                                <Button onClick={() => changeStock(data.row.id, count + 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
                                     <Icon icon={CaretRight} />
                                 </Button>
                             </Grid>
@@ -298,11 +253,11 @@ function Inventario() {
             field: 'price',    
             headerName: 'Precio',
             sortable: false,
-            width: 120,
+            width: 100,
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let count = data.row.quantity;
+                let count = data.row.price;
                 return  <TextField
                         hiddenLabel
                         size='small'
@@ -311,7 +266,7 @@ function Inventario() {
                         type="number"
                         label=""
                         InputProps={{
-                            readOnly: true,
+                            type: "number",
                             style: {textAlign: 'center'}
                         }}
                         value={count}
@@ -323,11 +278,11 @@ function Inventario() {
             field: 'minimalStock',    
             headerName: 'Mínimo',
             sortable: false,
-            width: 120,
+            width: 90,
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let count = data.row.quantity;
+                let count = data.row.minStock;
                 return  <TextField
                             hiddenLabel
                             size='small'
@@ -336,7 +291,7 @@ function Inventario() {
                             type="number"
                             label=""
                             InputProps={{
-                                readOnly: true,
+                                type: "number",
                                 style: {textAlign: 'center'}
                             }}
                             value={count}
@@ -344,84 +299,31 @@ function Inventario() {
             }
         },
         { 
-            field: 'quantity',     
+            field: 'almacen',     
             headerName: `Almacén`,
             width: 100,
             sortable: false
         },
         { 
-            field: 'transito',     
+            field: 'asignados',     
             headerName: `Transito`,
             width: 100,
-            sortable: false
+            sortable: false,
+            renderCell: (cellValues) => {
+                let data = cellValues;
+                let text = data.row.asignados;
+                return  text === null ? 0 : text
+            }
         }
     ];
 
-    const handleCloseModalSaveChanges = () => {
-        setopenSaveChanges(false);
+    const handleCloseModalAddItem = () => {
+        setopenModalAddItem(false);
     }
 
-    const savePermissions = () => {
-        setsending(true);
-        let urlSavePermissions = "/AdmIn/grANTROle/adD";
-
-        let formatPermissions = [];
-        for (let i = 0; i < data.length; i++) {
-            const task = data[i];
-            let taskpermissions = task.permissions;
-
-            Object.keys(taskpermissions).forEach((key) => {
-                let newPermission   =       {};
-                newPermission.id    =       taskpermissions[key].id;
-                newPermission.isActived =   taskpermissions[key].active;
-
-                formatPermissions.push(newPermission);
-            });
-        }
-
-        let formatData = {
-            roleId: group,
-            permission: formatPermissions
-        }
-
-        setalertSuccessMessage("");
-        setalertErrorMessage("");
-
-        axios({
-            method: "POST",
-            url: urlSavePermissions,
-            data: formatData
-        }).then((res) => {
-
-            console.log(res.data);
-            setsending(false);
-
-            if(res.data.result){
-                setalertSuccessMessage(res.data.message);
-                handleCloseModalSaveChanges();
-
-                setTimeout(() => {
-                    setalertSuccessMessage("");
-                }, 20000);
-            }
-
-        }).catch((err) => {
-
-            let fetchError = err;
-
-            console.error(fetchError);
-            if(fetchError.response){
-                console.log(err.response);
-                setalertErrorMessage(err.response.data.data.message);
-                setTimeout(() => {
-                    setalertErrorMessage("");
-                }, 20000);
-                handleCloseModalSaveChanges();
-                setsending(false);
-                // return Promise.reject(err.response.data.data);
-            }
-
-        });
+    const openModal = () => {
+        resetForm();
+        setopenModalAddItem(true);
     }
 
     return (
@@ -433,25 +335,103 @@ function Inventario() {
                 </Typography>
             </Box>
 
+            
             <Modal
-                open={openSaveChanges}
-                onClose={handleCloseModalSaveChanges}
-                aria-labelledby="modal-modal-change-role-title"
-                aria-describedby="modal-modal-change-role-description"
-                style={{ display:'flex', alignItems:'center', justifyContent:'center' }}
+                open={openModalAddItem}
+                onClose={handleCloseModalAddItem}
+                aria-labelledby="modal-add-item-to-inventory"
+                aria-describedby="modal-add-item-to-inventory"
+                style={{ 
+                    display:'flex', 
+                    alignItems:'center', 
+                    justifyContent:'center' 
+                }}
             >
                 <RootStyle>
-                    <Typography variant="h5" sx={{mb: 4}}>
-                       ¿Desea guardar esta configuración para el grupo: "{groupName}" en el modulo: "{moduleName}"?
+
+                <FormikProvider value={formik}>
+                    <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+
+                    <Typography id="modal-modal-title" variant="h3" component="h3">
+                        Agregar un producto
                     </Typography>
-                    <LoadingButton loading={sending} onClick={() => savePermissions()} sx={{px : 3, mx: 2}} variant="contained" color="primary" size="large">
-                        Sí, confirmar
+
+                    <Grid container sx={{ mt: 3 }} columnSpacing={3}>
+                        <Grid item md={8}>
+                            <Stack spacing={3}>
+                                <TextField
+                                    size='small'
+                                    fullWidth
+                                    autoComplete="name"
+                                    type="text"
+                                    label="Nombres"
+
+                                    {...getFieldProps('name')}
+                                    error={Boolean(touched.name && errors.name)}
+                                    helperText={touched.name && errors.name}
+                                />         
+                            </Stack>
+                        </Grid>
+                        <Grid item md={4}>
+                            <Stack spacing={3}>
+                                <TextField
+                                    size='small'
+                                    fullWidth
+                                    autoComplete="existence"
+                                    type="text"
+                                    label="Existencia"
+
+                                    InputProps={{
+                                        type: "number"
+                                    }}
+
+                                    {...getFieldProps('existence')}
+                                    error={Boolean(touched.existence && errors.existence)}
+                                    helperText={touched.existence && errors.existence}
+                                />         
+                            </Stack>
+                        </Grid>
+                        <Grid item md={12}>
+                            <Stack spacing={3} sx={{my: 2}}>
+                                <TextField
+                                    size='small'
+                                    fullWidth
+                                    autoComplete="description"
+                                    type="text"
+                                    label="Descripción"
+
+                                    multiline
+                                    rows={2}
+                                    maxRows={4}
+
+                                    {...getFieldProps('description')}
+                                    error={Boolean(touched.description && errors.description)}
+                                    helperText={touched.description && errors.description}
+                                />         
+                            </Stack>
+                        </Grid>
+                    </Grid>
+
+                    <LoadingButton
+                        fullWidth
+                        size="large"
+                        type="submit"
+                        variant="contained"
+                        loading={sending}
+                        color="primary"
+                        disabled={
+                            !permissions.crea || 
+                            (values.name === "" || values.description === "" || values.existence === "")}
+                    >
+                        Agregar
                     </LoadingButton>
-                    <Button onClick={() => handleCloseModalSaveChanges()} sx={{px : 3, mx: 2}} size="large">
-                        No, cancelar
-                    </Button>
+
+                    </Form>
+                </FormikProvider>
+                    
                 </RootStyle>
             </Modal>
+            
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
@@ -471,7 +451,7 @@ function Inventario() {
 
                         <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 5}}>
                             <Grid item lg={3}>
-                                <Button variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
+                                <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
                                     Nuevo Artículo
                                 </Button>
                             </Grid>
@@ -508,7 +488,7 @@ function Inventario() {
                                 <ul style={{listStyle: "none"}}>
                                     <li>
                                         <Typography variant="h6" color="success">
-                                            <i className="mdi mdi-checkbox-blank" />
+                                            <i className="mdi mdi-checkbox-blank" style={{ color: "#54D62C" }} />
                                             <Typography sx={{ml: 2}} component="span" color="text.primary">
                                                 <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
                                                     Satisfactorio:
@@ -519,7 +499,7 @@ function Inventario() {
                                     </li>
                                     <li>
                                         <Typography variant="h6" color="warning">
-                                            <i className="mdi mdi-checkbox-blank" />
+                                            <i className="mdi mdi-checkbox-blank" style={{ color: "#FFC107" }} />
                                             <Typography sx={{ml: 2}} component="span" color="text.primary">
                                                 <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
                                                     Advertencia:
@@ -543,7 +523,7 @@ function Inventario() {
                             </div>
                         }
 
-                        {searchTasks &&
+                        {loading &&
                             <Loader />
                         }
                     

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import axios from "../../../auth/fetch"
+import axios from "../../../../auth/fetch"
 import moment from "moment"
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import * as Yup from 'yup';
@@ -11,10 +11,11 @@ import { useSelector } from "react-redux";
 import { Link, Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert, Divider, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 // import { DataGrid } from '@mui/x-data-grid';
 
-import Scrollbar from "../../../components/Scrollbar";
-import Loader from '../../../components/Loader/Loader';
-import Page from '../../../components/Page';
+import Scrollbar from "../../../../components/Scrollbar";
+import Loader from '../../../../components/Loader/Loader';
+import Page from '../../../../components/Page';
 
+import {AgendaPdf} from "./pdf/Agenda";
 import { PDFDownloadLink, BlobProvider } from "@react-pdf/renderer";
 import printJS from 'print-js'
 
@@ -30,7 +31,10 @@ export default function Agenda() {
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
-    const [dateSearch, setdateSearch]           = useState(moment().format("MM/DD/YYYY"));
+    const [dateSearch, setdateSearch]                   = useState(moment().format("MM/DD/YYYY"));
+
+    const [doctors, setdoctors]                         = useState(null);
+    const [nurses, setnurses]                           = useState(null);
 
     // SearchData
     const [textSearchData, settextSearchData]   = useState("");
@@ -41,7 +45,14 @@ export default function Agenda() {
     const patientTypes          = useSelector(state => state.dashboard.patientTypes.data.data);
     const appointmentTypes      = useSelector(state => state.dashboard.appointmentTypes.data.data);
 
-    let urlGetData          = "/aPpoINtMent/by/DATE/";
+    let urlGetData              = "/aPpoINtMent/by/DATE/";
+    const urlGetPersonal        = "/EMplOyeFIle/BYGRoUP/get/?grp=7&grp=6";
+
+    const printFile = async (blob) => {
+        let pdfUrl    = await window.URL.createObjectURL(blob);
+        await printJS(pdfUrl);
+        window.URL.revokeObjectURL(pdfUrl);
+    }
 
     const LoginSchema =     Yup.object().shape({
         text:               Yup.string().required('')
@@ -72,7 +83,6 @@ export default function Agenda() {
         setsearch(true);
         let url = urlGetData+moment(dateSearch, "MM/DD/YYYY").format("YYYY-MM-DD"); 
         // console.log(moment(dateSearch, "MM/DD/YYYY").format("YYYY-MM-DD"));
-
         
         axios.get(url)
         .then((res) => {
@@ -89,9 +99,25 @@ export default function Agenda() {
                 }
             }
 
-            setsearch(false);
-            setsending(false);
-            setloading(false);
+            // Empleados (medico, enfermera)
+            axios.get(urlGetPersonal)
+            .then((res) => {
+                console.log("PERSONAL", res.data);
+                let dataList = res.data.data;
+
+                if(dataList.length > 0){
+                    setdoctors(dataList[0].accountRoles);
+                    setnurses(dataList[1].accountRoles);
+                }
+
+                setsearch(false);
+                setsending(false);
+                setloading(false);
+
+            }).catch((err) => {
+                console.error(err);
+            });
+
 
         }).catch((err) => {
 
@@ -116,6 +142,17 @@ export default function Agenda() {
 
     // console.log(appointmentTypes);
 
+    let doctorInDateSelected    = "";
+    let nurseInDateSelected     = "";
+
+    if(appoinmentSelected !== null){
+        doctorInDateSelected = doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
+        doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
+    
+        nurseInDateSelected = nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.nurses.employeeId));
+        nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
+    }
+    
     return (
         <Page title="Agenda | CEMA">
         <Container maxWidth="xl">
@@ -196,13 +233,13 @@ export default function Agenda() {
                                     <Grid item lg={4}>
                                     {appoinmentSelected !== null ?
                                         <BlobProvider 
-                                            // document={<FichaPersonalPrint data={dataToEdit} />}
+                                            document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
                                         >
                                             {({ blob, url, loading, error }) => {
                                                 console.log(blob);
                                                 // Do whatever you need with blob here
                                                 return <Button 
-                                                    // onClick={() => printFile(blob)} 
+                                                    onClick={() => printFile(blob)} 
                                                     // disabled={!permissions.imprime || typeForm === "create"} 
                                                     variant="contained" fullWidth
                                                 >
@@ -229,8 +266,8 @@ export default function Agenda() {
                                     >   
                                         {appoinmentSelected !== null ?
                                             <PDFDownloadLink
-                                                // document={<FichaPersonalPrint data={appoinmentSelected} />}
-                                                fileName="cita.pdf"
+                                                document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
+                                                fileName="cita_agenda.pdf"
                                             >
                                                 Descargar
                                             </PDFDownloadLink>
@@ -383,13 +420,17 @@ export default function Agenda() {
 
                                             <Typography sx={{mb: 2}}> 
                                                 <Typography component="span">
-                                                    Doctor: <Typography component="span" sx={{fontWeight: 700}}>Exler Vazquez</Typography>
+                                                    Doctor: <Typography component="span" sx={{fontWeight: 700}}>
+                                                        {doctorInDateSelected}
+                                                    </Typography>
                                                 </Typography>
                                             </Typography>
 
                                             <Typography sx={{mb: 2}}> 
                                                 <Typography component="span">
-                                                    Enfermería: <Typography component="span" sx={{fontWeight: 700}}>Luis Ibañez</Typography>
+                                                    Enfermería: <Typography component="span" sx={{fontWeight: 700}}>
+                                                        {nurseInDateSelected}
+                                                    </Typography>
                                                 </Typography>
                                             </Typography>
                                         </Grid>
@@ -401,9 +442,9 @@ export default function Agenda() {
                 }
 
                 {loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Box sx={{py: 3, px: 5}}>
                         <Loader />
-                    </Card>
+                    </Box>
                 }
             </Grid>
         </Container>

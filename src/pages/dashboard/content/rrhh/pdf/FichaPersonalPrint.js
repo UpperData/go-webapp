@@ -8,6 +8,7 @@ import {
   Image
 } from "@react-pdf/renderer";
 import moment from "moment";
+import logo from "../../../../../images/logo.png"
 
 const styles = StyleSheet.create({
   page: {
@@ -88,6 +89,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18
+  },
+  logo: {
+    width: 200,
+    marginBottom: 30
+    // marginLeft: 'auto',
+    // marginRight: 'auto'
   }
 });
 
@@ -102,6 +109,8 @@ export function FichaPersonalPrint(props) {
       <Page size="A4" style={styles.page}>
      
           <View style={styles.section}>
+
+            <Image style={styles.logo} src={logo} />
 
             <Text style={{ ...styles.title,  marginBottom: 30, fontSize: 18, fontFamily: "Helvetica-Bold" }}>
               Ficha personal { /* props.data !== null ? "- id:"+props.data.id : "" */}

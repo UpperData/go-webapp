@@ -98,6 +98,11 @@
     }
 }
 
+.normalLineHeight {
+    line-height: normal !important;
+    white-space: initial !important;
+}
+
 /*
 strong, .fw-bold{
     font-weight: 600;
@@ -114,6 +119,15 @@ header{
     background-color: transparent !important;
 }
 */
+
+.badgedata{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F4F6F8;
+    border-radius: 20px;
+    padding: .4em;
+}
 
 .overlay-page-dashboard{
     position: absolute;

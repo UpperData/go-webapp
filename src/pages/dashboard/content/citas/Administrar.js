@@ -19,6 +19,10 @@ import { useSelector } from "react-redux";
 import { getPermissions } from "../../../../utils/getPermissions";
 import { matchRoutes, useLocation } from "react-router-dom"
 
+import { CitaPdf } from "./pdf/Cita";
+import { PDFDownloadLink, usePDF, BlobProvider } from "@react-pdf/renderer";
+import printJS from 'print-js'
+
 export default function AdministrarCita() {
 
     const [loading,     setloading]                     = useState(true);
@@ -66,12 +70,17 @@ export default function AdministrarCita() {
     const urlGetPatientType         = "/pAtieNt/TYPE/geT/*";
     const urlGetAppointmentTypes    = "/APpOINtMENt/typE/*"; 
 
+    const printFile = async (blob) => {
+        let pdfUrl    = await window.URL.createObjectURL(blob);
+        await printJS(pdfUrl);
+        window.URL.revokeObjectURL(pdfUrl);
+    }
+
     // Permissions
     const location                              = useLocation();
     let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
     let permissions                             = getPermissions(location, MenuPermissionList);
     console.log(permissions);
-
 
     const LoginSchema =     Yup.object().shape({
         appointmentTypeId:  Yup.string().required('Debe seleccionar el tipo de cita'),
@@ -456,13 +465,49 @@ export default function AdministrarCita() {
                                         </Button>
                                     </Grid>
                                     <Grid item lg={3}>
-                                        <Button disabled={!permissions.imprime || typeForm === "create"} variant="contained" fullWidth>
-                                            Imprimir
-                                        </Button>
+                                        {dataToEdit !== null ?
+                                            <BlobProvider 
+                                                document={<CitaPdf data={{...dataToEdit, doctors, nurses}} />}
+                                            >
+                                                {({ blob, url, loading, error }) => {
+                                                    console.log(blob);
+                                                    // Do whatever you need with blob here
+                                                    return <Button 
+                                                        onClick={() => printFile(blob)} 
+                                                        disabled={!permissions.imprime || typeForm === "create"} 
+                                                        variant="contained" fullWidth
+                                                    >
+                                                        Imprimir
+                                                    </Button>
+                                                }}
+                                            </BlobProvider>
+                                        :
+                                            <Button 
+                                                disabled={!permissions.imprime || typeForm === "create"} 
+                                                variant="contained" fullWidth
+                                            >
+                                                Imprimir
+                                            </Button>
+                                        }
                                     </Grid>
                                     <Grid item lg={3}>
-                                        <Button disabled={!permissions.imprime || typeForm === "create"} variant="contained" color="secondary" fullWidth>
-                                            Descargar
+                                        <Button 
+                                            disabled={!permissions.imprime || typeForm === "create"} 
+                                            variant="contained" 
+                                            color="secondary" 
+                                            fullWidth    
+                                            className={dataToEdit !== null ? "pdf-download-link" : ""}
+                                        >   
+                                            {dataToEdit !== null ?
+                                                <PDFDownloadLink
+                                                    document={<CitaPdf data={{...dataToEdit, doctors, nurses}} />}
+                                                    fileName="cita.pdf"
+                                                >
+                                                    Descargar
+                                                </PDFDownloadLink>
+                                                :
+                                                "Descargar"
+                                            }
                                         </Button>
                                     </Grid>
                                     <Grid item lg={3}>
@@ -492,6 +537,7 @@ export default function AdministrarCita() {
                                         </Grid>
                                     </Grid>
                                 </Grid>
+                                
 
                                 {/* 
                                 <Typography variant="h4" sx={{mb: 3}}>
