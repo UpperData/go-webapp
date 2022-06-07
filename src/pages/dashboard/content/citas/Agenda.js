@@ -282,9 +282,9 @@ export default function Agenda() {
                             </Box>
 
                             {search &&
-                                <Card sx={{py: 3, px: 5}}>
+                                <Box sx={{py: 3, px: 5}}>
                                     <Loader />
-                                </Card>
+                                </Box>
                             }
 
                             {data.rows.length <= 0 && !search &&
@@ -442,9 +442,9 @@ export default function Agenda() {
                 }
 
                 {loading &&
-                    <Box sx={{py: 3, px: 5}}>
+                    <Card sx={{py: 3, px: 5}}>
                         <Loader />
-                    </Box>
+                    </Card>
                 }
             </Grid>
         </Container>

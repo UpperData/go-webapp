@@ -4,7 +4,7 @@ import { useFormik, Form, FormikProvider } from 'formik';
 
 // material
 import { Box, Grid, Stack, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
@@ -22,6 +22,12 @@ import CaretRight from "@iconify/icons-ant-design/caret-right"
 import CaretLeft from "@iconify/icons-ant-design/caret-left"
 import { getPermissions } from "../../../../utils/getPermissions";
 import { useSelector } from "react-redux";
+
+import ExportExcel from "react-export-excel"
+
+const ExcelFile     = ExportExcel.ExcelFile;
+const ExcelSheet    = ExportExcel.ExcelSheet;
+const ExcelColumn   = ExportExcel.ExcelColumn;
 
 // ----------------------------------------------------------------------
 
@@ -55,8 +61,16 @@ function Inventario() {
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
-    const urlGetData    = "/InveTorY/get/ALL";
-    const urlNewItem    = "/INVETOry/aricle/new";
+    const [typeForm, settypeForm]                       = useState("create");
+    const [itemToEdit, setitemToEdit]                   = useState(null);
+
+    // const [editingItemInTable, seteditingItemInTable]   = useState(null);
+    const [changeInputStock, setchangeInputStock]       = useState(false);
+
+    const urlGetData        = "/InveTorY/get/ALL";
+    const urlNewItem        = "/INVETOry/aricle/new";
+    const urlEditItem       = "/InVETOrY/aricLe/EdIT";
+    const urlEditItemData   = "/InvEToRY/UpdaTE/ARTICLE";
 
     // Permissions
     const location                              = useLocation();
@@ -66,7 +80,7 @@ function Inventario() {
     const LoginSchema =     Yup.object().shape({
         name:               Yup.string().required('Debe ingresar un nombre'),  
         description:        Yup.string().required('Debe ingresar una descripción'),
-        existence:          Yup.string().required('Ingrese stock'),
+        // existence:          Yup.string().required('Ingrese stock'),
     });
 
     const formik = useFormik({
@@ -82,30 +96,23 @@ function Inventario() {
 
                 let data = {
                     name:               values.name,
-                    description:        values.description,
-                    existence:          values.existence,
+                    description:        values.description
+                }
+
+                if(typeForm === "create"){
+                    data.existence = values.existence;
+                }else{
+                    data.id        = itemToEdit.id;
                 }
 
                 console.log(data);
                 setsending(true);
 
-                /*
-                    const config = {
-                        onUploadProgress: progressEvent => {
-                        let progressData = progress;
-                        progressData = (progressEvent.loaded / progressEvent.total) * 100;
-
-                        console.log(progressData);
-
-                        setprogress(progressData);
-                        setcount(count + progressData);
-                        }
-                    }
-                */
-
-                axios.post(
-                    urlNewItem,
-                    data,
+                axios({
+                    method: typeForm === "create" ? "POST" : "PUT",
+                    url:    typeForm === "create" ? urlNewItem : urlEditItem,
+                    data
+                }
                     // config
                 ).then((res) => {
 
@@ -116,6 +123,7 @@ function Inventario() {
                         setalertSuccessMessage(res.data.message);
                         resetForm();
                         setopenModalAddItem(false);
+                        getList();
 
                         setTimeout(() => {
                             setalertSuccessMessage("");
@@ -138,6 +146,20 @@ function Inventario() {
 
             } catch(e) {
                 // setformErrors(e);
+
+                /*
+                    const config = {
+                        onUploadProgress: progressEvent => {
+                        let progressData = progress;
+                        progressData = (progressEvent.loaded / progressEvent.total) * 100;
+
+                        console.log(progressData);
+
+                        setprogress(progressData);
+                        setcount(count + progressData);
+                        }
+                    }
+                */
             }
         }
     });
@@ -153,6 +175,9 @@ function Inventario() {
 
             console.log("---Data---");
             console.log(res);
+
+            settypeForm("create");
+            setitemToEdit(null);
 
             setdata(res);
             setloading(false);
@@ -180,6 +205,8 @@ function Inventario() {
 
     const changeStock = (id, newCount) => {
         if(newCount >= 0){
+            setchangeInputStock(true);
+
             let list        = [...data];
             let item        = list.find(item => item.id === id);
             let index       = list.indexOf(item);
@@ -191,14 +218,38 @@ function Inventario() {
             item.existence  = newCount;
             list[index]     = item;
 
+
             setdata(list);
             setcount(count * 20);
         }
     }
 
+    const editItem = (data) => {
+        console.log("Edit", data);
+
+        setFieldValue("name",           data.article.name);
+        setFieldValue("description",    data.article.description);
+
+        settypeForm("edit");
+        setitemToEdit(data);
+        setopenModalAddItem(true);
+    }
+
+    const handleCloseModalAddItem = () => {
+        setopenModalAddItem(false);
+    }
+
+    const openModal = () => {
+        setitemToEdit(null);
+        resetForm();
+        settypeForm("create");
+        setopenModalAddItem(true);
+    }
+
     let columns = [
         // { field: 'id',          headerName: 'ID', width: 70 },
         { 
+            editable: false,
             field: 'articleId',     
             headerName: `Nombre`,
             width: 200,
@@ -206,13 +257,22 @@ function Inventario() {
             renderCell: (cellValues) => {
                 let data = cellValues;
                 // console.log(data);
-                return <Typography sx={{fontWeight: 'bold', mb:0}} variant="body">
-                    {data.row.article.name}
-                </Typography>
+                return  <Button 
+                            sx={{
+                                fontWeight: 'bold', 
+                                mb:0, 
+                                justifyContent: "start"
+                            }} 
+                            fullWidth 
+                            variant="body"
+                            onClick={() => editItem(data.row)}
+                        >
+                            {data.row.article.name} &nbsp; <i className="mdi mdi-pencil" />
+                        </Button>
             }
         },
         { 
-            field: 'stock',    
+            field: 'existence',    
             headerName: 'Existencia',
             sortable: false,
             width: 200,
@@ -222,7 +282,7 @@ function Inventario() {
                 let count = data.row.existence;
                 return  <Grid container alignItems="center">
                             <Grid xs={4} item sx={{px: .5}}>
-                                <Button onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                                <Button disabled={sending} onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
                                     <Icon icon={CaretLeft} />
                                 </Button>
                             </Grid>
@@ -242,7 +302,7 @@ function Inventario() {
                                 />
                             </Grid>
                             <Grid xs={4} item sx={{px: .5}}>
-                                <Button onClick={() => changeStock(data.row.id, count + 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                                <Button disabled={sending} onClick={() => changeStock(data.row.id, count + 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
                                     <Icon icon={CaretRight} />
                                 </Button>
                             </Grid>
@@ -255,54 +315,65 @@ function Inventario() {
             sortable: false,
             width: 100,
             headerAlign: 'center',
+            editable: true,
+            type: 'number',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let count = data.row.price;
-                return  <TextField
-                        hiddenLabel
-                        size='small'
-                        fullWidth
-                        autoComplete="lastname"
-                        type="number"
-                        label=""
-                        InputProps={{
-                            type: "number",
-                            style: {textAlign: 'center'}
-                        }}
-                        value={count}
-                    />
-                            
+                let price = data.row.price;
+                return <Typography>
+                    $ {price}
+                </Typography>
             }
         },
         { 
-            field: 'minimalStock',    
+            field: 'minStock',    
             headerName: 'Mínimo',
             sortable: false,
             width: 90,
             headerAlign: 'center',
+            editable: true,
+            type: 'number',
             renderCell: (cellValues) => {
                 let data = cellValues;
                 let count = data.row.minStock;
-                return  <TextField
-                            hiddenLabel
-                            size='small'
-                            fullWidth
-                            autoComplete="lastname"
-                            type="number"
-                            label=""
-                            InputProps={{
-                                type: "number",
-                                style: {textAlign: 'center'}
-                            }}
-                            value={count}
-                        />
+                return <Typography>
+                    {count}
+                </Typography>
             }
+
+            // valueGetter: ({ value }) => value && Number(value),
+            /*
+                renderCell: (cellValues) => {
+                    let data = cellValues;
+                    let count = data.row.minStock;
+                    return  <TextField
+                                hiddenLabel
+                                size='small'
+                                fullWidth
+                                autoComplete="lastname"
+                                type="number"
+                                label=""
+                                InputProps={{
+                                    type: "number",
+                                    style: {textAlign: 'center'}
+                                }}
+                                value={count}
+                            />
+                }
+            */
         },
         { 
             field: 'almacen',     
             headerName: `Almacén`,
             width: 100,
-            sortable: false
+            sortable: false,
+            renderCell: (cellValues) => {
+                let data = cellValues;
+                let almacen = data.row.almacen;
+                return <Typography>
+                    {almacen}
+                </Typography>
+            }
         },
         { 
             field: 'asignados',     
@@ -312,18 +383,71 @@ function Inventario() {
             renderCell: (cellValues) => {
                 let data = cellValues;
                 let text = data.row.asignados;
-                return  text === null ? 0 : text
+                return <Typography>
+                    {text === null ? 0 : text}
+                </Typography>
             }
         }
     ];
 
-    const handleCloseModalAddItem = () => {
-        setopenModalAddItem(false);
+    const editItemData = (itemData) => {
+
+        let data = {
+            articleId:  itemData.articleId,
+            existence:  itemData.existence,
+            price:      itemData.price,
+            minStock:   itemData.minStock
+        }
+
+        setsending(true);
+        setalertSuccessMessage("");
+
+        axios({
+            method: "PUT",
+            url:    urlEditItemData,
+            data
+        }
+            // config
+        ).then((res) => {
+
+            setsending(false);
+            setchangeInputStock(false);
+
+            setalertSuccessMessage(res.data.message);
+            setTimeout(() => {
+                setalertSuccessMessage("");
+            }, 2000);
+
+            if(res.data.result){
+                // resetForm();
+                // setopenModalAddItem(false);
+            }
+
+        }).catch((err) => {
+            let fetchError = err;
+        });
     }
 
-    const openModal = () => {
-        resetForm();
-        setopenModalAddItem(true);
+    const handleCellEditStop = (params) => {
+        // console.log(params);
+        let dataBeforeEdit = params.row;
+        if(dataBeforeEdit[params.field] !== params.value){
+
+            console.log("Edit");
+            // ------------------Edit-------------------------
+            dataBeforeEdit[params.field] = params.value;
+            console.log(dataBeforeEdit);
+            let dataToEdit = dataBeforeEdit;
+            editItemData(dataToEdit);
+        }
+    };
+
+    const validateChanges = (params) => {
+        if(params.field === "existence" && changeInputStock){
+            console.log(params);
+            let dataToEdit = params.row;
+            editItemData(dataToEdit);
+        }
     }
 
     return (
@@ -334,7 +458,6 @@ function Inventario() {
                     Inventario
                 </Typography>
             </Box>
-
             
             <Modal
                 open={openModalAddItem}
@@ -353,11 +476,11 @@ function Inventario() {
                     <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
 
                     <Typography id="modal-modal-title" variant="h3" component="h3">
-                        Agregar un producto
+                        {typeForm === "create" ? "Agregar un producto" : "Editar un producto"}
                     </Typography>
 
                     <Grid container sx={{ mt: 3 }} columnSpacing={3}>
-                        <Grid item md={8}>
+                        <Grid item md={typeForm === "create" ? 8 : 12}>
                             <Stack spacing={3}>
                                 <TextField
                                     size='small'
@@ -372,25 +495,27 @@ function Inventario() {
                                 />         
                             </Stack>
                         </Grid>
-                        <Grid item md={4}>
-                            <Stack spacing={3}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="existence"
-                                    type="text"
-                                    label="Existencia"
+                        {typeForm === "create" &&
+                            <Grid item md={4}>
+                                <Stack spacing={3}>
+                                    <TextField
+                                        size='small'
+                                        fullWidth
+                                        autoComplete="existence"
+                                        type="text"
+                                        label="Existencia"
 
-                                    InputProps={{
-                                        type: "number"
-                                    }}
+                                        InputProps={{
+                                            type: "number"
+                                        }}
 
-                                    {...getFieldProps('existence')}
-                                    error={Boolean(touched.existence && errors.existence)}
-                                    helperText={touched.existence && errors.existence}
-                                />         
-                            </Stack>
-                        </Grid>
+                                        {...getFieldProps('existence')}
+                                        error={Boolean(touched.existence && errors.existence)}
+                                        helperText={touched.existence && errors.existence}
+                                    />         
+                                </Stack>
+                            </Grid>
+                        }
                         <Grid item md={12}>
                             <Stack spacing={3} sx={{my: 2}}>
                                 <TextField
@@ -420,10 +545,12 @@ function Inventario() {
                         loading={sending}
                         color="primary"
                         disabled={
-                            !permissions.crea || 
-                            (values.name === "" || values.description === "" || values.existence === "")}
+                            (!permissions.crea && typeForm === "create") || 
+                            (!permissions.edita && typeForm === "edit")  || 
+                            (values.name === "" || values.description === "")
+                        }
                     >
-                        Agregar
+                        {typeForm === "create" ? "Agregar" : "Editar"}
                     </LoadingButton>
 
                     </Form>
@@ -437,6 +564,40 @@ function Inventario() {
                 {!loading &&
                     <Card sx={{py: 3, px: 5}}>
 
+                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 3}}>
+                            <Grid item lg={3}>
+                                <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
+                                    Nuevo Artículo
+                                </Button>
+                            </Grid>
+                            <Grid item lg={4}>
+                                {data !== null
+                                ?
+                                    <ExcelFile
+                                        filename="inventario"
+                                        element={
+                                            <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
+                                                Descargar Hoja de Inventario
+                                            </Button>
+                                        }
+                                    >
+                                        <ExcelSheet data={data} name="Inventario">
+                                            <ExcelColumn label="Producto" value={(col) => col.article.name} />
+                                            <ExcelColumn label="Existencia" value="existence" />
+                                            <ExcelColumn label="Precio (usd)" value="price" />
+                                            <ExcelColumn label="Stock mínimo" value="minStock" />
+                                            <ExcelColumn label="Almacén" value="almacen" />
+                                            <ExcelColumn label="Transito" value="asignados" />
+                                        </ExcelSheet>
+                                    </ExcelFile>
+                                :
+                                    <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
+                                        Descargar Hoja de Inventario
+                                    </Button>
+                                }
+                            </Grid>
+                        </Grid>
+
                         {alertSuccessMessage !== "" &&
                             <Alert sx={{mb: 3}} severity="success">
                                 {alertSuccessMessage}
@@ -448,27 +609,27 @@ function Inventario() {
                                 {alertErrorMessage}
                             </Alert>
                         }
-
-                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 5}}>
-                            <Grid item lg={3}>
-                                <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
-                                    Nuevo Artículo
-                                </Button>
-                            </Grid>
-                            <Grid item lg={4}>
-                                <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                    Descargar Hoja de Inventario
-                                </Button>
-                            </Grid>
-                        </Grid>
                     
                         {data !== null && data.length > 0 !== "" &&
-                            <div>
+                            <div className="inventario-content-table">
+
+                                <Alert sx={{mb: 3}} severity="info">
+                                    Puede modificar el valor de los elementos haciendo click.
+                                </Alert>
+                                
                                 <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
                                     <DataGrid
                                         sx={{mb:4}}
                                         rows={data}
                                         columns={columns}
+
+                                        // onCellEditStop={(params) => handleCellEditStop(params)}
+                                        // experimentalFeatures={{ newEditingApi: true }}
+                                        // onCellEditStart={(params) => handleCellEditStart(params)}
+                                        // processRowUpdate={processRowUpdate}
+
+                                        onCellEditCommit={(params) => handleCellEditStop(params)}
+                                        onCellFocusOut={(params)   => validateChanges(params)}
 
                                         page={0}
                                         pageSize={6}

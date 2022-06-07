@@ -1,4 +1,4 @@
-import {SET_MENU, SET_ROLE, SET_CIVIL_STATUS_TYPES, SET_PHONE_TYPES_LIST, SET_PATIENT_TYPES, SET_PERSONAL_TYPES, SET_APPOINTMENT_TYPES} from '../types'
+import {SET_MENU, SET_ROLE, SET_CIVIL_STATUS_TYPES, SET_PHONE_TYPES_LIST, SET_PATIENT_TYPES, SET_PERSONAL_TYPES, SET_APPOINTMENT_TYPES, SET_MEMBERSHIPS} from '../types'
 
 const initialState = {
     menu:               null,
@@ -8,7 +8,8 @@ const initialState = {
     patientTypes:       null,
 
     personalTypes:      null,
-    appointmentTypes:   null,    
+    appointmentTypes:   null,  
+    memberships:        null  
 }
 
 const dashboardReducer = (state = initialState, action) => {
@@ -53,6 +54,12 @@ const dashboardReducer = (state = initialState, action) => {
             return{
                 ...state,
                 appointmentTypes: action.payload
+            };
+
+        case SET_MEMBERSHIPS:
+            return{
+                ...state,
+                memberships: action.payload
             };
         
         default: return state;

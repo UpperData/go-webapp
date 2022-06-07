@@ -1,6 +1,6 @@
 export const getPermissions = (location, MenuPermissionList) => {
-    console.log(location);
-    console.log(MenuPermissionList);
+    // console.log(location);
+    // console.log(MenuPermissionList);
 
     let path = location.pathname;
     let listPermissions = MenuPermissionList;

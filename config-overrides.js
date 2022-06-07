@@ -10,6 +10,7 @@ module.exports = function override(config, env) {
     util: require.resolve("util"),
     buffer: require.resolve("buffer"),
     asset: require.resolve("assert"),
+    fs: false
   },
   config.plugins.push(
       new webpack.ProvidePlugin({

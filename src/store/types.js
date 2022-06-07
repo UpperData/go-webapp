@@ -12,3 +12,5 @@ export const SET_PHONE_TYPES_LIST       = 'SET_PHONE_TYPES_LIST';
 export const SET_PATIENT_TYPES          = 'SET_PATIENT_TYPES';
 export const SET_PERSONAL_TYPES         = 'SET_PERSONAL_TYPES';
 export const SET_APPOINTMENT_TYPES      = 'SET_APPOINTMENT_TYPES';
+
+export const SET_MEMBERSHIPS            = 'SET_MEMBERSHIPS';

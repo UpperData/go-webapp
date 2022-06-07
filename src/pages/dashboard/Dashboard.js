@@ -7,7 +7,7 @@ import Loader from "../../components/Loader/Loader"
 import DashboardLayout from '../../layouts/dashboard';
 
 import {useSelector, useDispatch} from "react-redux"
-import { set_appointment_types, set_civil_status_types_list, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
+import { set_appointment_types, set_civil_status_types_list, set_memberships, set_menu, set_patient_types, set_phone_types_list, set_role } from '../../store/dashboard/actions';
 
 import Home from './content/Home';
 import InConstruction from '../shared/InConstruction';
@@ -26,6 +26,8 @@ import VerifyEmail from '../shared/verifyEmail';
 import Perfil from './content/configuraciones/Perfil';
 import Agenda from './content/citas/Agenda';
 import PatientHistory from './content/citas/PatientHistory';
+import Membership from './content/usuarios-y-permisos/Membership';
+import Bills from './content/finanzas/Recibos';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -74,6 +76,7 @@ function Dashboard() {
         await dispatch(set_civil_status_types_list());
         await dispatch(set_patient_types());
         await dispatch(set_appointment_types());
+        await dispatch(set_memberships());
 
         setloaded(true);
     }
@@ -86,7 +89,14 @@ function Dashboard() {
                     // console.log(session.userData.data.role[0].id);
                     getData();
                 }
-            }else if(dashboard.menu !== null && dashboard.appointmentTypes !== null && dashboard.civilStatusTypes !== null && dashboard.phoneTypesList !== null && dashboard.patientTypes !== null){
+            }else if(
+                    dashboard.menu !== null && 
+                    dashboard.appointmentTypes !== null && 
+                    dashboard.civilStatusTypes !== null && 
+                    dashboard.phoneTypesList !== null && 
+                    dashboard.patientTypes !== null &&
+                    dashboard.memberships !== null
+                ){
                 // console.log(dashboard);
                 setloading(false);
             }
@@ -115,7 +125,9 @@ function Dashboard() {
                     <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                     <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
-                
+                <Route path="account/activate/"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="Permissions/MeMbership/"    element={<PrivateRoute><Membership /></PrivateRoute>}/>
+
                 {/* rrhh */}
                 <Route path="rRHH/EmPloyEE/FILE"            element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
 
@@ -128,6 +140,9 @@ function Dashboard() {
                 {/* inventario */}
                 <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><Inventario /></PrivateRoute>}/>
                 <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
+            
+                {/* finanzas */}
+                <Route path="finace/vouCHer/"           element={<PrivateRoute><Bills /></PrivateRoute>}/>
             </Route>
             
             <Route path="*"       element={<Page404 />} />
