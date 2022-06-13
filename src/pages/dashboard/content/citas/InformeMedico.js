@@ -1,30 +1,25 @@
 import { useState, useEffect } from "react"
 import * as Yup from 'yup';
 // material
-import { Radio, Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText, Alert } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-
-import { styled, alpha } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
-import SearchIcon from '@iconify/icons-ant-design/search';
+import { Radio, Input, Divider, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText, Alert } from '@mui/material';
+import {useLocation } from 'react-router-dom';
 import { useFormik, Form, FormikProvider } from 'formik';
-import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
+import { LoadingButton } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
 import Scrollbar from "../../../../components/Scrollbar";
 
 import { Icon } from '@iconify/react';
-import CaretDown from "@iconify/icons-ant-design/caret-down"
-import CaretUp from "@iconify/icons-ant-design/caret-up"
 import CaretRight from "@iconify/icons-ant-design/caret-right"
 import CaretLeft from "@iconify/icons-ant-design/caret-left"
 
+import { useSelector } from "react-redux";
 import axios from "../../../../auth/fetch"
 import Loader from '../../../../components/Loader/Loader';
 
 // components
 import Page from '../../../../components/Page';
-import { useSelector } from "react-redux";
+import { getPermissions } from "../../../../utils/getPermissions";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -46,12 +41,14 @@ export default function InformeMedico() {
     const [sending, setsending]                         = useState(false);
 
     const [count, setcount]                             = useState(0);
-    const [examsSelected,       setexamsSelected]       = useState([]);
 
     const [listDates, setlistDates]                     = useState(null);
     
     const [examsList, setexamsList]                     = useState(null);
     const [medicinesList, setmedicinesList]             = useState(null);
+
+    const [medicinesInList,     setMedicinesInList]     = useState([]);
+    const [examsSelected,       setexamsSelected]       = useState([]);
 
     // SearchData
     const [textSearchData, settextSearchData]           = useState("");
@@ -60,13 +57,25 @@ export default function InformeMedico() {
     const [idToEdit, setidToEdit]                       = useState(null);
     const [typeForm, settypeForm]                       = useState("create");
 
+    const [alertSuccessMessage, setalertSuccessMessage] = useState("");
+    const [alertErrorMessage,   setalertErrorMessage]   = useState("");
+
     const idUser = useSelector(state => state.session.userData.data.account.id);
-    console.log(idUser);
 
+    // principalloading
     const urlGetAppointmentByDoctor                     = "/aPPoINtMent/DOCToR/By";
-
     const urlGetMedicines                               = `/invENtOrY/aSSGNmEnT/byDoCTOR/${idUser}`;
     const urlGetExams                                   = "/exaMs/geT/*";
+
+    const urlGetMedicalReport                           = "/MEdiCaL/GET/Report/";
+
+    const urlSaveMedicalReport                          = "/MEDiCAl/aDd/REport/";
+    const urlUpdateMedicalReport                        = "/mEdiCaL/EDiT/RepORt/";
+
+    // Permissions
+    const location                              = useLocation();
+    let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
+    let permissions                             = getPermissions(location, MenuPermissionList);
 
     const LoginSchema =     Yup.object().shape({
         appointmentId:      Yup.string().required('Debe seleccionar una cita'),
@@ -75,6 +84,7 @@ export default function InformeMedico() {
         withExams:          Yup.boolean(),
         withMedicine:       Yup.boolean(),
 
+        dosage:             Yup.string(),
         otherExams:         Yup.string(),
     });
 
@@ -82,55 +92,146 @@ export default function InformeMedico() {
         validateOnChange: false,
         initialValues: {
             appointmentId:  "",
-
             description:    "",
-
             withExams:      false,
             withMedicine:   false,
-
+            dosage:         "",
             otherExams:     "",
         },
         validationSchema: LoginSchema,
-        onSubmit: async (values) => {
+        onSubmit: async (values, {resetForm}) => {
           try {
+
+            let formattedData = {
+                // id: idToEdit,
+                appointmentId:  values.appointmentId,
+                description:    values.description,
+
+                withExams:      values.withExams,
+                withMedicine:   values.withMedicine,
+
+                dosage:         values.dosage,
+                otherExams:     values.otherExams,
+
+                medicines:      [],
+                exams:          []
+            };
+
+            
+            let medicinesInReport = [];
+
+            if(medicinesInList.length > 0){
+                let searchMedicines = medicinesInList.filter(item => Number(item.count) > 0);
+                medicinesInReport   = [...searchMedicines];
+            }
+            
+            if(values.withExams && examsSelected.length === 0){
+                setalertErrorMessage("Debe seleccionar los examenes requeridos.");
+            }else if(values.withMedicine && medicinesInReport.length === 0){
+                setalertErrorMessage("Debe seleccionar una medicina.");
+            }else if(values.withMedicine && values.dosage === ""){
+                setalertErrorMessage("Debe ingresar una posología.");
+            }else if(typeForm){
+                // setsending(true);
+
+                let newExamsSelectedList = [];
+                for (let i = 0; i < examsSelected.length; i++) {
+                    const exam = examsList.find(item => Number(item.id) === examsSelected[i]);
+                    // console.log(exam);
+
+                    newExamsSelectedList.push(exam);
+                }
+
+                let newMedicinesSelectedList = [];
+                for (let i = 0; i < medicinesInReport.length; i++) {
+                    const medicine = medicinesInReport[i];
+                    console.log(medicine);
+                    let formattedMedicine       = {};
+                    formattedMedicine.id        = medicine.id;
+                    formattedMedicine.name      = medicine.article.name;
+                    formattedMedicine.cantidad  = medicine.article.count;
+
+                    newMedicinesSelectedList.push(formattedMedicine);
+                }
+
+                formattedData.medicines     = newMedicinesSelectedList;
+                formattedData.exams         = newExamsSelectedList;
+
+                setalertErrorMessage("");
+                setalertSuccessMessage("");
+
+                console.log(formattedData);
+
+                axios({
+                    method: "post",
+                    url: urlSaveMedicalReport,
+                    data: formattedData
+                }).then((res) => {
+
+                    console.log(res.data);
+                    if(res.data.result){
+
+                        setalertSuccessMessage(res.data.message);
+                        formattedMedicines(medicinesList);
+                        resetForm();
+                        setsending(false);
+
+                        setTimeout(() => {
+                            setalertSuccessMessage("");
+                        }, 20000);
+                    }
+
+                }).catch((err) => {
+
+                    let fetchError = err;
+                    console.error(fetchError);
+                    if(fetchError.response){
+                        console.log(err.response);
+                        setalertErrorMessage(err.response.data.message || err.response.data.data.message);
+                        setsending(false);
+                        // return Promise.reject(err.response.data.data);
+                    }
+                });
+                
+            }
+                
             // setformErrors("");
             // await login(values.email, values.password);
+
           } catch(e) {
+
             // setformErrors(e);
+
           }
         }
     });
 
-    const toggleValueToExams = async (value) => {
-        let newList = examsSelected;
-        // console.log(newList);
-        let verify  = newList.find(item => item === value);
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
-        if(verify){
-            // delete
-            newList = newList.filter(item => item !== value);
-            await setexamsSelected(newList);
+    const formattedMedicines = (medicines) => {
+        if(medicines.length > 0){
+            let newMedicinesList = [];
+
+            for (let i = 0; i < medicines.length; i++) {
+                const medicine = medicines[i];
+                let newMedicineItem   = {...medicine};
+                newMedicineItem.count = 0;
+                newMedicinesList.push(newMedicineItem);
+            }
+
+            setMedicinesInList(newMedicinesList);
+            setloading(false);
         }else{
-            // add
-            newList.push(value);
-            await setexamsSelected(newList);
+            setMedicinesInList([]);
+            setloading(false);
         }
-
-        await setcount(count + 5);
-        console.log(newList);
     }
 
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue } = formik;
-
-    const changeWithMedicine = (showMedicine) => {
-        setFieldValue("withMedicine", showMedicine);
-    }
-
-    const changeWithExams = (showWithExams) => {
-        setFieldValue("withExams", showWithExams);
-    }
-
+    // get all data
     const getData = () => {
+
+        // appointments
+
         axios.get(urlGetAppointmentByDoctor)
         .then((res) => {
             let data        = res.data;
@@ -142,27 +243,32 @@ export default function InformeMedico() {
 
                 setlistDates(res.data.data);
 
+                // exams
+
                 axios.get(urlGetExams)
                 .then((res) => {
                     let data        = res.data;
                     let dataList    = res.data.data;
 
-                    console.log(res.data);
+                    // console.log(res.data);
 
                     if(data.result){
                         setexamsList(res.data.data);
+
+                        // medicines
 
                         axios.get(urlGetMedicines)
                         .then((res) => {
                             let data        = res.data;
                             let dataList    = res.data.data;
 
-                            console.log(res.data);
+                            // console.log(res.data);
 
                             if(data.result){
                                 setmedicinesList(res.data.data);
+                                formattedMedicines(res.data.data);
+
                                 setsearch(false);
-                                setloading(false);
                             }
 
                         }).catch((err) => {
@@ -190,6 +296,62 @@ export default function InformeMedico() {
         }
     }, []);
 
+    const reset = () => {
+        setdataToEdit(null);
+        setidToEdit(null);
+
+        settypeForm("create");
+ 
+        settextSearchData("");
+        setsearchingData(false);
+
+        formattedMedicines(medicinesList);
+
+        setalertErrorMessage("");
+        setalertErrorMessage("");
+        setsending(false);
+
+        resetForm();
+    }
+
+    const changeWithMedicine = (showMedicine) => {
+        setFieldValue("withMedicine", showMedicine);
+    }
+
+    const changeWithExams = (showWithExams) => {
+        setFieldValue("withExams", showWithExams);
+    }
+
+    const toggleValueToExams = async (value) => {
+        let newList = examsSelected;
+        // console.log(newList);
+        let verify  = newList.find(item => item === value);
+
+        if(verify){
+            // delete
+            newList = newList.filter(item => item !== value);
+            await setexamsSelected(newList);
+        }else{
+            // add
+            newList.push(value);
+            await setexamsSelected(newList);
+        }
+
+        await setcount(count + 5);
+        console.log(newList);
+    }
+
+    const handleMedicineCountCHange = (id, newCount) => {
+        let list    = [...medicinesInList];
+        let getItem = list.find(item => item.id === id);
+        let index   = list.indexOf(getItem);
+
+        getItem.count = newCount;
+
+        list[index] = getItem;
+        setMedicinesInList(list);
+    }
+
     return (
         <Page title="Ficha de empleado | Cema">
         <Container maxWidth="xl">
@@ -207,23 +369,35 @@ export default function InformeMedico() {
                                 <Loader />
                             }
 
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
+
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
+
                             {!loading && !searchingData &&
                                 <div>
                                     {listDates.length > 0 ?
                                         <div>
                                             <Grid sx={{mb: 3}} container columnSpacing={3}>
                                                 <Grid item lg={3}>
-                                                    <Button variant="outlined" fullWidth>
+                                                    <Button onClick={() => reset()} variant="contained" fullWidth>
                                                         Nuevo
                                                     </Button>
                                                 </Grid>
                                                 <Grid item lg={3}>
-                                                    <Button variant="contained" fullWidth>
+                                                    <Button disabled={dataToEdit === null} variant="contained" fullWidth color="secondary">
                                                         Imprimir
                                                     </Button>
                                                 </Grid>
                                                 <Grid item lg={3}>
-                                                    <Button variant="contained" color="secondary" fullWidth>
+                                                    <Button disabled={dataToEdit === null} variant="contained" color="secondary" fullWidth>
                                                         Descargar
                                                     </Button>
                                                 </Grid>
@@ -258,25 +432,25 @@ export default function InformeMedico() {
                                                 <Grid item lg={12}>
                                                     
                                                     <Box sx={{ pb: 1 }}>
-                                                        <Typography variant="h5">
+                                                        <Typography variant="h6">
                                                             Información General
                                                         </Typography>
 
-                                                        <Grid container columnSpacing={3} sx={{my: 2}}>
+                                                        <Grid container columnSpacing={3} sx={{mt: 2, mb: 1}}>
                                                             <Grid item xs={12}>
                                                                 <FormControl fullWidth size="small">
                                                                     <InputLabel id="demo-simple-select-date">
-                                                                        ID Cita - CI – Nombre - Apellido
+                                                                        ID Cita - Nombre Apellido
                                                                     </InputLabel>
                                                                     <Select
                                                                         fullWidth
                                                                         labelId="demo-simple-select-date"
                                                                         id="demo-simple-select-date"
 
-                                                                        // value={values.direccion}
-                                                                        // onChange={(e) => changeDirection(setFieldValue, `${e.target.value}`)}
+                                                                        value={values.appointmentId}
+                                                                        onChange={(e) => setFieldValue('appointmentId', `${e.target.value}`)}
                                                                         
-                                                                        label="ID Cita - CI – Nombre - Apellido"
+                                                                        label="ID Cita - Nombre Apellido"
                                                                         MenuProps={MenuProps}
 
                                                                         {...getFieldProps('appointmentId')}
@@ -286,8 +460,8 @@ export default function InformeMedico() {
 
                                                                         {listDates !== null && listDates.map((item, key) => {
                                                                             let dataItem = item;
-                                                                            return <MenuItem key={key} value={`${dataItem.patientId}`}>
-                                                                                        {`${dataItem.document.number} - ${dataItem.nombre} ${dataItem.apellido}`}
+                                                                            return <MenuItem key={key} value={`${dataItem.appointments[0].appointmentId}`}>
+                                                                                       {dataItem.appointments[0].appointmentId} - {`${dataItem.nombre} ${dataItem.apellido} (${dataItem.document.nationality.toLowerCase()+"-"+dataItem.document.number})`}
                                                                                     </MenuItem>
                                                                         })}
 
@@ -302,152 +476,243 @@ export default function InformeMedico() {
                                                         </Grid>
                                                     </Box>
 
-                                                    <Stack spacing={3} sx={{mb: 1}}>
-                                                        <TextField
-                                                            size='small'
-                                                            fullWidth
-                                                            autoComplete="description"
-                                                            type="number"
-                                                            label="Descripción"
-                                                            multiline
-                                                            rows={7}
-                                                            // maxRows={10}
+                                                    {values.appointmentId !== "" &&
+                                                        <div>
 
-                                                            {...getFieldProps('description')}
-                                                            error={Boolean(touched.description && errors.description)}
-                                                            helperText={touched.description && errors.description}
-                                                        />
-                                                    </Stack>
+                                                            <Stack spacing={3} sx={{mt: 2}}>
+                                                                <TextField
+                                                                    size='small'
+                                                                    fullWidth
+                                                                    autoComplete="description"
+                                                                    type="number"
+                                                                    label="Descripción"
+                                                                    multiline
+                                                                    rows={5}
+                                                                    // maxRows={10}
 
+                                                                    {...getFieldProps('description')}
+                                                                    error={Boolean(touched.description && errors.description)}
+                                                                    helperText={touched.description && errors.description}
+                                                                />
+                                                            </Stack>
 
-                                                    <Grid sx={{mt:4}} container columnSpacing={3}>
-                                                        <Grid item xs={6}>
+                                                            <Grid sx={{mt:4}} container columnSpacing={3}>
+                                                                <Grid item xs={6}>
 
-                                                            <Typography sx={{mb: 1}} align="center" variant="h5">
-                                                                ¿Se aplicaron medicamentos? 
-                                                            </Typography>
-                                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
-                                                                <Button onClick={() => changeWithMedicine(!values.withMedicine)} sx={{py: .81}} variant={values.withMedicine  ? "contained" : "outlined"} color="primary">Si</Button>
-                                                                <Button onClick={() => changeWithMedicine(!values.withMedicine)} sx={{py: .81}} variant={!values.withMedicine ? "contained" : "outlined"} color="primary">No</Button>
-                                                            </ButtonGroup>
-
-                                                            {values.withMedicine &&
-                                                                <Card sx={{py: 3, px: 3}}>
-                                                                    <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
-                                                                        Medicamentos Aplicados
+                                                                    <Typography sx={{mb: 1}} align="center" variant="h6">
+                                                                        ¿Se aplicaron medicamentos? 
                                                                     </Typography>
-                                                                    <List>
-                                                                        <ListItem 
-                                                                            // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                            // disablePadding
-                                                                        >
-                                                                            <Grid container alignItems="center">
-                                                                                <Grid xs={7}>
-                                                                                    Diclofenaco 10mg 
-                                                                                </Grid>
-                                                                                <Grid xs={5}>
-                                                                                    <Grid container alignItems="center">
-                                                                                        <Grid xs={4} sx={{px: .5}}>
-                                                                                            <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
-                                                                                                <Icon icon={CaretLeft} />
-                                                                                            </Button>
-                                                                                        </Grid>
-                                                                                        <Grid xs={4}>
-                                                                                            <TextField
-                                                                                                hiddenLabel
-                                                                                                size='small'
-                                                                                                fullWidth
-                                                                                                autoComplete="lastname"
-                                                                                                type="number"
-                                                                                                label=""
-                                                                                                InputProps={{
-                                                                                                    readOnly: true,
-                                                                                                }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        <Grid xs={4} sx={{px: .5}}>
-                                                                                            <Button type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
-                                                                                                <Icon icon={CaretRight} />
-                                                                                            </Button>
-                                                                                        </Grid>
-                                                                                    </Grid>
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                        </ListItem>
-                                                                    </List>
-                                                                </Card>
-                                                            }
+                                                                    <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                                        <Button disabled={medicinesInList.length <= 0} size="small" onClick={() => changeWithMedicine(true)} sx={{py: .81}} variant={values.withMedicine  ? "contained" : "outlined"} color="secondary">Si</Button>
+                                                                        <Button size="small" onClick={() => changeWithMedicine(false)} sx={{py: .81}} variant={!values.withMedicine ? "contained" : "outlined"} color="secondary">No</Button>
+                                                                    </ButtonGroup>
 
-                                                        </Grid>
-                                                        <Grid item xs={6}>
-
-                                                            <Typography sx={{mb: 1}} align="center" variant="h5">
-                                                                ¿Requiere exámenes médicos? 
-                                                            </Typography>
-                                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
-                                                                <Button onClick={() => changeWithExams(!values.withExams)} sx={{py: .81}} variant={values.withExams  ? "contained" : "outlined"} color="primary">Si</Button>
-                                                                <Button onClick={() => changeWithExams(!values.withExams)} sx={{py: .81}} variant={!values.withExams ? "contained" : "outlined"} color="primary">No</Button>
-                                                            </ButtonGroup>
-
-                                                            {values.withExams &&
-                                                                <Card sx={{py: 3, px: 3}}>
-                                                                    <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
-                                                                        Exámenes Aplicados
-                                                                    </Typography>
-                                                                    <List>
-                                                                        <Scrollbar
-                                                                            sx={{
-                                                                                height: 320,
-                                                                                '& .simplebar-content': { maxHeight: 250 ,height: "auto", display: 'flex', flexDirection: 'column' }
-                                                                            }}
-                                                                        >
-                                                                            {examsList.map((exam, key) => {
-                                                                                 let item = exam;
-                                                                                    return <ListItem 
-                                                                                        key={key}
-                                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                                        // disablePadding
+                                                                    {values.withMedicine 
+                                                                        ?
+                                                                        <Card sx={{py: 3, px: 3}}>
+                                                                            <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
+                                                                                Medicamentos Aplicados
+                                                                            </Typography>
+                                                                            {medicinesInList.length > 0
+                                                                            ?
+                                                                                <List>
+                                                                                    <Scrollbar
+                                                                                        sx={{
+                                                                                            height: "auto",
+                                                                                            '& .simplebar-content': { maxHeight: 200 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                                        }}
                                                                                     >
-                                                                                        <ListItemButton 
-                                                                                            selected={examsSelected.includes(item.id)} 
-                                                                                            onClick={() => toggleValueToExams(item.id)}
-                                                                                        >
-                                                                                            <ListItemText primary={item.name} />
-                                                                                        </ListItemButton>
-                                                                                    </ListItem>
-                                                                            })}
-                                                                        </Scrollbar>
-                                                                    </List>
-                                                                </Card>
+                                                                                        {medicinesInList.map((medicine, key) => {
+                                                                                            let item = medicine;
+                                                                                            return <ListItem 
+                                                                                                    key={key}
+                                                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                                        disablePadding
+                                                                                                    >
+                                                                                                    <Grid container alignItems="center">
+                                                                                                        <Grid item xs={7}>
+                                                                                                            <Typography sx={{fontWeight: "bold"}}>
+                                                                                                                {item.article.name}
+                                                                                                            </Typography>
+                                                                                                        </Grid>
+                                                                                                        <Grid item xs={5}>
+                                                                                                            <Grid container alignItems="center">
+                                                                                                                <Grid item xs={4} sx={{px: .5}}>
+                                                                                                                    <Button 
+                                                                                                                        type="button" 
+                                                                                                                        size="small" 
+                                                                                                                        sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}}
+                                                                                                                        color="secondary" 
+                                                                                                                        variant="contained"
+                                                                                                                        disabled={sending || item.count === 0}
+                                                                                                                        onClick={() => handleMedicineCountCHange(item.id, item.count - 1)}
+                                                                                                                    >
+                                                                                                                        <Icon icon={CaretLeft} />
+                                                                                                                    </Button>
+                                                                                                                </Grid>
+                                                                                                                <Grid item xs={4}>
+                                                                                                                    <TextField
+                                                                                                                        hiddenLabel
+                                                                                                                        size='small'
+                                                                                                                        fullWidth
+                                                                                                                        autoComplete="lastname"
+                                                                                                                        type="number"
+                                                                                                                        label=""
+                                                                                                                        InputProps={{
+                                                                                                                            readOnly: true,
+                                                                                                                        }}
+                                                                                                                        value={item.count}
+                                                                                                                    />
+                                                                                                                </Grid>
+                                                                                                                <Grid item xs={4} sx={{px: .5}}>
+                                                                                                                    <Button 
+                                                                                                                        type="button" 
+                                                                                                                        size="small" 
+                                                                                                                        sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} 
+                                                                                                                        color="secondary" 
+                                                                                                                        variant="contained"
+                                                                                                                        disabled={sending || item.count >= item.quantity}
+                                                                                                                        onClick={() => handleMedicineCountCHange(item.id, item.count + 1)}
+                                                                                                                    >
+                                                                                                                        <Icon icon={CaretRight} />
+                                                                                                                    </Button>
+                                                                                                                </Grid>
+                                                                                                            </Grid>
+                                                                                                        </Grid>
+                                                                                                    </Grid>
+                                                                                                    <Divider />
+                                                                                                </ListItem>
+                                                                                        })}
+                                                                                    </Scrollbar>
+                                                                                </List>
+                                                                            :
+                                                                                <Alert severity="info"> 
+                                                                                    Sin medicamentos
+                                                                                </Alert>
+                                                                            }
+                                                                        </Card>
+                                                                        :
+                                                                        <Card sx={{py: 3, px: 3}}>
+                                                                            <Alert severity="info"> 
+                                                                                No se requirió de medicamentos adicionales.
+                                                                            </Alert>
+                                                                        </Card>
+                                                                    }
+
+                                                                </Grid>
+                                                                <Grid item xs={6}>
+
+                                                                    <Typography sx={{mb: 1}} align="center" variant="h6">
+                                                                        ¿Requiere exámenes médicos? 
+                                                                    </Typography>
+                                                                    <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                                        <Button size="small" onClick={() => changeWithExams(true)}  sx={{py: .81}} variant={values.withExams  ? "contained" : "outlined"} color="secondary">Si</Button>
+                                                                        <Button size="small" onClick={() => changeWithExams(false)} sx={{py: .81}} variant={!values.withExams ? "contained" : "outlined"} color="secondary">No</Button>
+                                                                    </ButtonGroup>
+
+                                                                    {values.withExams 
+                                                                        ?
+                                                                        <Card sx={{py: 3, px: 3}}>
+                                                                            <Typography align="center" sx={{ mb: 1, mt:2 }} variant="h5">
+                                                                                Exámenes Aplicados
+                                                                            </Typography>
+                                                                            <List>
+                                                                                <Scrollbar
+                                                                                    sx={{
+                                                                                        height: 200,
+                                                                                        '& .simplebar-content': { maxHeight: 200 ,height: 200, display: 'flex', flexDirection: 'column' }
+                                                                                    }}
+                                                                                >
+                                                                                    {examsList.map((exam, key) => {
+                                                                                        let item = exam;
+                                                                                            return <ListItem 
+                                                                                                key={key}
+                                                                                                // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                                disablePadding
+                                                                                            >
+                                                                                                <ListItemButton 
+                                                                                                    selected={examsSelected.includes(item.id)} 
+                                                                                                    onClick={() => toggleValueToExams(item.id)}
+                                                                                                >
+                                                                                                    <ListItemText primary={item.name} />
+                                                                                                </ListItemButton>
+                                                                                            </ListItem>
+                                                                                    })}
+                                                                                </Scrollbar>
+                                                                            </List>
+                                                                        </Card>
+                                                                        :
+                                                                        <Card sx={{py: 3, px: 3}}>
+                                                                            <Alert severity="info"> 
+                                                                                Sin examenes requeridos.
+                                                                            </Alert>
+                                                                        </Card>
+                                                                    }
+
+                                                                </Grid>
+                                                            </Grid>
+
+                                                            { values.withMedicine &&
+                                                                <div>
+
+                                                                    <Typography sx={{mt: 4}} variant="h6">
+                                                                        Posología
+                                                                    </Typography>
+                                                                    <Stack spacing={3} sx={{my: 1}}>
+                                                                        <TextField
+
+                                                                            size='small'
+                                                                            fullWidth
+                                                                            autoComplete="otherExams"
+                                                                            type="text"
+                                                                            label="Otros"
+                                                                            multiline
+                                                                            rows={4}
+                                                                            // maxRows={4}
+
+                                                                            {...getFieldProps('dosage')}
+                                                                            error={Boolean(touched.dosage && errors.dosage)}
+                                                                            helperText={touched.dosage && errors.dosage}
+                                                                        />
+                                                                    </Stack>
+
+                                                                </div>
                                                             }
 
-                                                        </Grid>
-                                                    </Grid>
+                                                            { values.withExams &&
+                                                                <div>
 
+                                                                    <Typography sx={{mt: 4}} variant="h6">
+                                                                        Otros examenes
+                                                                    </Typography>
+                                                                    <Stack spacing={3} sx={{my: 1}}>
+                                                                        <TextField
 
-                                                    <Typography sx={{mt: 4}} variant="h5">
-                                                        Otros examenes
-                                                    </Typography>
-                                                    <Stack spacing={3} sx={{my: 1}}>
-                                                        <TextField
-                                                            size='small'
-                                                            fullWidth
-                                                            autoComplete="otherExams"
-                                                            type="number"
-                                                            label="Otros"
-                                                            multiline
-                                                            rows={2}
-                                                            // maxRows={4}
+                                                                            size='small'
+                                                                            fullWidth
+                                                                            autoComplete="otherExams"
+                                                                            type="text"
+                                                                            label="Otros"
+                                                                            multiline
+                                                                            rows={2}
+                                                                            // maxRows={4}
 
-                                                            {...getFieldProps('otherExams')}
-                                                            error={Boolean(touched.otherExams && errors.otherExams)}
-                                                            helperText={touched.otherExams && errors.otherExams}
-                                                        />
-                                                    </Stack>
+                                                                            {...getFieldProps('otherExams')}
+                                                                            error={Boolean(touched.otherExams && errors.otherExams)}
+                                                                            helperText={touched.otherExams && errors.otherExams}
+                                                                        />
+                                                                    </Stack>
+
+                                                                </div>
+                                                            }
+
+                                                        </div>
+                                                    }
+
                                                 </Grid>
                                             </Grid>
 
-                                            {typeForm === "create" &&
+                                            {typeForm === "create" && values.appointmentId !== "" &&
                                                 <LoadingButton
                                                     fullWidth
                                                     size="large"
@@ -461,7 +726,7 @@ export default function InformeMedico() {
                                                 </LoadingButton>
                                             }
 
-                                            {typeForm === "edit" &&
+                                            {typeForm === "edit" && values.appointmentId !== "" &&
                                                 <LoadingButton
                                                     fullWidth
                                                     size="large"

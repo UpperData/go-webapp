@@ -145,7 +145,7 @@ export default function Agenda() {
     let doctorInDateSelected    = "";
     let nurseInDateSelected     = "";
 
-    if(appoinmentSelected !== null){
+    if(appoinmentSelected !== null && doctors !== null && nurses !== null){
         doctorInDateSelected = doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
         doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
     

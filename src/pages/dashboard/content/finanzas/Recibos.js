@@ -5,13 +5,16 @@ import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton } from '@mui/lab';
 
-import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert, FormControl,InputLabel,Select } from '@mui/material';
+import { Box, Stack, Grid, Container, Typography, Card, MenuItem, Button, Modal, TextField, Alert, FormControl,InputLabel,Select } from '@mui/material';
 // import { DataGrid } from '@mui/x-data-grid';
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 
 import Loader from '../../../../components/Loader/Loader';
 import Page from '../../../../components/Page';
 
+import { RecibosPdf } from "./pdf/Recibos";
+import { PDFDownloadLink, BlobProvider } from "@react-pdf/renderer";
+import printJS from 'print-js'
 
 let dummyData = [
     {
@@ -25,49 +28,236 @@ let dummyData = [
 export default function Bills() {
 
     const [sending, setsending] = useState(false);
-    const [loading, setloading] = useState(false);
-    const [search, setsearch]   = useState(false);
-    const [data, setdata]       = useState(dummyData);
+    const [loading, setloading] = useState(true);
+    const [search, setsearch]   = useState(true);
 
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
-    let urlGetData          = "";
+    const [doctorAmount, setdoctorAmount]   = useState("");
+    const [amount, setAmount]               = useState("");
+
+    const [searchData, setsearchData]   = useState(false);
+    const [data, setdata]               = useState([]);
+    const [dataDoctor, setDataDoctor]   = useState(null);
+    const [doctors, setdoctors]         = useState([]);
+    const [doctor, setdoctor]           = useState(null);
+
+    const [idToSearch, setidToSearch]       = useState("");
+    const [billSelected, setbillSelected]   = useState(null);
+
+    const [showModalCancelBill, setshowModalCancelBill] = useState(false);
+
+    let urlGetData                  = "/aPpoInTMent/by/pAY/";
+    let urlGetUsersWithAccount      = "/EMplOyeFIle/StATUS/gET/true";
+    let urlUpdateAmount             = "/EMplOyefIle/update/fee/";
+    let urlCreateBill               = "/vouchEr/NeW/";
+
+    const style = {
+        width: "95%",
+        margin: "auto",
+        maxWidth: "600px",
+        backgroundColor: "#fff",
+        userSelect: "none",
+        boxShadow: 'none',
+        textAlign: 'center',
+    };
 
     const LoginSchema =     Yup.object().shape({
-        text:               Yup.string().required('')
+        description:        Yup.string().required('Debe ingresar una descripción'),
+        amount:             Yup.string().required('Precio'),
+        quantity:           Yup.string().required('Cantidad')
     });
 
     const formik = useFormik({
+        validateOnChange: false,
         initialValues: {
-            text:      ""
+            description:    "",
+            amount:         "",
+            quantity:       ""
         },
         validationSchema: LoginSchema,
         onSubmit: async (values, {resetForm}) => {
           try {
 
-            setsending(true);
-            setalertErrorMessage("");
-            setalertSuccessMessage("");
+            let data =  {
+                concept:        values.description,
+                description:    values.description,
+                appointmentId:  null,
+                amount:         values.amount,
+                quantity:       values.quantity
+            }
+
+            let actualList = [...dataDoctor];
+            if(actualList.length === 0){
+                data.id     = 1;
+                actualList.push(data);
+                setDataDoctor(actualList);
+            }else{
+                data.id = actualList[actualList.length - 1].id + 1;
+                actualList.push(data);
+                setDataDoctor(actualList);
+            }
+            
+            resetForm();
             
           } catch(e) {
-            setsending(false);
+            console.log(e);
           }
         }
     });
 
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps } = formik;
+    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
-    const getList = async () => {
-        axios.get(urlGetData)
+    const updateAmount = async () => {
+
+        let datasend = {
+            employeeFileId: doctor,
+            amount:         amount.toString()
+        }
+
+        setsending(true);
+        axios({
+            method: "put",
+            url:    urlUpdateAmount,
+            data:   datasend
+        }).then((res) => {
+            console.log(res.data);
+            setsending(false);
+
+            let newDoctorsList  = [...doctors];
+            let doctorData      = newDoctorsList.find(item => item.employeeFileId.toString() === datasend.employeeFileId);
+            let index           = newDoctorsList.indexOf(doctorData);
+
+            newDoctorsList[index].amount = datasend.amount;
+            setdoctors(newDoctorsList);
+            setalertSuccessMessage(res.data.message);
+
+            setdoctorAmount(datasend.amount);
+            updateTable(dataDoctor, datasend.employeeFileId);
+
+            setTimeout(() => {
+                setalertSuccessMessage("");
+            }, 4000);
+
+        }).catch((err) => {
+            console.error(err);
+            setsending(false);
+        });
+
+    }
+
+    const updateTable = (dataDoctorList, idDoctor) => {
+        console.log("Actualizando tabla");
+        
+        let doctorAmountData = 0;
+        let doctorData = doctors.find(item => item.employeeFileId.toString() === idDoctor);
+        if(doctorData.fees.length > 0){
+            doctorAmountData = doctorData.fees[0].amount;
+        }
+
+        let newList         = [];
+        for (let i = 0; i < dataDoctorList.length; i++) {
+            const dataDoctorListItem = dataDoctorList[i];
+            let newItem = {...dataDoctorListItem};
+            newItem.id  = i + 1;
+
+            if(!newItem.hasOwnProperty("quantity")){
+                newItem.quantity = 1;
+            }
+
+            /*
+                if(!newItem.hasOwnProperty("amount")){
+                    newItem.amount = doctorAmountData;
+                }
+            */
+
+            newList.push(newItem);
+        }
+
+        console.log(newList);
+        setDataDoctor(newList);
+        setsearchData(false);
+    }
+
+    const getBills = async (idDoctor) => {
+        setsearchData(true);
+
+        setdoctor(idDoctor);
+        let doctorData = doctors.find(item => item.employeeFileId.toString() === idDoctor);
+        if(doctorData.fees.length > 0){
+            setdoctorAmount(doctorData.fees[0].amount);
+            setAmount(doctorData.fees[0].amount);
+        }
+
+        axios.get(urlGetData+idDoctor)
         .then((res) => {
 
             console.log("---Data---");
             console.log(res.data);
 
-            setdata(res.data.data);
+            let dataDoctorList  = res.data.data;
+            updateTable(dataDoctorList, idDoctor);
+
+        }).catch((err) => {
+
+            let error = err.response;
+            if(error){
+                if(error.data){
+                    setloading(true);
+                }
+            }
+        });
+    }
+
+    const getBillById = async () => {
+        let urlCreateBill               = `/VouCHER/GEt/${doctor}/${idToSearch}/`;
+
+        setsearch(true);
+
+        axios.get(urlCreateBill)
+        .then((res) => {
+            
+            console.log("Data search");
+            console.log(res.data);
+            setsearch(false);
+
+            if(res.data.data !== null){
+
+                setbillSelected(res.data.data);
+                updateTable(res.data.data.details, doctor);
+
+            }else{
+                setalertErrorMessage("No se ha podido encontrar el voucher");
+
+                setTimeout(() => {
+                    setalertErrorMessage("");
+                }, 4000);
+            }
+
+        }).catch((err) => {
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+
+                setsearch(false);
+                setalertErrorMessage(err.response.data.data.message);
+
+            }
+        });
+    }
+
+    const getDoctors = async () => {
+        axios.get(urlGetUsersWithAccount)
+        .then((res) => {
+
+            console.log("---Data---");
+            console.log(res.data);
+
+            setdoctors(res.data.data);
             setsending(false);
             setloading(false);
+            setsearch(false);
 
         }).catch((err) => {
 
@@ -84,47 +274,152 @@ export default function Bills() {
     useEffect(async () => {
         if(loading){
             if(search){
-                await getList();
+                await getDoctors();
             }
         }
     }, []);
 
+    const deleteBill = (id) => {
+        let actualList  = [...dataDoctor];
+        let newList     = actualList.filter(item => Number(item.id) !== Number(id));
+
+        setDataDoctor(newList);
+    }
+
+    const saveData = () => {
+        setsending(true);
+
+        let totalAmount = 0;
+
+        for (let i = 0; i < dataDoctor.length; i++) {
+            const dataBill = dataDoctor[i];
+            if(dataBill.hasOwnProperty("quantity")){
+                totalAmount += (Number(dataBill.amount) * Number(dataBill.quantity));
+            }else{
+                totalAmount += Number(dataBill.amount);
+            }
+        }
+
+        let formattedData = {
+            employeeFileId: doctor,
+            amount:         doctorAmount,
+            details:        dataDoctor
+        }
+
+        axios({
+            method: "post",
+            url:    urlCreateBill,
+            data:   formattedData
+        }).then((res) => {
+
+            console.log(res.data);
+
+            setalertSuccessMessage(res.data.message);
+            setsending(false);
+            resetForm();
+            setAmount("");
+            setdoctorAmount("");
+            setDataDoctor([]);
+            setdoctor(null);
+
+            setidToSearch("");
+            setbillSelected(null);
+
+            setTimeout(() => {
+                setalertSuccessMessage("");
+            }, 4000);
+
+        }).catch((err) => {
+            console.error(err);
+            setsending(false);
+        });
+    }
+
+    const CancelBill = () => {
+        if(billSelected !== null){
+            let url = `/VOUCHER/UPDATE/${billSelected.voucherId}`;
+            setsending(true);
+
+            axios.get(url).then((res) => {
+
+                console.log(res.data);
+
+                setshowModalCancelBill(false);
+
+                setalertSuccessMessage(res.data.message);
+                setsending(false);
+                resetForm();
+                setAmount("");
+                setdoctorAmount("");
+                setDataDoctor([]);
+                setdoctor(null);
+
+                setidToSearch("");
+                setbillSelected(null);
+
+                setTimeout(() => {
+                    setalertSuccessMessage("");
+                }, 4000);
+
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
+    }
 
     let columns = [
-        { 
-            field: 'id',          
-            headerName: '#', 
-            width: 50,
-            headerAlign: 'center',
-            sortable: false,
-            align: "center"
-        },
+        /*
+            { 
+                field: 'id',          
+                headerName: '#', 
+                width: 50,
+                headerAlign: 'center',
+                sortable: false,
+                align: "center"
+            },
+        */
         { 
             editable: false,
             field: 'articleId',     
             headerName: `Descripción`,
-            width: 300,
+            minWidth: 300, 
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
                 // console.log(data);
                 return  <Typography sx={{fontWeight: "bold"}}>
-                    {data.row.description}
+                    {data.row.description} 
+                    <Button 
+                        variant="contained" 
+                        size="small" 
+                        color="primary" 
+                        sx={{px: 1, ml: 3}}
+                        onClick={() => deleteBill(data.row.id)}
+                        disabled={sending}
+                    >
+                        Eliminar
+                    </Button>
                 </Typography> 
             }
         },
         { 
-            field: 'price',    
+            field: 'amount',    
             headerName: 'Precio',
             sortable: false,
-            width: 150,
+            minWidth: 150, 
+            flex: 1,
             headerAlign: 'center',
             align: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let price = data.row.price;
+                let amount = data.row.amount;
+                if(!amount){
+                    amount = doctorAmount;
+                }
+
                 return  <Typography>
-                    {"Bs."+price}
+                    {"Bs." + amount}
                 </Typography> 
             }
         },
@@ -132,231 +427,419 @@ export default function Bills() {
             field: 'quantity',    
             headerName: 'Cantidad',
             sortable: false,
-            width: 100,
+            minWidth: 120, 
+            flex: 1,
             headerAlign: 'center',
             align: 'center',
         },
         { 
             field: 'sub-total',     
             headerName: `Sub Total`,
-            width: 200,
+            minWidth: 200, 
+            flex: 1,
             headerAlign: 'right',
             align: "right",
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let price = data.row.price;
-                return  <Typography>
-                    {"Bs."+price}
-                </Typography> 
+                let quantity = data.row.quantity;
+                let amount = data.row.amount;
+
+                if(!amount){
+                    amount = doctorAmount;
+                }
+
+                let result  = amount*quantity;
+                // console.log(quantity, amount, result);
+                
+                return  <Typography sx={{fontWeight: "bold"}} align="right">
+                    Bs. {result}
+                </Typography>
             }
         }
     ];
 
+    let totalAmount = 0;
+
+    if(dataDoctor !== null && dataDoctor.length > 0){
+        for (let i = 0; i < dataDoctor.length; i++) {
+            const dataBill = dataDoctor[i];
+            let dataamount = 0;
+    
+            if(dataBill.hasOwnProperty("amount") && dataBill.amount !== null){
+                dataamount = dataBill.amount;
+            }else if(billSelected === null){
+                    dataamount = doctorAmount;
+            }
+    
+            totalAmount += dataamount * Number(dataBill.quantity);
+            
+        }
+    }
+
+    const printFile = async (blob) => {
+        let pdfUrl    = await window.URL.createObjectURL(blob);
+        await printJS(pdfUrl);
+        window.URL.revokeObjectURL(pdfUrl);
+    }
+
     return (
         <Page title="Recibos | CEMA">
-        <Container maxWidth="xl">
-            <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
-                    Recibos
-                </Typography>
-            </Box>
+            <Modal
+                open={showModalCancelBill}
+                onClose={() => setshowModalCancelBill(false)}
+                aria-labelledby="modal-cancel-bill-title"
+                aria-describedby="modal-cancel-bill-description"
+                style={{ 
+                    display:'flex', 
+                    alignItems:'center', 
+                    justifyContent:'center' 
+                }}
+            >
+                <Box sx={{...style, p: 5, borderRadius: 2}}>
+                    <Typography variant="h5" alignItems="center" sx={{mb: 3}}>
+                        ¿Desea anular este recibo?
+                    </Typography>
+                    <div>
+                        <LoadingButton
+                            size="large"
+                            variant="contained"
+                            loading={sending}
+                            color="primary" 
+                            onClick={() => CancelBill()}
+                            sx={{mx: 1}}
+                        >
+                            Sí, anular
+                        </LoadingButton>
+                        <Button disabled={sending} size="large" sx={{mx: 1}} onClick={() => setshowModalCancelBill(false)}>
+                            Cancelar
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
 
-            <Grid sx={{ pb: 3 }} item xs={12}>
-                {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+            <Container maxWidth="xl">
+                <Box sx={{ pb: 3 }}>
+                    <Typography variant="h4">
+                        Recibos
+                    </Typography>
+                </Box>
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
+                <Grid sx={{ pb: 3 }} item xs={12}>
+                    {!loading &&
+                        <Card sx={{py: 3, px: 5}}>
 
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
 
-                        <Box sx={{mb: 3}}>
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
 
-                            <Grid sx={{mb: 5}} container columnSpacing={3}>
-                                <Grid item lg={8}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id="bill-user-id">
-                                            Empleado / Contratado
-                                        </InputLabel>
-                                        <Select
-                                            fullWidth
-                                            labelId="Doctor"
-                                            id="bill-user-id"
-                                            defaultValue=""
-                                            // value={doctor === null ? "" : doctor}
-                                            // onChange={(e) => changeDoctor(e.target.value)}
-                                            label="Empleado / Contratado"
-                                            // MenuProps={MenuProps}
-                                            // disabled={municipios.length === 0}
+                            <Box>
+                                <Typography sx={{ mb: 3, fontWeight: "bold" }}>
+                                    Seleccione
+                                </Typography>
 
-                                            // {...getFieldProps('departamento')}
-                                            // error={Boolean(touched.municipio && errors.municipio)}
-                                            // helperText={touched.departamento && errors.departamento}
-                                        >
-                                            {/*
-                                                doctors.map((item, key) => {
-                                                    let dataItem = item;
-                                                    // console.log(dataItem.account.employeeFiles);
-                                                    return <MenuItem key={key} value={dataItem.account.accountId.toString()}>
-                                                                {dataItem.account.employeeFiles.length > 0
-                                                                    ?
-                                                                    dataItem.account.employeeFiles[0].fisrtName+ " " +dataItem.account.employeeFiles[0].lastName
-                                                                    :
-                                                                    dataItem.account.name
-                                                                }
-                                                            </MenuItem>
-                                                })
-                                            */}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item lg={4}>
-                                    <Grid container columnSpacing={1}>
-                                        <Grid item lg={8}>
-                                            <TextField
-                                                label="Honorario"
-                                                size="small"
-                                                // value={textSearchData}
-                                                // onChange={(e) => settextSearchData(e.target.value)}
-                                                // disabled={!permissions.consulta}
-                                            />
-                                        </Grid>
-                                        <Grid item lg={4}>
-                                            <LoadingButton 
-                                                variant="contained" 
-                                                color="primary"
-                                                type="button"
-                                                sx={{ minWidth: "100%", width: "100%"}}
-                                                // onClick={() => searchDataToEdit(setFieldValue)}
-                                                // loading={searchingData}
-                                                // disabled={textSearchData === "" || !permissions.consulta}
+                                <Grid container columnSpacing={3}>
+                                    <Grid item lg={8}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id="bill-user-id">
+                                                Empleado / Contratado
+                                            </InputLabel>
+                                            <Select
+                                                fullWidth
+                                                labelId="Doctor"
+                                                id="bill-user-id"
+                                                defaultValue=""
+                                                value={doctor === null ? "" : doctor}
+                                                onChange={(e) => getBills(e.target.value)}
+                                                label="Empleado / Contratado"
+                                                // MenuProps={MenuProps}
+                                                // disabled={municipios.length === 0}
+
+                                                // {...getFieldProps('departamento')}
+                                                // error={Boolean(touched.municipio && errors.municipio)}
+                                                // helperText={touched.departamento && errors.departamento}
                                             >
-                                                Actualizar
-                                            </LoadingButton>
+                                                {
+                                                    doctors.map((item, key) => {
+                                                        let dataItem = item;
+                                                        // console.log(dataItem.account.employeeFiles);
+                                                        return <MenuItem key={key} value={dataItem.employeeFileId.toString()}>
+                                                                    {dataItem.fisrtName + " " + dataItem.lastName}
+                                                                </MenuItem>
+                                                    })
+                                                }
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item lg={4}>
+                                        <Grid container columnSpacing={1}>
+                                            <Grid item lg={7}>
+                                                <TextField
+                                                    label="Honorario"
+                                                    size="small"
+                                                    disabled={doctor === null || sending || billSelected !== null}
+                                                    value={ billSelected !== null ? billSelected.amount : amount}
+                                                    onChange={(e) => setAmount(e.target.value)}
+                                                    type="number"
+                                                />
+                                            </Grid>
+                                            <Grid item lg={5}>
+                                                <LoadingButton 
+                                                    variant="contained" 
+                                                    color="primary"
+                                                    type="button"
+                                                    sx={{ minWidth: "100%", width: "100%"}}
+                                                    disabled={doctor === null || (doctor !== null && amount === "") || billSelected !== null}
+                                                    onClick={() => updateAmount()}
+                                                    loading={sending}
+                                                    // disabled={textSearchData === "" || !permissions.consulta}
+                                                >
+                                                    Actualizar
+                                                </LoadingButton>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
 
-                            <Grid sx={{mb: 5}} container columnSpacing={3}>
-                                <Grid item lg={2}>
-                                    <Button 
-                                        // onClick={() => reset()} 
-                                        variant="outlined" 
-                                        fullWidth
-                                    >
-                                        Anular
-                                    </Button>
-                                </Grid>
-                                <Grid item lg={2}>
-                                    <Button 
-                                        // disabled={!permissions.imprime || typeForm === "create"} 
-                                        variant="contained" fullWidth
-                                    >
-                                        Imprimir
-                                    </Button>
-                                </Grid>
-                                <Grid item lg={2}>
-                                    <Button 
-                                        // disabled={!permissions.imprime || typeForm === "create"} 
-                                        variant="contained" fullWidth
-                                    >
-                                        Guardar
-                                    </Button>
-                                </Grid>
-                                <Grid item lg={2}>
-                                    &nbsp;
-                                </Grid>
-                                <Grid item lg={4}>
-                                    <Grid container columnSpacing={1}>
-                                        <Grid item lg={8}>
-                                            <TextField
-                                                label="Recibo #"
-                                                size="small"
-                                                // value={textSearchData}
-                                                // onChange={(e) => settextSearchData(e.target.value)}
-                                                // disabled={!permissions.consulta}
-                                            />
+                                {doctor !== null &&
+                                    <Grid sx={{mb: 5, mt:5}} container columnSpacing={3}>
+                                        <Grid item lg={2}>
+                                            <Button 
+                                                disabled={billSelected === null}
+                                                // onClick={() => reset()} 
+                                                onClick={() => setshowModalCancelBill(true)}
+                                                variant="contained" 
+                                                fullWidth
+                                                disabed
+                                            >
+                                                Anular
+                                            </Button>
+                                        </Grid>
+                                        <Grid item lg={2}>
+                                            {billSelected !== null ?
+                                                <BlobProvider 
+                                                    document={<RecibosPdf data={{ dataVoucher: {...billSelected}, items: dataDoctor, doctor: doctors.find(item => item.employeeFileId.toString() === doctor) }} />}
+                                                >
+                                                    {({ blob, url, loading, error }) => {
+                                                        console.log(blob);
+                                                        // Do whatever you need with blob here
+                                                        return <Button 
+                                                            onClick={() => printFile(blob)} 
+                                                            // disabled={!permissions.imprime || typeForm === "create"} 
+                                                            variant="contained" fullWidth color="secondary"
+                                                        >
+                                                            Imprimir
+                                                        </Button>
+                                                    }}
+                                                </BlobProvider>
+                                            :
+                                                <Button 
+                                                    disabled
+                                                    variant="contained" fullWidth color="secondary"
+                                                >
+                                                    Imprimir
+                                                </Button>
+                                            }
+                                        </Grid>
+                                        <Grid item lg={2}>
+                                            <Button 
+                                                disabled={(dataDoctor !== null && dataDoctor.length === 0) || billSelected !== null} 
+                                                variant="contained" 
+                                                fullWidth
+                                                color='secondary'
+                                                onClick={() =>  saveData()}
+                                            >
+                                                Guardar
+                                            </Button>
+                                        </Grid>
+                                        <Grid item lg={2}>
+                                            &nbsp;
                                         </Grid>
                                         <Grid item lg={4}>
-                                            <LoadingButton 
-                                                variant="contained" 
-                                                color="primary"
-                                                type="button"
-                                                sx={{ minWidth: "100%", width: "100%"}}
-                                                // onClick={() => searchDataToEdit(setFieldValue)}
-                                                // loading={searchingData}
-                                                // disabled={textSearchData === "" || !permissions.consulta}
-                                            >
-                                                Buscar
-                                            </LoadingButton>
+                                            <Grid container columnSpacing={1}>
+                                                <Grid item lg={8}>
+                                                    <TextField
+                                                        label="Recibo #"
+                                                        size="small"
+                                                        value={idToSearch}
+                                                        onChange={(e) => setidToSearch(e.target.value)}
+                                                        // disabled={!permissions.consulta}
+                                                    />
+                                                </Grid>
+                                                <Grid item lg={4}>
+                                                    <LoadingButton 
+                                                        variant="contained" 
+                                                        color="primary"
+                                                        type="button"
+                                                        sx={{ minWidth: "100%", width: "100%"}}
+                                                        onClick={() => getBillById()}
+                                                        loading={search}
+                                                        disabled={idToSearch === ""}
+                                                    >
+                                                        Buscar
+                                                    </LoadingButton>
+                                                </Grid>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
-                                </Grid>
-                            </Grid>
+                                }
 
-                        </Box>
+                            </Box>
 
-                        <Box>
-                            <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
-                                <DataGrid
-                                    sx={{mb:4}}
-                                    rows={data}
-                                    columns={columns}
+                            {searchData 
+                                ?
+                                    <Box>
+                                        <Loader />
+                                    </Box>
+                                :
+                                <div>
 
-                                    // onCellEditStop={(params) => handleCellEditStop(params)}
-                                    // experimentalFeatures={{ newEditingApi: true }}
-                                    // onCellEditStart={(params) => handleCellEditStart(params)}
-                                    // processRowUpdate={processRowUpdate}
+                                    {doctor !== null &&
+                                        <div>
 
-                                    // onCellEditCommit={(params) => handleCellEditStop(params)}
-                                    // onCellFocusOut={(params)   => validateChanges(params)}
+                                            <Box sx={{mt: 3}}>
+                                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
+                                                    <DataGrid
+                                                        rows={dataDoctor}
+                                                        columns={columns}
+                                                        components={{
+                                                            NoRowsOverlay: () => (
+                                                            <Stack height="100%" alignItems="center" justifyContent="center">
+                                                                No se han encontrado datos de recibo
+                                                            </Stack>
+                                                            )
+                                                        }}
 
-                                    hideFooter
-                                    page={0}
-                                    pageSize={6}
-                                    rowsPerPageOptions={[6,10,20]}
-                                    // autoPageSize
-                                    rowCount={data.length}
+                                                        // onCellEditStop={(params) => handleCellEditStop(params)}
+                                                        // experimentalFeatures={{ newEditingApi: true }}
+                                                        // onCellEditStart={(params) => handleCellEditStart(params)}
+                                                        // processRowUpdate={processRowUpdate}
 
-                                    disableColumnFilter
-                                    disableColumnMenu
-                                    autoHeight 
-                                    disableColumnSelector
-                                    disableSelectionOnClick
-                                    // checkboxSelection
-                                />
-                            </div>
-                        </Box>
+                                                        // onCellEditCommit={(params) => handleCellEditStop(params)}
+                                                        // onCellFocusOut={(params)   => validateChanges(params)}
 
-                        {/* form */}
+                                                        hideFooter
+                                                        page={0}
+                                                        pageSize={6}
+                                                        rowsPerPageOptions={[6,10,20]}
+                                                        // autoPageSize
+                                                        rowCount={dataDoctor.length}
 
-                        {/* 
-                            <FormikProvider value={formik}>
-                                <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-                                    
-                                </Form>
-                            </FormikProvider>
-                        */}
+                                                        disableColumnFilter
+                                                        disableColumnMenu
+                                                        autoHeight 
+                                                        disableColumnSelector
+                                                        disableSelectionOnClick
+                                                        // checkboxSelection
+                                                    />
+                                                </div>
+                                                {(dataDoctor.length > 0) &&
+                                                    <div>
+                                                        <Typography sx={{fontWeight: "bold", mt: 2}} align="right">
+                                                            Sub Total : Bs. {totalAmount}
+                                                        </Typography>
+                                                    </div>
+                                                }
+                                            </Box>
 
-                    </Card>
-                }
+                                            <Typography sx={{mb: 3, mt: 3,  fontWeight: "bold"}}>
+                                                Agregar recibo
+                                            </Typography>
 
-                {loading &&
-                    <Card sx={{py: 3, px: 5}}>
-                        <Loader />
-                    </Card>
-                }
-            </Grid>
-        </Container>
+                                            <FormikProvider value={formik}>
+                                                <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+
+                                                    <Box>
+                                                        <Grid container columnSpacing={3}>
+                                                            <Grid item lg={6}>
+                                                                <TextField
+                                                                    size='small'
+                                                                    fullWidth
+                                                                    autoComplete="description"
+                                                                    type="text"
+                                                                    label="Descripción"
+                                                                    // multiline
+                                                                    // minRows={4}
+                                                                    // maxRows={6}
+                                                                    {...getFieldProps('description')}
+                                                                    error={Boolean(touched.description && errors.description)}
+                                                                    helperText={touched.description && errors.description}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item lg={2}>
+                                                                <TextField
+                                                                    size='small'
+                                                                    fullWidth
+                                                                    autoComplete="amount"
+                                                                    type="text"
+                                                                    label="Precio"
+                                                                    // multiline
+                                                                    // minRows={4}
+                                                                    // maxRows={6}
+                                                                    {...getFieldProps('amount')}
+                                                                    error={Boolean(touched.amount && errors.amount)}
+                                                                    helperText={touched.amount && errors.amount}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item lg={2}>
+                                                                <TextField
+                                                                    size='small'
+                                                                    fullWidth
+                                                                    autoComplete="address"
+                                                                    type="text"
+                                                                    label="Cantidad"
+                                                                    // multiline
+                                                                    // minRows={4}
+                                                                    // maxRows={6}
+                                                                    {...getFieldProps('quantity')}
+                                                                    error={Boolean(touched.quantity && errors.quantity)}
+                                                                    helperText={touched.quantity && errors.quantity}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item lg={2}>
+                                                                <LoadingButton 
+                                                                    variant="contained" 
+                                                                    color="primary"
+                                                                    type="submit"
+                                                                    sx={{ minWidth: "100%", width: "100%"}}
+                                                                    // disabled={doctor === null || (doctor !== null && amount === "")}
+                                                                    // onClick={() => updateAmount()}
+                                                                    // loading={sending}
+                                                                    // disabled={textSearchData === "" || !permissions.consulta}
+                                                                >
+                                                                    Agregar
+                                                                </LoadingButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+
+                                                </Form>
+                                            </FormikProvider>
+
+                                        </div>
+                                    }
+
+                                </div>
+                            }
+
+                        </Card>
+                    }
+
+                    {loading &&
+                        <Card sx={{py: 3, px: 5}}>
+                            <Loader />
+                        </Card>
+                    }
+                </Grid>
+            </Container>
         </Page>
     );
 }
