@@ -21,6 +21,10 @@ import Loader from '../../../../components/Loader/Loader';
 import Page from '../../../../components/Page';
 import { getPermissions } from "../../../../utils/getPermissions";
 
+import { InformePdf } from "./pdf/Informe";
+import { PDFDownloadLink, usePDF, BlobProvider } from "@react-pdf/renderer";
+import printJS from 'print-js'
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -306,6 +310,12 @@ export default function InformeMedico() {
         resetForm();
     }
 
+    const printFile = async (blob) => {
+        let pdfUrl    = await window.URL.createObjectURL(blob);
+        await printJS(pdfUrl);
+        window.URL.revokeObjectURL(pdfUrl);
+    }
+
     // get all data
     const getData = () => {
 
@@ -489,7 +499,7 @@ export default function InformeMedico() {
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">
-                    Informe Medico
+                    Informe Médico
                 </Typography>
             </Box>
             <FormikProvider value={formik}>
@@ -523,13 +533,58 @@ export default function InformeMedico() {
                                             </Button>
                                         </Grid>
                                         <Grid item lg={3}>
-                                            <Button disabled={dataToEdit === null} variant="contained" fullWidth color="secondary">
-                                                Imprimir
-                                            </Button>
+
+                                            {dataToEdit !== null ?
+                                                <BlobProvider 
+                                                    document={<InformePdf data={{...dataToEdit}} />}
+                                                >
+                                                    {({ blob, url, loading, error }) => {
+                                                        console.log(blob);
+                                                        // Do whatever you need with blob here
+                                                        return <Button 
+                                                            onClick={() => printFile(blob)} 
+                                                            disabled={!permissions.imprime || typeForm === "create"} 
+                                                            variant="contained" 
+                                                            fullWidth
+                                                            color="secondary"
+                                                        >
+                                                            Imprimir
+                                                        </Button>
+                                                    }}
+                                                </BlobProvider>
+                                            :
+                                                <Button 
+                                                    disabled={!permissions.imprime || typeForm === "create"} 
+                                                    variant="contained" 
+                                                    fullWidth
+                                                    color="secondary"
+                                                >
+                                                    Imprimir
+                                                </Button>
+                                            }
+
                                         </Grid>
                                         <Grid item lg={3}>
-                                            <Button disabled={dataToEdit === null} variant="contained" color="secondary" fullWidth>
-                                                Descargar
+                                            <Button 
+                                                disabled={
+                                                    // !permissions.imprime || 
+                                                    typeForm === "create"
+                                                } 
+                                                variant="contained" 
+                                                color="secondary" 
+                                                fullWidth    
+                                                className={dataToEdit !== null ? "pdf-download-link" : ""}
+                                            >   
+                                                {dataToEdit !== null ?
+                                                    <PDFDownloadLink
+                                                        document={<InformePdf data={{...dataToEdit}} />}
+                                                        fileName="cita.pdf"
+                                                    >
+                                                        Descargar
+                                                    </PDFDownloadLink>
+                                                    :
+                                                    "Descargar"
+                                                }
                                             </Button>
                                         </Grid>
                                         <Grid item lg={3}>
