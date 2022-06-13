@@ -67,7 +67,7 @@ export default function InformeMedico() {
     const urlGetMedicines                               = `/invENtOrY/aSSGNmEnT/byDoCTOR/${idUser}`;
     const urlGetExams                                   = "/exaMs/geT/*";
 
-    const urlGetMedicalReport                           = "/MEdiCaL/GET/Report/";
+    const urlGetMedicalReport                           = "/mEdiCAL/get/RePORt/DOCtOR/";
 
     const urlSaveMedicalReport                          = "/MEDiCAl/aDd/REport/";
     const urlUpdateMedicalReport                        = "/mEdiCaL/EDiT/RepORt/";

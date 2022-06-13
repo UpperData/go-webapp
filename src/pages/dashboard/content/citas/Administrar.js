@@ -138,7 +138,6 @@ export default function AdministrarCita() {
                 address:            dataAddress,
                 isOpened:           true,
 
-                // cambiar a medical
                 medialPersonal:     {
                     nurses: {employeeId: nursesSelected[0]},
                     doctor: {employeeId: doctorsSelected[0]}
