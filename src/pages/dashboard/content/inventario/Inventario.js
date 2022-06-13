@@ -252,11 +252,12 @@ function Inventario() {
             editable: false,
             field: 'articleId',     
             headerName: `Nombre`,
-            width: 200,
+            maxWidth: 200,
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
-                // console.log(data);
+                
                 return  <Button 
                             sx={{
                                 fontWeight: 'bold', 
@@ -275,11 +276,24 @@ function Inventario() {
             field: 'existence',    
             headerName: 'Existencia',
             sortable: false,
-            width: 200,
+            maxWidth: 200,
+            flex: 1,
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
-                let count = data.row.existence;
+
+                let count    = Number(data.row.existence);
+                let minStock = Number(data.row.minStock);
+
+                let colorAlert = "";
+                if(count > minStock){
+                    colorAlert = "#54D62C";
+                }else if(count === minStock){
+                    colorAlert = "#FFC107";
+                }else if(count < minStock){
+                    colorAlert = "#D0302A";
+                }
+
                 return  <Grid container alignItems="center">
                             <Grid xs={4} item sx={{px: .5}}>
                                 <Button disabled={sending} onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
@@ -294,9 +308,10 @@ function Inventario() {
                                     autoComplete="lastname"
                                     type="number"
                                     label=""
+                                    sx={{ borderColor: colorAlert}}
                                     InputProps={{
                                         readOnly: true,
-                                        style: {textAlign: 'center'}
+                                        style: {textAlign: 'center', color: colorAlert}
                                     }}
                                     value={count}
                                 />
@@ -313,7 +328,8 @@ function Inventario() {
             field: 'price',    
             headerName: 'Precio',
             sortable: false,
-            width: 100,
+            maxWidth: 100,
+            flex: 1,
             headerAlign: 'center',
             editable: true,
             type: 'number',
@@ -329,7 +345,8 @@ function Inventario() {
             field: 'minStock',    
             headerName: 'Mínimo',
             sortable: false,
-            width: 90,
+            maxWidth: 90,
+            flex: 1,
             headerAlign: 'center',
             editable: true,
             type: 'number',
@@ -365,7 +382,8 @@ function Inventario() {
         { 
             field: 'almacen',     
             headerName: `Almacén`,
-            width: 100,
+            maxWidth: 100,
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -378,7 +396,8 @@ function Inventario() {
         { 
             field: 'asignados',     
             headerName: `Transito`,
-            width: 100,
+            maxWidth: 100,
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
