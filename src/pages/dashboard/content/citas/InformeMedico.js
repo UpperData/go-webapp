@@ -64,12 +64,17 @@ export default function InformeMedico() {
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
 
+    const [doctors, setdoctors]                         = useState(null);
+    const [nurses, setnurses]                           = useState(null);
+
     const idUser = useSelector(state => state.session.userData.data.account.id);
 
     // principalloading
     const urlGetAppointmentByDoctor                     = "/aPPoINtMent/DOCToR/By";
     const urlGetMedicines                               = `/invENtOrY/aSSGNmEnT/byDoCTOR/${idUser}`;
     const urlGetExams                                   = "/exaMs/geT/*";
+
+    const urlGetPersonal                                = "/EMplOyeFIle/BYGRoUP/get/?grp=7&grp=6";
 
     const urlGetMedicalReport                           = "/mEdiCAL/get/RePORt/DOCtOR/";
 
@@ -324,54 +329,61 @@ export default function InformeMedico() {
         axios.get(urlGetAppointmentByDoctor)
         .then((res) => {
             let data        = res.data;
-            let dataList    = res.data.data;
 
-            console.log(res.data);
+            axios.get(urlGetPersonal)
+            .then((res) => {
+                let dataList = res.data.data;
+                if(dataList.length > 0){
 
-            if(data.result){
-
-                setlistDates(res.data.data);
-
-                // exams
-
-                axios.get(urlGetExams)
-                .then((res) => {
-                    let data        = res.data;
-                    let dataList    = res.data.data;
-
-                    // console.log(res.data);
+                    setdoctors(dataList[0].accountRoles);
+                    setnurses(dataList[1].accountRoles);
 
                     if(data.result){
-                        setexamsList(res.data.data);
 
-                        // medicines
-
-                        axios.get(urlGetMedicines)
+                        setlistDates(data.data);
+        
+                        // exams
+        
+                        axios.get(urlGetExams)
                         .then((res) => {
                             let data        = res.data;
                             let dataList    = res.data.data;
-
+        
                             // console.log(res.data);
-
+        
                             if(data.result){
-                                setmedicinesList(res.data.data);
-                                formattedMedicines(res.data.data);
-
-                                setsearch(false);
+                                setexamsList(res.data.data);
+        
+                                // medicines
+        
+                                axios.get(urlGetMedicines)
+                                .then((res) => {
+                                    let data        = res.data;
+                                    let dataList    = res.data.data;
+        
+                                    // console.log(res.data);
+        
+                                    if(data.result){
+                                        setmedicinesList(res.data.data);
+                                        formattedMedicines(res.data.data);
+        
+                                        setsearch(false);
+                                    }
+        
+                                }).catch((err) => {
+                                    console.error(err);
+                                });
+        
                             }
-
+        
                         }).catch((err) => {
                             console.error(err);
                         });
-
                     }
-
-                }).catch((err) => {
-                    console.error(err);
-                });
-
-            }
-
+                }
+            }).catch((err) => {
+                console.error(err);
+            });
         }).catch((err) => {
             console.error(err);
         });
@@ -536,7 +548,7 @@ export default function InformeMedico() {
 
                                             {dataToEdit !== null ?
                                                 <BlobProvider 
-                                                    document={<InformePdf data={{...dataToEdit}} />}
+                                                    document={<InformePdf data={{...dataToEdit, doctors, nurses}} />}
                                                 >
                                                     {({ blob, url, loading, error }) => {
                                                         console.log(blob);
@@ -577,7 +589,7 @@ export default function InformeMedico() {
                                             >   
                                                 {dataToEdit !== null ?
                                                     <PDFDownloadLink
-                                                        document={<InformePdf data={{...dataToEdit}} />}
+                                                        document={<InformePdf data={{...dataToEdit, doctors, nurses}} />}
                                                         fileName="cita.pdf"
                                                     >
                                                         Descargar

@@ -54,12 +54,37 @@ const styles = StyleSheet.create({
     marginBottom: 30
     // marginLeft: 'auto',
     // marginRight: 'auto'
+  },
+  theader: {
+    borderTop: '1px solid #000',
+    borderBottom: '1px solid #000',
+    borderLeft: '1px solid #000',
+  },
+  tcell: {
+    borderBottom: '1px solid #000',
+    borderLeft: '1px solid #000',
+  },
+  td: {
+    borderRight: '1px solid #000',
+    padding: 5,
+  },
+  th: {
+    borderRight: '1px solid #000',
+    padding: 5,
   }
 });
 
 export function InformePdf(props) {
 
   console.log("pdf props", props.data);
+
+  let doctorInDateSelected    = "";
+  doctorInDateSelected = props.data.doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(props.data.appointment.medialPersonal.doctor.employeeId));
+  doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
+
+  let nurseInDateSelected    = "";
+  nurseInDateSelected = props.data.nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(props.data.appointment.medialPersonal.nurses.employeeId));
+  nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
 
   return (
     <Document>
@@ -75,39 +100,121 @@ export function InformePdf(props) {
             {props.data !== null &&
                 <View>
 
-                    <View style={{marginBottom: 30,  flexDirection: 'row', alignItems: "center", justifyContent: "flex-start" }}>
+                  <View style={{borderBottom: '1px solid #000', marginBottom: 15,  flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
                       <View>
-                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold", marginBottom: 15 }}>
+                          Doctor
+                        </Text>
+                        <Text style={{ ...styles.text}}>
+                          {doctorInDateSelected}
+                        </Text>
+                      </View>
+                      
+                      <View style={{marginLeft: 15}}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold", marginBottom: 15}}>
+                          Enfermera / personal medico
+                        </Text>
+                        <Text style={{ ...styles.text }}>
+                          {nurseInDateSelected}
+                        </Text>
+                      </View>
+                  </View>
+
+                  <Text style={{ ...styles.text, marginBottom: 15, fontFamily: "Helvetica-Bold" }}>
+                    Descripcion:
+                  </Text>
+                  <Text style={{ borderBottom: '1px solid #000', ...styles.text,  marginBottom: 15}}>
+                    {props.data.description}
+                  </Text>
+
+                  <View style={{borderBottom: '1px solid #000', marginBottom: 15,  flexDirection: 'row', alignItems: "center", justifyContent: "flex-start" }}>
+                      <View>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold", marginBottom: 15 }}>
                           ¿Se aplicaron medicamentos?
                         </Text>
-                        <Text style={{ ...styles.text, marginLeft: 3 }}>
+                        <Text style={{ ...styles.text}}>
                           {props.data.withMedicine ? "si" : "no"}
                         </Text>
                       </View>
                       
-                      <View>
-                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold", marginLeft: 15 }}>
+                      <View style={{marginLeft: 15}}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold", marginBottom: 15}}>
                           ¿Requiere exámenes médicos?
                         </Text>
-                        <Text style={{ ...styles.text, marginLeft: 3 }}>
+                        <Text style={{ ...styles.text }}>
                           {props.data.withExams ? "si" : "no"}
                         </Text>
                       </View>
                   </View>
 
-                  <Text style={{ ...styles.text, marginBottom: 5, fontFamily: "Helvetica-Bold" }}>
-                    Descripcion:
-                  </Text>
-                  <Text style={{ ...styles.text,  marginBottom: 30}}>
-                    {props.data.description}
-                  </Text>
+                  {props.data.exams !== null && props.data.exams.length > 0 &&
+                    <View style={{ marginBottom: 15 }}>
+                        <Text style={{ ...styles.text, marginBottom: 15, fontFamily: "Helvetica-Bold" }}>
+                          Examenes:
+                        </Text>
+                        <View style={{ ...styles.theader, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
+                          <Text style={{ ...styles.th, ...styles.text, width: "15%", fontFamily: "Helvetica-Bold" }}>
+                            #
+                          </Text>
+                          <Text style={{ ...styles.th, ...styles.text, width: "85%", fontFamily: "Helvetica-Bold", textAlign: "left" }}>
+                            Nombre
+                          </Text>
+                        </View>
+                        {Array.isArray(props.data.exams) && props.data.exams.length > 0 && props.data.exams.map((item, key) => {
+                          let dataItem = item;
 
-                  <Text style={{ ...styles.text, marginBottom: 5, fontFamily: "Helvetica-Bold" }}>
+                          return  <View key={key} style={{ ...styles.tcell, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
+                                    <Text style={{ ...styles.td, ...styles.text, width: "15%", fontFamily: "Helvetica" }}>
+                                      {dataItem.id}
+                                    </Text>
+                                    <Text style={{ ...styles.td, ...styles.text, width: "85%", fontFamily: "Helvetica", textAlign: "left" }}>
+                                      {dataItem.name}
+                                    </Text>
+                                  </View>
+                        })}
+                    </View>
+                  }
+
+                  <Text style={{ ...styles.text, marginBottom: 15, fontFamily: "Helvetica-Bold" }}>
                     Otros examenes:
                   </Text>
-                  <Text style={{ ...styles.text}}>
+                  <Text style={{ ...styles.text, marginBottom: 15, borderBottom: '1px solid #000'}}>
                     {props.data.otherExams}
                   </Text>
+
+                  {props.data.medicines !== null && props.data.medicines.length > 0 &&
+                    <View style={{ marginBottom: 15 }}>
+                        <Text style={{ ...styles.text, marginBottom: 15, fontFamily: "Helvetica-Bold" }}>
+                          Medicinas:
+                        </Text>
+                        <View style={{ ...styles.theader, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
+                          <Text style={{ ...styles.th, ...styles.text, width: "15%", fontFamily: "Helvetica-Bold" }}>
+                            #
+                          </Text>
+                          <Text style={{ ...styles.th, ...styles.text, width: "65%", fontFamily: "Helvetica-Bold", textAlign: "left" }}>
+                            Nombre
+                          </Text>
+                          <Text style={{ ...styles.th, ...styles.text, width: "20%", fontFamily: "Helvetica-Bold", textAlign: "left" }}>
+                            Cantidad
+                          </Text>
+                        </View>
+                        {Array.isArray(props.data.medicines) && props.data.medicines.length > 0 && props.data.medicines.map((item, key) => {
+                          let dataItem = item;
+
+                          return  <View key={key} style={{ ...styles.tcell, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
+                                    <Text style={{ ...styles.td, ...styles.text,width: "15%", fontFamily: "Helvetica" }}>
+                                      {dataItem.id}
+                                    </Text>
+                                    <Text style={{ ...styles.td, ...styles.text,width: "65%", fontFamily: "Helvetica", textAlign: "left" }}>
+                                      {dataItem.name}
+                                    </Text>
+                                    <Text style={{ ...styles.td, ...styles.text,width: "20%", fontFamily: "Helvetica", textAlign: "left" }}>
+                                      {dataItem.cantidad}
+                                    </Text>
+                                  </View>
+                        })}
+                    </View>
+                  }
 
               </View>
             }
