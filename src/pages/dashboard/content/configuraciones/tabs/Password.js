@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import * as Yup from 'yup';
-import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField } from '@mui/material';
+import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField, Hidden } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
 
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -177,13 +177,17 @@ function Info() {
                         </FormikProvider>
                     </Grid>
                     
-                    <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                    
-                    <Grid item md={5} xs={12}>
-                        
-                        <img src="/static/password.png" alt="Informacion de perfil" />
-                        
-                    </Grid>
+                    <Hidden mdDown>
+                        <>
+                            <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
+                            
+                            <Grid item md={5} xs={12}>
+                                
+                                <img src="/static/password.png" alt="Informacion de perfil" />
+                                
+                            </Grid>
+                        </>
+                    </Hidden>
                 </Grid>
             </Grid>
         </Box>

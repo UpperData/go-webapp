@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton } from '@mui/lab';
 
-import { Box, Grid, Divider, Container, Typography, Card, Button, Modal, TextField, Alert, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Box, Grid, Divider, Container, Typography, Card, CardContent, Button, Modal, TextField, Alert, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 // import { DataGrid } from '@mui/x-data-grid';
 import Scrollbar from "../../../../components/Scrollbar";
 
@@ -325,200 +325,202 @@ export default function Membership() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 4, px: 5}}>
+                    <Card>
+                        <CardContent>
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
 
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
+                            <Grid container justifyContent="space-between" columnSpacing={3}>
 
-                        <Grid container justifyContent="space-between" columnSpacing={3}>
+                                <Grid item xs={12} md={6}>
 
-                            <Grid item xs={12} md={6}>
+                                    <Typography variant="h5" align="center" sx={{mb: 3, mt: 2, fontWeight: "bold"}}>
+                                        Usuario
+                                    </Typography>
 
-                                <Typography variant="h5" align="center" sx={{mb: 3, fontWeight: "bold"}}>
-                                    Usuario
-                                </Typography>
-
-                                <Grid container columnSpacing={3}>
-                                    <Grid item lg={9}>
-                                        <TextField
-                                            label="Email"
-                                            size="small"
-                                            fullWidth
-                                            value={email}
-                                            onChange={(e) => setemail(e.target.value)}
-                                            disabled={search}
-                                        />
+                                    <Grid container columnSpacing={3}>
+                                        <Grid item md={9} xs={12}>
+                                            <TextField
+                                                label="Email"
+                                                size="small"
+                                                fullWidth
+                                                value={email}
+                                                onChange={(e) => setemail(e.target.value)}
+                                                disabled={search}
+                                            />
+                                        </Grid>
+                                        <Grid item md={3} xs={12}>
+                                            <LoadingButton 
+                                                variant="contained" 
+                                                color="primary"
+                                                type="button"
+                                                fullWidth
+                                                sx={{py: .9}}
+                                                onClick={() => getUser()}
+                                                loading={search}
+                                                // disabled={textSearchData === "" || !permissions.consulta}
+                                            >
+                                                validar
+                                            </LoadingButton>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item lg={3}>
-                                        <LoadingButton 
-                                            variant="contained" 
-                                            color="primary"
-                                            type="button"
-                                            fullWidth
-                                            sx={{py: .9}}
-                                            onClick={() => getUser()}
-                                            loading={search}
-                                            // disabled={textSearchData === "" || !permissions.consulta}
-                                        >
-                                            validar
-                                        </LoadingButton>
-                                    </Grid>
+
+                                    {data !== null 
+                                        ?
+                                        <div>
+                                            <div>
+                                                <Typography style={{fontWeight:'bold'}} sx={{mb: 2, mt: 3}}>
+                                                    Actuales: 
+                                                </Typography>
+                                                {RoleListByUser.length > 0
+                                                ?
+                                                <Box sx={{ px: 3, mb:5 }}>
+                                                    <ul className="list-unstyled">
+                                                        {membershipsList.map((item, key) => {
+                                                            let dataItem = item;
+                                                            return  <li
+                                                                        key={key}
+                                                                    >
+                                                                    <Grid container alignItems="center" columnSpacing={3} sx={{mb: 1}}>
+                                                                        <Grid item md={9}>
+                                                                            <Typography sx={{fontWeight: "bold"}}>
+                                                                                - {item.role.name}
+                                                                                {/* 
+                                                                                    <Typography variant="span" sx={{fontWeight: "normal", ml: 1}}>
+                                                                                        desde 01-02-2022
+                                                                                    </Typography>
+                                                                                */}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid item md={3}>
+                                                                            <LoadingButton 
+                                                                                variant="contained" 
+                                                                                color="primary"
+                                                                                type="button"
+                                                                                sx={{py: .6, px: 2, ml: 2}}
+                                                                                size="small"
+
+                                                                                onClick={() => revokeMembership(item.role.roleId)}
+                                                                                fullWidth
+                                                                                loading={sending}
+                                                                                disabled={sending}
+                                                                            >
+                                                                                Revocar
+                                                                            </LoadingButton>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </li>
+                                                            })}
+                                                    </ul>
+                                                </Box>
+                                                :
+                                                <Alert sx={{my: 3}} severity="info">
+                                                    No ha sido asignada ninguna membresía para este usuario.
+                                                </Alert>  
+                                                }
+                                            </div>
+
+                                            <LoadingButton 
+                                                variant="contained" 
+                                                color="primary"
+                                                type="button"
+                                                fullWidth
+                                                sx={{py: .9}}
+                                                disabled={sending || RoleListByUser.length === 0}
+                                                onClick={() => revokeAll()}
+                                                loading={sending}
+                                                // disabled={textSearchData === "" || !permissions.consulta}
+                                            >
+                                                Revocar todo
+                                            </LoadingButton>
+                                        </div>
+                                        :
+                                        <div>
+                                            &nbsp;
+                                        </div>  
+                                    }
+
                                 </Grid>
 
-                                {data !== null 
-                                    ?
-                                    <div>
+                                <Divider orientation="vertical" flexItem />
+
+                                <Grid item xs={12} md={5}>
+
+                                    <Typography variant="h5" align="center" sx={{mb: 3, mt: 2, fontWeight: "bold"}}>
+                                        Grupos
+                                    </Typography>
+
+                                    {data !== null 
+                                        ?
                                         <div>
-                                            <Typography style={{fontWeight:'bold'}} sx={{mb: 2, mt: 3}}>
-                                                Actuales: 
-                                            </Typography>
-                                            {RoleListByUser.length > 0
-                                            ?
-                                            <Box sx={{ px: 3, mb:5 }}>
-                                                <ul className="list-unstyled">
-                                                    {membershipsList.map((item, key) => {
-                                                        let dataItem = item;
-                                                        return  <li
-                                                                    key={key}
-                                                                >
-                                                                <Grid container alignItems="center" columnSpacing={3} sx={{mb: 1}}>
-                                                                    <Grid item md={9}>
-                                                                        <Typography sx={{fontWeight: "bold"}}>
-                                                                            - {item.role.name}
-                                                                            {/* 
-                                                                                <Typography variant="span" sx={{fontWeight: "normal", ml: 1}}>
-                                                                                    desde 01-02-2022
-                                                                                </Typography>
-                                                                            */}
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                    <Grid item md={3}>
-                                                                        <LoadingButton 
-                                                                            variant="contained" 
-                                                                            color="primary"
-                                                                            type="button"
-                                                                            sx={{py: .6, px: 2, ml: 2}}
-                                                                            size="small"
-
-                                                                            onClick={() => revokeMembership(item.role.roleId)}
-                                                                            fullWidth
-                                                                            loading={sending}
-                                                                            disabled={sending}
+                                            <List>
+                                                {memberships.length > 0 &&
+                                                    
+                                                        <Scrollbar
+                                                            sx={{
+                                                                height: 250,
+                                                                '& .simplebar-content': { maxHeight: 320 ,height: 250, display: 'flex', flexDirection: 'column' }
+                                                            }}
+                                                        >
+                                                            {memberships.map((role, key) => {
+                                                                let item = role;
+                                                                return <ListItem 
+                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                        disablePadding
+                                                                        key={key}
+                                                                    >
+                                                                        <ListItemButton 
+                                                                            selected={membershipsSelected.includes(role.id)} 
+                                                                            onClick={() => toggleValueToMemberships(role.id)}
                                                                         >
-                                                                            Revocar
-                                                                        </LoadingButton>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </li>
-                                                        })}
-                                                </ul>
-                                            </Box>
-                                            :
-                                            <Alert sx={{my: 3}} severity="info">
-                                                No ha sido asignada ninguna membresía para este usuario.
-                                            </Alert>  
-                                            }
+                                                                            <ListItemText primary={role.name} />
+                                                                        </ListItemButton>
+                                                                    </ListItem>
+                                                            })}
+                                                        </Scrollbar>
+                                                    
+                                                }
+                                            </List>
+                                            <LoadingButton 
+                                                variant="contained" 
+                                                color="primary"
+                                                type="button"
+                                                fullWidth
+                                                sx={{py: .9, mt:2}}
+                                                onClick={() => updateAllData()}
+                                                loading={sending}
+                                                disabled={sending || (membershipsSelected.length === 0 && membershipsList.length === 0)}
+                                            >
+                                                Actualizar
+                                            </LoadingButton>
                                         </div>
+                                        :
+                                        <Alert sx={{my: 3}} severity="info">
+                                            Seleccione un usuario para ver sus membresías.
+                                        </Alert>  
+                                    }
 
-                                        <LoadingButton 
-                                            variant="contained" 
-                                            color="primary"
-                                            type="button"
-                                            fullWidth
-                                            sx={{py: .9}}
-                                            disabled={sending || RoleListByUser.length === 0}
-                                            onClick={() => revokeAll()}
-                                            loading={sending}
-                                            // disabled={textSearchData === "" || !permissions.consulta}
-                                        >
-                                            Revocar todo
-                                        </LoadingButton>
-                                    </div>
-                                    :
-                                    <div>
-                                        &nbsp;
-                                    </div>  
-                                }
+                                </Grid>       
 
                             </Grid>
-
-                            <Divider orientation="vertical" flexItem />
-
-                            <Grid item xs={12} md={5}>
-
-                                <Typography variant="h5" align="center" sx={{mb: 2, fontWeight: "bold"}}>
-                                    Grupos
-                                </Typography>
-
-                                {data !== null 
-                                    ?
-                                    <div>
-                                        <List>
-                                            {memberships.length > 0 &&
-                                                
-                                                    <Scrollbar
-                                                        sx={{
-                                                            height: 250,
-                                                            '& .simplebar-content': { maxHeight: 320 ,height: 250, display: 'flex', flexDirection: 'column' }
-                                                        }}
-                                                    >
-                                                        {memberships.map((role, key) => {
-                                                            let item = role;
-                                                            return <ListItem 
-                                                                    // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                    disablePadding
-                                                                    key={key}
-                                                                >
-                                                                    <ListItemButton 
-                                                                        selected={membershipsSelected.includes(role.id)} 
-                                                                        onClick={() => toggleValueToMemberships(role.id)}
-                                                                    >
-                                                                        <ListItemText primary={role.name} />
-                                                                    </ListItemButton>
-                                                                </ListItem>
-                                                        })}
-                                                    </Scrollbar>
-                                                
-                                            }
-                                        </List>
-                                        <LoadingButton 
-                                            variant="contained" 
-                                            color="primary"
-                                            type="button"
-                                            fullWidth
-                                            sx={{py: .9, mt:2}}
-                                            onClick={() => updateAllData()}
-                                            loading={sending}
-                                            disabled={sending || (membershipsSelected.length === 0 && membershipsList.length === 0)}
-                                        >
-                                            Actualizar
-                                        </LoadingButton>
-                                    </div>
-                                    :
-                                    <Alert sx={{my: 3}} severity="info">
-                                        Seleccione un usuario para ver sus membresías.
-                                    </Alert>  
-                                }
-
-                            </Grid>       
-
-                        </Grid>
-
+                        </CardContent>
                     </Card>
                 }
 
                 {loading &&
-                    <Card sx={{py: 3, px: 5}}>
-                        <Loader />
+                    <Card>
+                        <CardContent>
+                            <Loader />
+                        </CardContent>
                     </Card>
                 }
             </Grid>

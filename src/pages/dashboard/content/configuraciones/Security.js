@@ -1,6 +1,6 @@
 // material
 import {useState} from "react"
-import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Tab } from '@mui/material';
+import { Box, Grid, Container, Typography, Card, CardContent, Button, Modal, TextField, Tab, Tabs } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import TabContext from '@mui/lab/TabContext';
@@ -51,30 +51,55 @@ export default function Security() {
             </Box>
 
             <Grid sx={{ pb: 3 }} item xs={12}>
-                <Card sx={{py: 3, px: 5}}>
-                    
-                    <TabContext value={tab}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <TabList onChange={handleChange} aria-label="lab API tabs example">
-                            <Tab label="Info."      value="1" />
-                            <Tab label="Password"   value="2" />
-                            <Tab label="Email"      value="3" />
-                            <Tab label="Secret"     value="4" />
-                        </TabList>
-                        </Box>
-                        <TabPanel value="1">
-                            <Info />
-                        </TabPanel>
-                        <TabPanel value="2">
-                            <Password />
-                        </TabPanel>
-                        <TabPanel value="3">
-                            <Email />
-                        </TabPanel>
-                        <TabPanel value="4">
-                            <Secret />
-                        </TabPanel>
-                    </TabContext>
+                <Card>
+                    <CardContent>
+                        <TabContext value={tab}>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <TabList 
+                                scrollButtons
+                                allowScrollButtonsMobile 
+                                onChange={handleChange} 
+                                aria-label="lab API tabs example"
+                            >
+                                <Tab label="Info."      value="1" />
+                                <Tab label="Password"   value="2" />
+                                <Tab label="Email"      value="3" />
+                                <Tab label="Secret"     value="4" />
+                            </TabList>
+
+                            {/* 
+                                <Tabs
+                                    // value={value}
+                                    // onChange={handleChange}
+                                    variant="scrollable"
+                                    scrollButtons="auto"
+                                    aria-label="scrollable auto tabs example"
+                                >
+
+                                    <Tab label="Item One" />
+                                    <Tab label="Item Two" />
+                                    <Tab label="Item Three" />
+                                    <Tab label="Item Four" />
+                                    <Tab label="Item Five" />
+
+                                </Tabs>
+                            */}
+
+                            </Box>
+                            <TabPanel value="1">
+                                <Info />
+                            </TabPanel>
+                            <TabPanel value="2">
+                                <Password />
+                            </TabPanel>
+                            <TabPanel value="3">
+                                <Email />
+                            </TabPanel>
+                            <TabPanel value="4">
+                                <Secret />
+                            </TabPanel>
+                        </TabContext>
+                    </CardContent>
                 </Card>
             </Grid>
         </Container>

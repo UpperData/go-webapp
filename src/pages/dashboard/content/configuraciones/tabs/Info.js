@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Grid, Container, Typography, Divider } from '@mui/material';
+import { Box, Grid, Container, Typography, Divider, Hidden } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
 import {useSelector, useDispatch} from "react-redux"
 import axios from "../../../../../auth/fetch"
@@ -48,12 +48,12 @@ function Info() {
                         <Grid item md={6} xs={12}>
 
                             <Grid sx={{mb: 3}} container columnSpacing={3}>
-                                <Grid item xs={6} md={5}>
+                                <Grid item xs={12} md={5}>
                                     <Typography style={{fontWeight:'bold'}}>
                                         Fecha Creación: 
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={6} md={7}>
+                                <Grid item xs={12} md={7}>
                                     <Typography color="text.secondary">
                                         {moment(data.createdAt.split("T")[0], "YYYY-MM-DD").format("D, MMMM YYYY")} 
                                     </Typography>
@@ -61,12 +61,12 @@ function Info() {
                             </Grid>
 
                             <Grid sx={{mb: 3}} container columnSpacing={3}>
-                                <Grid item xs={6} md={5}>
+                                <Grid item xs={12} md={5}>
                                     <Typography style={{fontWeight:'bold'}}>
                                         Última modificación:
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={6} md={7}>
+                                <Grid item xs={12} md={7}>
                                     <Typography color="text.secondary">
                                         {moment(data.updatedAt.split("T")[0], "YYYY-MM-DD").format("D, MMMM YYYY")}
                                     </Typography>
@@ -94,12 +94,16 @@ function Info() {
                             </div>
 
                         </Grid>
-                        <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                        <Grid item md={5} xs={12}>
-                            <Box sx={{width: "100%", maxWidth: "250px", margin: "auto"}}>
-                                <img src="/static/info.png" alt="Informacion de perfil" />
-                            </Box>
-                        </Grid>
+                        <Hidden mdDown>
+                            <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
+                        </Hidden>
+                        <Hidden mdDown>
+                            <Grid item md={5} xs={0}>
+                                <Box sx={{width: "80%", maxWidth: "250px", margin: "auto"}}>
+                                    <img src="/static/info.png" alt="Informacion de perfil" />
+                                </Box>
+                            </Grid>
+                        </Hidden>
                     </Grid>
                 </Grid>
             </Box>

@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react"
 // material
-import { Box, Grid, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Box, Grid, Container, Typography,Alert,  Card, CardContent, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
@@ -382,129 +382,137 @@ function Permissions() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
+                        <CardContent>
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
 
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
 
-                        <div>
-                            <Typography sx={{mb: 2}} variant="h6">
-                                Seleccione
-                            </Typography>
-                            <Grid container sx={{mb: 3}} columnSpacing={3}>
-                                <Grid sx={{pt: 0}} item md={6}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id="demo-simple-select-autowidth-label">
-                                            Grupos
-                                        </InputLabel>
-                                        <Select
-                                            fullWidth
-                                            labelId="demo-simple-select-autowidth-label"
-                                            id="demo-simple-select-autowidth"
-                                            value={group}
-                                            onChange={(e) => changeGroup(e.target.value)}
-                                            label="Grupos"
-                                            MenuProps={MenuProps}
-                                        >
-                                            {groups.map((item, key) => {
-                                                let dataItem = item;
-                                                return <MenuItem key={key} value={dataItem.id}>
-                                                            {dataItem.name}
-                                                        </MenuItem>
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item md={6}>
-                                    <FormControl fullWidth size="small">
-                                        <InputLabel id="demo-simple-select-autowidth-label">
-                                            Módulos
-                                        </InputLabel>
-                                        <Select
-                                            fullWidth
-                                            labelId="demo-simple-select-autowidth-label"
-                                            id="demo-simple-select-autowidth"
-                                            value={module}
-                                            onChange={(e) => changeModule(e.target.value)}
-                                            label="Módulos"
-                                            MenuProps={MenuProps}
-                                            disabled={group === ""}
-                                        >
-                                            {modules.map((item, key) => {
-                                                let dataItem = item;
-                                                return <MenuItem key={key} value={dataItem.id}>
-                                                            {dataItem.name}
-                                                        </MenuItem>
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
-                        </div>
-                    
-                        {module !== "" && group !== "" && tasks !== null && !searchTasks &&
                             <div>
-                                <Grid alignItems="center" justifyContent="space-between" container sx={{mb: 4}} columnSpacing={3}>
-                                    <Grid alignItems="center" item xs={6}>
-                                        <Typography sx={{mb: 0}} variant="h6">
-                                            Administrar Grupo {`"${groupName}"`}
-                                        </Typography>
+                                <Typography sx={{mb: 2}} variant="h6">
+                                    Seleccione
+                                </Typography>
+                                <Grid container columnSpacing={3}>
+                                    <Grid item sx={{pt: 0, mb: 2}} xs={12} md={6}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id="demo-simple-select-autowidth-label">
+                                                Grupos
+                                            </InputLabel>
+                                            <Select
+                                                fullWidth
+                                                labelId="demo-simple-select-autowidth-label"
+                                                id="demo-simple-select-autowidth"
+                                                value={group}
+                                                onChange={(e) => changeGroup(e.target.value)}
+                                                label="Grupos"
+                                                MenuProps={MenuProps}
+                                            >
+                                                {groups.map((item, key) => {
+                                                    let dataItem = item;
+                                                    return <MenuItem key={key} value={dataItem.id}>
+                                                                {dataItem.name}
+                                                            </MenuItem>
+                                                })}
+                                            </Select>
+                                        </FormControl>
                                     </Grid>
-                                    <Grid sx={{pt: 0}} item xs={4}>
-                                        <Box sx={{ textAlign: "right" }} item>
-                                            <Button onClick={() => setopenSaveChanges(true)} sx={{px: 5}} variant="contained" color="primary">
-                                                Guardar
-                                            </Button>
-                                        </Box>
+
+                                    <Grid item sx={{pt: 0, mb: 2}} xs={12} md={6}>
+                                        <FormControl fullWidth size="small">
+                                            <InputLabel id="demo-simple-select-autowidth-label">
+                                                Módulos
+                                            </InputLabel>
+                                            <Select
+                                                fullWidth
+                                                labelId="demo-simple-select-autowidth-label"
+                                                id="demo-simple-select-autowidth"
+                                                value={module}
+                                                onChange={(e) => changeModule(e.target.value)}
+                                                label="Módulos"
+                                                MenuProps={MenuProps}
+                                                disabled={group === ""}
+                                            >
+                                                {modules.map((item, key) => {
+                                                    let dataItem = item;
+                                                    return <MenuItem key={key} value={dataItem.id}>
+                                                                {dataItem.name}
+                                                            </MenuItem>
+                                                })}
+                                            </Select>
+                                        </FormControl>
                                     </Grid>
                                 </Grid>
-
-                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>
-                                    
-                                    <DataGrid
-                                        sx={{mb:4}}
-                                        rows={data}
-                                        columns={columns}
-
-                                        page={0}
-                                        pageSize={6}
-                                        rowsPerPageOptions={[6,10,20]}
-                                        // autoPageSize
-                                        rowCount={data.length}
-
-                                        disableColumnFilter
-                                        disableColumnMenu
-                                        autoHeight 
-                                        disableColumnSelector
-                                        disableSelectionOnClick
-                                        // checkboxSelection
-                                    />
-
-                                </div>
-                                
-                                <Box sx={{ textAlign: "right" }} item xs={12}>
-                                    <Button onClick={() => setopenSaveChanges(true)} sx={{px: 5}} variant="contained" color="primary">
-                                        Guardar
-                                    </Button>
-                                </Box>
-                                
                             </div>
-                        }
+                        
+                            {module !== "" && group !== "" && tasks !== null && !searchTasks &&
+                                <div>
+                                    <Grid alignItems="center" justifyContent="space-between" container sx={{mb: 4}} columnSpacing={3}>
+                                        <Grid sx={{pt: 0}} item md={6} xs={12}>
+                                            <Typography sx={{mb: 0}} variant="h6">
+                                                Administrar Grupo {`"${groupName}"`}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid sx={{pt: 0}} item md={4} xs={12}>
+                                            <Box sx={{ textAlign: "right" }} item>
+                                                <Button onClick={() => setopenSaveChanges(true)} sx={{px: 5}} variant="contained" color="primary">
+                                                    Guardar
+                                                </Button>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
 
-                        {searchTasks &&
-                            <Loader />
-                        }
-                    
+                                    <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>
+                                        
+                                        <DataGrid
+                                            sx={{mb:4}}
+                                            rows={data}
+                                            columns={columns}
+
+                                            page={0}
+                                            pageSize={6}
+                                            rowsPerPageOptions={[6,10,20]}
+                                            // autoPageSize
+                                            rowCount={data.length}
+
+                                            disableColumnFilter
+                                            disableColumnMenu
+                                            autoHeight 
+                                            disableColumnSelector
+                                            disableSelectionOnClick
+                                            hideFooter
+                                            // checkboxSelection
+                                        />
+
+                                    </div>
+                                    
+                                    <Box sx={{ textAlign: "right" }} item xs={12}>
+                                        <Button 
+                                            onClick={() => setopenSaveChanges(true)} 
+                                            sx={{px: 5}} 
+                                            variant="contained" 
+                                            color="primary"
+                                        >
+                                            Guardar
+                                        </Button>
+                                    </Box>
+                                    
+                                </div>
+                            }
+
+                            {searchTasks &&
+                                <Loader />
+                            }
+                        
+                        </CardContent>
                     </Card>
                 }
 

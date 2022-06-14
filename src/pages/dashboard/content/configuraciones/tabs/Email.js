@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup';
-import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField, Button, Modal } from '@mui/material';
+import { Box, Grid, Container, Typography, Divider, Alert, Stack, TextField, Button, Modal, Hidden } from '@mui/material';
 import ProfileImgUploader from "../../../../../components/uploadImage/ProfileImgUploader"
 
 import {useSelector, useDispatch} from "react-redux"
@@ -279,32 +279,36 @@ function Email() {
                                 </Form>
                             </FormikProvider>
                         </Grid>
-                        
-                        <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
-                        
-                        <Grid item md={5} xs={12}>
-                            
-                            {(!isVerify)
-                                ?
-                                <div>
-                                    <Alert sx={{mb: 3}} severity="info">
-                                        {isVerifyMsg}
-                                    </Alert>
-                                    <Button disabled fullWidth variant="contained" size="large" color="secondary">
-                                        Certificar Email
-                                    </Button>
-                                </div>
-                                :
-                                <div>
-                                    <Box sx={{width: "100%", maxWidth: "250px", margin: "auto"}}>
-                                        <img src="/static/check.png" alt="Cuenta verificada" />
-                                    </Box>
-                                    <Typography sx={{pt: 2, fontWeight: "bold"}} component="h4" align='center'>
-                                        {isVerifyMsg}
-                                    </Typography>
-                                </div>
-                            }
-                        </Grid>
+
+                        <Hidden mdDown>
+                            <>
+                                <Divider orientation="vertical" flexItem style={{marginRight:"-1px"}} />
+                                
+                                <Grid item md={5} xs={12}>
+                                    
+                                    {(!isVerify)
+                                        ?
+                                        <div>
+                                            <Alert sx={{mb: 3}} severity="info">
+                                                {isVerifyMsg}
+                                            </Alert>
+                                            <Button disabled fullWidth variant="contained" size="large" color="secondary">
+                                                Certificar Email
+                                            </Button>
+                                        </div>
+                                        :
+                                        <div>
+                                            <Box sx={{width: "100%", maxWidth: "250px", margin: "auto"}}>
+                                                <img src="/static/check.png" alt="Cuenta verificada" />
+                                            </Box>
+                                            <Typography sx={{pt: 2, fontWeight: "bold"}} component="h4" align='center'>
+                                                {isVerifyMsg}
+                                            </Typography>
+                                        </div>
+                                    }
+                                </Grid>
+                            </>
+                        </Hidden>
                     </Grid>
                 </Grid>
             </Box>
