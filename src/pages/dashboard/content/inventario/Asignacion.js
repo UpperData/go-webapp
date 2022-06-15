@@ -2,7 +2,7 @@ import {useState, useEffect} from "react"
 import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 // material
-import { Box, Grid, Stack, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { CardContent, Hidden, Box, Grid, Stack, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
@@ -230,7 +230,9 @@ function Asignacion() {
         { 
             field: 'name',     
             headerName: `Nombre`,
-            width: 250,
+            maxWidth: 250,
+            minWidth: 200,
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -243,7 +245,9 @@ function Asignacion() {
         { 
             field: 'stock',     
             headerName: `Descripción`,
-            width: 250,
+            maxWidth: 280,
+            minWidth: 240,
+            flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -257,7 +261,9 @@ function Asignacion() {
             field: 'quantity',    
             headerName: 'Cantidad',
             sortable: false,
-            width: 120,
+            maxWidth: 130,
+            minWidth: 120,
+            flex: 1,
             headerAlign: 'center',
             align: "center"
         },
@@ -265,7 +271,9 @@ function Asignacion() {
             field: 'id',    
             headerName: '',
             sortable: false,
-            width: 200,
+            maxWidth: 250,
+            minWidth: 200,
+            flex: 1,
             headerAlign: 'center',
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -636,153 +644,171 @@ function Asignacion() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
+                        <CardContent>
 
-                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 3}}>
-                            <Grid item lg={3}>
-                                <Button disabled={doctor === null || searchData} onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
-                                    Nueva asignación
-                                </Button>
-                            </Grid>
-                            <Grid item lg={4}>
-                                {(doctor === null || searchData) 
-                                ?
+                            <Grid container justifyContent="space-between" columnSpacing={3}>
+                                <Grid item md={3} xs={12}  sx={{mb: 2}}>
                                     <Button 
                                         disabled={doctor === null || searchData} 
+                                        onClick={() => openModal()} 
                                         variant="contained" 
-                                        color="secondary" 
+                                        color="primary" 
                                         fullWidth 
                                         sx={{px : 3}} 
-                                        size="large"
+                                        size="normal"
                                     >
-                                        Descargar hoja asignación
+                                        Nueva asignación
                                     </Button>
-                                :
-                                    <ExcelFile
-                                        filename="Asignacion"
-                                        element={
-                                            <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                                Descargar hoja asignación
-                                            </Button>
-                                        }
-                                    >
-                                        <ExcelSheet data={items} name="Asignación">
-                                            <ExcelColumn label="Producto"       value={(col) => col.article.name.toString()} />
-                                            <ExcelColumn label="Descripción"    value={(col) => col.article.description.toString()}/>
-                                            <ExcelColumn label="Cantidad"       value="quantity" />
-                                        </ExcelSheet>
-                                    </ExcelFile>
-                                }
-                            </Grid>
-                        </Grid>
-
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
-
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
-
-                        <Grid container columnSpacing={3} sx={{mb: 3}}>
-                            <Grid item xs={12}>
-                                <Typography sx={{mb: 1, fontWeight: "bold"}}>
-                                    Seleccione un doctor:
-                                </Typography>
-                                <FormControl fullWidth size="small">
-                                    <InputLabel id="doctors">
-                                        Doctor
-                                    </InputLabel>
-                                    <Select
-                                        fullWidth
-                                        labelId="Doctor"
-                                        id="doctors"
-                                        defaultValue=""
-                                        value={doctor === null ? "" : doctor}
-                                        onChange={(e) => changeDoctor(e.target.value)}
-                                        label="Doctor"
-                                        // MenuProps={MenuProps}
-                                        // disabled={municipios.length === 0}
-
-                                        // {...getFieldProps('departamento')}
-                                        // error={Boolean(touched.municipio && errors.municipio)}
-                                        // helperText={touched.departamento && errors.departamento}
-                                    >
-                                        {doctors.map((item, key) => {
-                                            let dataItem = item;
-                                            // console.log(dataItem.account.employeeFiles);
-                                            return <MenuItem key={key} value={dataItem.account.accountId.toString()}>
-                                                        {dataItem.account.employeeFiles.length > 0
-                                                            ?
-                                                            dataItem.account.employeeFiles[0].fisrtName+ " " +dataItem.account.employeeFiles[0].lastName
-                                                            :
-                                                            dataItem.account.name
-                                                        }
-                                                    </MenuItem>
-                                        })}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                        </Grid>
-                    
-
-                        {searchData 
-                            ?
-                            <Loader />
-                            :
-                            <div>
-                                {(items !== null && items.length > 0 && doctor !== null) 
+                                </Grid>
+                                <Grid item md={4} xs={12} sx={{mb: 2}}>
+                                    {(doctor === null || searchData) 
                                     ?
-                                        <div>
-                                            <Box sx={{textAlign: "right", mb: 3}}>
-                                                <Button onClick={() => startToReturnItem(null)} type="button" size="small" sx={{py: 1, px: 5}} color="primary" variant="contained">
-                                                    Devolver Todo
-                                                </Button>
-                                            </Box>
-
-                                            <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
-                                                <DataGrid
-                                                    sx={{mb:4}}
-                                                    rows={items}
-                                                    columns={columns}
-
-                                                    page={0}
-                                                    pageSize={6}
-                                                    rowsPerPageOptions={[6,10,20]}
-                                                    // autoPageSize
-                                                    rowCount={items.length}
-
-                                                    disableColumnFilter
-                                                    disableColumnMenu
-                                                    autoHeight 
-                                                    disableColumnSelector
-                                                    disableSelectionOnClick
-                                                    // checkboxSelection
-                                                />
-                                            </div>
-                                        </div>
+                                        <Button 
+                                            disabled={doctor === null || searchData} 
+                                            variant="contained" 
+                                            color="secondary" 
+                                            fullWidth 
+                                            sx={{px : 3}} 
+                                            size="normal"
+                                        >
+                                            Descargar hoja asignación
+                                        </Button>
                                     :
-                                        <div>
-                                            {doctor !== null &&
-                                                <Alert severity="info">
-                                                    No se han encontrado productos asignados para este doctor.
-                                                </Alert>
+                                        <ExcelFile
+                                            filename="Asignacion"
+                                            element={
+                                                <Button 
+                                                    variant="contained" 
+                                                    color="secondary" 
+                                                    fullWidth 
+                                                    sx={{px : 3}} 
+                                                    size="normal"
+                                                >
+                                                    Descargar hoja asignación
+                                                </Button>
                                             }
-                                        </div>
-                                }
-                            </div>
-                        }
+                                        >
+                                            <ExcelSheet data={items} name="Asignación">
+                                                <ExcelColumn label="Producto"       value={(col) => col.article.name.toString()} />
+                                                <ExcelColumn label="Descripción"    value={(col) => col.article.description.toString()}/>
+                                                <ExcelColumn label="Cantidad"       value="quantity" />
+                                            </ExcelSheet>
+                                        </ExcelFile>
+                                    }
+                                </Grid>
+                            </Grid>
+
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
+
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
+
+                            <Grid container columnSpacing={3} sx={{mb: 3}}>
+                                <Grid item xs={12}>
+                                    <Typography sx={{mb: 1, fontWeight: "bold"}}>
+                                        Seleccione un doctor:
+                                    </Typography>
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel id="doctors">
+                                            Doctor
+                                        </InputLabel>
+                                        <Select
+                                            fullWidth
+                                            labelId="Doctor"
+                                            id="doctors"
+                                            defaultValue=""
+                                            value={doctor === null ? "" : doctor}
+                                            onChange={(e) => changeDoctor(e.target.value)}
+                                            label="Doctor"
+                                            // MenuProps={MenuProps}
+                                            // disabled={municipios.length === 0}
+
+                                            // {...getFieldProps('departamento')}
+                                            // error={Boolean(touched.municipio && errors.municipio)}
+                                            // helperText={touched.departamento && errors.departamento}
+                                        >
+                                            {doctors.map((item, key) => {
+                                                let dataItem = item;
+                                                // console.log(dataItem.account.employeeFiles);
+                                                return <MenuItem key={key} value={dataItem.account.accountId.toString()}>
+                                                            {dataItem.account.employeeFiles.length > 0
+                                                                ?
+                                                                dataItem.account.employeeFiles[0].fisrtName+ " " +dataItem.account.employeeFiles[0].lastName
+                                                                :
+                                                                dataItem.account.name
+                                                            }
+                                                        </MenuItem>
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
+                        
+
+                            {searchData 
+                                ?
+                                <Loader />
+                                :
+                                <div>
+                                    {(items !== null && items.length > 0 && doctor !== null) 
+                                        ?
+                                            <div>
+                                                <Box sx={{textAlign: "right", mb: 3}}>
+                                                    <Button onClick={() => startToReturnItem(null)} type="button" size="small" sx={{py: 1, px: 5}} color="primary" variant="contained">
+                                                        Devolver Todo
+                                                    </Button>
+                                                </Box>
+
+                                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
+                                                    <DataGrid
+                                                        sx={{mb:4}}
+                                                        rows={items}
+                                                        columns={columns}
+
+                                                        page={0}
+                                                        pageSize={6}
+                                                        rowsPerPageOptions={[6,10,20]}
+                                                        // autoPageSize
+                                                        rowCount={items.length}
+
+                                                        disableColumnFilter
+                                                        disableColumnMenu
+                                                        autoHeight 
+                                                        disableColumnSelector
+                                                        disableSelectionOnClick
+                                                        // checkboxSelection
+                                                    />
+                                                </div>
+                                            </div>
+                                        :
+                                            <div>
+                                                {doctor !== null &&
+                                                    <Alert severity="info">
+                                                        No se han encontrado productos asignados para este doctor.
+                                                    </Alert>
+                                                }
+                                            </div>
+                                    }
+                                </div>
+                            }
+                        </CardContent>
                     
                     </Card>
                 }
 
                 {loading &&
-                    <Card sx={{py: 3, px: 5}}>
-                        <Loader />
+                    <Card>
+                        <CardContent>
+                            <Loader />
+                        </CardContent>
                     </Card>
                 }
             </Grid>

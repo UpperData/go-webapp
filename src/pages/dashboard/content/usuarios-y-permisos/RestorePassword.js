@@ -297,7 +297,13 @@ export default function RestorePassword() {
                                             />
                                         </Grid>
                                         <Grid item xs={12} md={2}>
-                                            <LoadingButton type="submit" loading={sending} fullWidth sx={{px: 5, py: 1}} variant="outlined" color="primary">
+                                            <LoadingButton 
+                                            type="submit" 
+                                            loading={sending} 
+                                            fullWidth sx={{px: 5, py: 1}} 
+                                            variant="contained" 
+                                            color="primary"
+                                            >
                                                 Restaurar
                                             </LoadingButton>
                                         </Grid>

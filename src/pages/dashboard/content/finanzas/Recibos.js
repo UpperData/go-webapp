@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton } from '@mui/lab';
 
-import { Box, Stack, Grid, Container, Typography, Card, MenuItem, Button, Modal, TextField, Alert, FormControl,InputLabel,Select } from '@mui/material';
+import { CardContent, Hidden, Box, Stack, Grid, Container, Typography, Card, MenuItem, Button, Modal, TextField, Alert, FormControl,InputLabel,Select } from '@mui/material';
 // import { DataGrid } from '@mui/x-data-grid';
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 
@@ -527,315 +527,322 @@ export default function Bills() {
 
                 <Grid sx={{ pb: 3 }} item xs={12}>
                     {!loading &&
-                        <Card sx={{py: 3, px: 5}}>
+                        <Card>
+                            <CardContent>
 
-                            {alertSuccessMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="success">
-                                    {alertSuccessMessage}
-                                </Alert>
-                            }
+                                {alertSuccessMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="success">
+                                        {alertSuccessMessage}
+                                    </Alert>
+                                }
 
-                            {alertErrorMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="error">
-                                    {alertErrorMessage}
-                                </Alert>
-                            }
+                                {alertErrorMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="error">
+                                        {alertErrorMessage}
+                                    </Alert>
+                                }
 
-                            <Box>
-                                <Typography sx={{ mb: 3, fontWeight: "bold" }}>
-                                    Seleccione
-                                </Typography>
+                                <Box>
+                                    <Typography sx={{fontWeight: "bold", mb: 2 }}>
+                                        Seleccione
+                                    </Typography>
 
-                                <Grid container columnSpacing={3}>
-                                    <Grid item lg={8}>
-                                        <FormControl fullWidth size="small">
-                                            <InputLabel id="bill-user-id">
-                                                Empleado / Contratado
-                                            </InputLabel>
-                                            <Select
-                                                fullWidth
-                                                labelId="Doctor"
-                                                id="bill-user-id"
-                                                defaultValue=""
-                                                value={doctor === null ? "" : doctor}
-                                                onChange={(e) => getBills(e.target.value)}
-                                                label="Empleado / Contratado"
-                                                // MenuProps={MenuProps}
-                                                // disabled={municipios.length === 0}
+                                    <Grid container columnSpacing={3}>
+                                        <Grid item lg={8} xs={12} sx={{mb: 2}}>
+                                            <FormControl fullWidth size="small">
+                                                <InputLabel id="bill-user-id">
+                                                    Empleado / Contratado
+                                                </InputLabel>
+                                                <Select
+                                                    fullWidth
+                                                    labelId="Doctor"
+                                                    id="bill-user-id"
+                                                    defaultValue=""
+                                                    value={doctor === null ? "" : doctor}
+                                                    onChange={(e) => getBills(e.target.value)}
+                                                    label="Empleado / Contratado"
+                                                    // MenuProps={MenuProps}
+                                                    // disabled={municipios.length === 0}
 
-                                                // {...getFieldProps('departamento')}
-                                                // error={Boolean(touched.municipio && errors.municipio)}
-                                                // helperText={touched.departamento && errors.departamento}
-                                            >
-                                                {
-                                                    doctors.map((item, key) => {
-                                                        let dataItem = item;
-                                                        // console.log(dataItem.account.employeeFiles);
-                                                        return <MenuItem key={key} value={dataItem.employeeFileId.toString()}>
-                                                                    {dataItem.fisrtName + " " + dataItem.lastName}
-                                                                </MenuItem>
-                                                    })
-                                                }
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item lg={4}>
-                                        <Grid container columnSpacing={1}>
-                                            <Grid item lg={7}>
-                                                <TextField
-                                                    label="Honorario"
-                                                    size="small"
-                                                    disabled={doctor === null || sending || billSelected !== null}
-                                                    value={ billSelected !== null ? billSelected.amount : amount}
-                                                    onChange={(e) => setAmount(e.target.value)}
-                                                    type="number"
-                                                />
-                                            </Grid>
-                                            <Grid item lg={5}>
-                                                <LoadingButton 
-                                                    variant="contained" 
-                                                    color="primary"
-                                                    type="button"
-                                                    sx={{ minWidth: "100%", width: "100%"}}
-                                                    disabled={doctor === null || (doctor !== null && amount === "") || billSelected !== null}
-                                                    onClick={() => updateAmount()}
-                                                    loading={sending}
-                                                    // disabled={textSearchData === "" || !permissions.consulta}
+                                                    // {...getFieldProps('departamento')}
+                                                    // error={Boolean(touched.municipio && errors.municipio)}
+                                                    // helperText={touched.departamento && errors.departamento}
                                                 >
-                                                    Actualizar
-                                                </LoadingButton>
-                                            </Grid>
+                                                    {
+                                                        doctors.map((item, key) => {
+                                                            let dataItem = item;
+                                                            // console.log(dataItem.account.employeeFiles);
+                                                            return <MenuItem key={key} value={dataItem.employeeFileId.toString()}>
+                                                                        {dataItem.fisrtName + " " + dataItem.lastName}
+                                                                    </MenuItem>
+                                                        })
+                                                    }
+                                                </Select>
+                                            </FormControl>
                                         </Grid>
-                                    </Grid>
-                                </Grid>
-
-                                {doctor !== null &&
-                                    <Grid sx={{mb: 5, mt:5}} container columnSpacing={3}>
-                                        <Grid item lg={2}>
-                                            <Button 
-                                                disabled={billSelected === null}
-                                                // onClick={() => reset()} 
-                                                onClick={() => setshowModalCancelBill(true)}
-                                                variant="contained" 
-                                                fullWidth
-                                                disabed
-                                            >
-                                                Anular
-                                            </Button>
-                                        </Grid>
-                                        <Grid item lg={2}>
-                                            {billSelected !== null ?
-                                                <BlobProvider 
-                                                    document={<RecibosPdf data={{ dataVoucher: {...billSelected}, items: dataDoctor, doctor: doctors.find(item => item.employeeFileId.toString() === doctor) }} />}
-                                                >
-                                                    {({ blob, url, loading, error }) => {
-                                                        console.log(blob);
-                                                        // Do whatever you need with blob here
-                                                        return <Button 
-                                                            onClick={() => printFile(blob)} 
-                                                            // disabled={!permissions.imprime || typeForm === "create"} 
-                                                            variant="contained" fullWidth color="secondary"
-                                                        >
-                                                            Imprimir
-                                                        </Button>
-                                                    }}
-                                                </BlobProvider>
-                                            :
-                                                <Button 
-                                                    disabled
-                                                    variant="contained" fullWidth color="secondary"
-                                                >
-                                                    Imprimir
-                                                </Button>
-                                            }
-                                        </Grid>
-                                        <Grid item lg={2}>
-                                            <Button 
-                                                disabled={(dataDoctor !== null && dataDoctor.length === 0) || billSelected !== null} 
-                                                variant="contained" 
-                                                fullWidth
-                                                color='secondary'
-                                                onClick={() =>  saveData()}
-                                            >
-                                                Guardar
-                                            </Button>
-                                        </Grid>
-                                        <Grid item lg={2}>
-                                            &nbsp;
-                                        </Grid>
-                                        <Grid item lg={4}>
+                                        <Grid item lg={4} xs={12} sx={{mb: 2}}>
                                             <Grid container columnSpacing={1}>
-                                                <Grid item lg={8}>
+                                                <Grid item lg={7} xs={8}>
                                                     <TextField
-                                                        label="Recibo #"
+                                                        label="Honorario"
                                                         size="small"
-                                                        value={idToSearch}
-                                                        onChange={(e) => setidToSearch(e.target.value)}
-                                                        // disabled={!permissions.consulta}
+                                                        disabled={doctor === null || sending || billSelected !== null}
+                                                        value={ billSelected !== null ? billSelected.amount : amount}
+                                                        onChange={(e) => setAmount(e.target.value)}
+                                                        type="number"
                                                     />
                                                 </Grid>
-                                                <Grid item lg={4}>
+                                                <Grid item lg={5} xs={4}>
                                                     <LoadingButton 
                                                         variant="contained" 
                                                         color="primary"
                                                         type="button"
-                                                        sx={{ minWidth: "100%", width: "100%"}}
-                                                        onClick={() => getBillById()}
-                                                        loading={search}
-                                                        disabled={idToSearch === ""}
+                                                        sx={{ minWidth: "100%", width: "100%", py: 1}}
+                                                        disabled={doctor === null || (doctor !== null && amount === "") || billSelected !== null}
+                                                        onClick={() => updateAmount()}
+                                                        loading={sending}
+                                                        // disabled={textSearchData === "" || !permissions.consulta}
                                                     >
-                                                        Buscar
+                                                        Actualizar
                                                     </LoadingButton>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                }
-
-                            </Box>
-
-                            {searchData 
-                                ?
-                                    <Box>
-                                        <Loader />
-                                    </Box>
-                                :
-                                <div>
 
                                     {doctor !== null &&
-                                        <div>
-
-                                            <Box sx={{mt: 3}}>
-                                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
-                                                    <DataGrid
-                                                        rows={dataDoctor}
-                                                        columns={columns}
-                                                        components={{
-                                                            NoRowsOverlay: () => (
-                                                            <Stack height="100%" alignItems="center" justifyContent="center">
-                                                                No se han encontrado datos de recibo
-                                                            </Stack>
-                                                            )
+                                        <Grid sx={{mb: 5, mt:2}} container columnSpacing={3}>
+                                            <Grid item md={2} xs={4}>
+                                                <Button 
+                                                    disabled={billSelected === null}
+                                                    // onClick={() => reset()} 
+                                                    onClick={() => setshowModalCancelBill(true)}
+                                                    variant="contained" 
+                                                    fullWidth
+                                                    disabed
+                                                    sx={{ py: 1 }}
+                                                >
+                                                    Anular
+                                                </Button>
+                                            </Grid>
+                                            <Grid item md={2} xs={4}>
+                                                {billSelected !== null ?
+                                                    <BlobProvider 
+                                                        document={<RecibosPdf data={{ dataVoucher: {...billSelected}, items: dataDoctor, doctor: doctors.find(item => item.employeeFileId.toString() === doctor) }} />}
+                                                    >
+                                                        {({ blob, url, loading, error }) => {
+                                                            console.log(blob);
+                                                            // Do whatever you need with blob here
+                                                            return <Button 
+                                                                sx={{ py: 1 }}
+                                                                onClick={() => printFile(blob)} 
+                                                                // disabled={!permissions.imprime || typeForm === "create"} 
+                                                                variant="contained" fullWidth color="secondary"
+                                                            >
+                                                                Imprimir
+                                                            </Button>
                                                         }}
-
-                                                        // onCellEditStop={(params) => handleCellEditStop(params)}
-                                                        // experimentalFeatures={{ newEditingApi: true }}
-                                                        // onCellEditStart={(params) => handleCellEditStart(params)}
-                                                        // processRowUpdate={processRowUpdate}
-
-                                                        // onCellEditCommit={(params) => handleCellEditStop(params)}
-                                                        // onCellFocusOut={(params)   => validateChanges(params)}
-
-                                                        hideFooter
-                                                        page={0}
-                                                        pageSize={6}
-                                                        rowsPerPageOptions={[6,10,20]}
-                                                        // autoPageSize
-                                                        rowCount={dataDoctor.length}
-
-                                                        disableColumnFilter
-                                                        disableColumnMenu
-                                                        autoHeight 
-                                                        disableColumnSelector
-                                                        disableSelectionOnClick
-                                                        // checkboxSelection
-                                                    />
-                                                </div>
-                                                {(dataDoctor.length > 0) &&
-                                                    <div>
-                                                        <Typography sx={{fontWeight: "bold", mt: 2}} align="right">
-                                                            Sub Total : Bs. {totalAmount}
-                                                        </Typography>
-                                                    </div>
+                                                    </BlobProvider>
+                                                :
+                                                    <Button 
+                                                        disabled
+                                                        variant="contained" fullWidth color="secondary"
+                                                        sx={{ py: 1 }}
+                                                    >
+                                                        Imprimir
+                                                    </Button>
                                                 }
-                                            </Box>
-
-                                            <Typography sx={{mb: 3, mt: 3,  fontWeight: "bold"}}>
-                                                Agregar recibo
-                                            </Typography>
-
-                                            <FormikProvider value={formik}>
-                                                <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-
-                                                    <Box>
-                                                        <Grid container columnSpacing={3}>
-                                                            <Grid item lg={6}>
-                                                                <TextField
-                                                                    size='small'
-                                                                    fullWidth
-                                                                    autoComplete="description"
-                                                                    type="text"
-                                                                    label="Descripción"
-                                                                    // multiline
-                                                                    // minRows={4}
-                                                                    // maxRows={6}
-                                                                    {...getFieldProps('description')}
-                                                                    error={Boolean(touched.description && errors.description)}
-                                                                    helperText={touched.description && errors.description}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item lg={2}>
-                                                                <TextField
-                                                                    size='small'
-                                                                    fullWidth
-                                                                    autoComplete="amount"
-                                                                    type="text"
-                                                                    label="Precio"
-                                                                    // multiline
-                                                                    // minRows={4}
-                                                                    // maxRows={6}
-                                                                    {...getFieldProps('amount')}
-                                                                    error={Boolean(touched.amount && errors.amount)}
-                                                                    helperText={touched.amount && errors.amount}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item lg={2}>
-                                                                <TextField
-                                                                    size='small'
-                                                                    fullWidth
-                                                                    autoComplete="address"
-                                                                    type="text"
-                                                                    label="Cantidad"
-                                                                    // multiline
-                                                                    // minRows={4}
-                                                                    // maxRows={6}
-                                                                    {...getFieldProps('quantity')}
-                                                                    error={Boolean(touched.quantity && errors.quantity)}
-                                                                    helperText={touched.quantity && errors.quantity}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item lg={2}>
-                                                                <LoadingButton 
-                                                                    variant="contained" 
-                                                                    color="primary"
-                                                                    type="submit"
-                                                                    sx={{ minWidth: "100%", width: "100%"}}
-                                                                    // disabled={doctor === null || (doctor !== null && amount === "")}
-                                                                    // onClick={() => updateAmount()}
-                                                                    // loading={sending}
-                                                                    // disabled={textSearchData === "" || !permissions.consulta}
-                                                                >
-                                                                    Agregar
-                                                                </LoadingButton>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Box>
-
-                                                </Form>
-                                            </FormikProvider>
-
-                                        </div>
+                                            </Grid>
+                                            <Grid item md={2} xs={4}>
+                                                <Button 
+                                                    disabled={(dataDoctor !== null && dataDoctor.length === 0) || billSelected !== null} 
+                                                    variant="contained" 
+                                                    fullWidth
+                                                    color='secondary'
+                                                    onClick={() =>  saveData()}
+                                                    sx={{ py: 1 }}
+                                                >
+                                                    Guardar
+                                                </Button>
+                                            </Grid>
+                                            <Grid item md={2} xs={12}>
+                                                &nbsp;
+                                            </Grid>
+                                            <Grid item md={4} xs={12}>
+                                                <Grid container columnSpacing={1}>
+                                                    <Grid item md={8} xs={8}>
+                                                        <TextField
+                                                            label="Recibo #"
+                                                            size="small"
+                                                            value={idToSearch}
+                                                            onChange={(e) => setidToSearch(e.target.value)}
+                                                            // disabled={!permissions.consulta}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item md={4} xs={4}>
+                                                        <LoadingButton 
+                                                            variant="contained" 
+                                                            color="primary"
+                                                            type="button"
+                                                            sx={{ minWidth: "100%", width: "100%", py: 1}}
+                                                            onClick={() => getBillById()}
+                                                            loading={search}
+                                                            disabled={idToSearch === ""}
+                                                        >
+                                                            Buscar
+                                                        </LoadingButton>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
                                     }
+                                </Box>
 
-                                </div>
-                            }
+                                {searchData 
+                                    ?
+                                        <Box>
+                                            <Loader />
+                                        </Box>
+                                    :
+                                    <div>
 
+                                        {doctor !== null &&
+                                            <div>
+                                                <Box>
+                                                    <Typography sx={{fontWeight: "bold", mb: 2 }}>
+                                                        Items
+                                                    </Typography>
+                                                    <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
+                                                        <DataGrid
+                                                            rows={dataDoctor}
+                                                            columns={columns}
+                                                            components={{
+                                                                NoRowsOverlay: () => (
+                                                                <Stack height="100%" alignItems="center" justifyContent="center">
+                                                                    No se han encontrado datos de recibo
+                                                                </Stack>
+                                                                )
+                                                            }}
+
+                                                            // onCellEditStop={(params) => handleCellEditStop(params)}
+                                                            // experimentalFeatures={{ newEditingApi: true }}
+                                                            // onCellEditStart={(params) => handleCellEditStart(params)}
+                                                            // processRowUpdate={processRowUpdate}
+
+                                                            // onCellEditCommit={(params) => handleCellEditStop(params)}
+                                                            // onCellFocusOut={(params)   => validateChanges(params)}
+
+                                                            hideFooter
+                                                            page={0}
+                                                            pageSize={6}
+                                                            rowsPerPageOptions={[6,10,20]}
+                                                            // autoPageSize
+                                                            rowCount={dataDoctor.length}
+
+                                                            disableColumnFilter
+                                                            disableColumnMenu
+                                                            autoHeight 
+                                                            disableColumnSelector
+                                                            disableSelectionOnClick
+                                                            // checkboxSelection
+                                                        />
+                                                    </div>
+                                                    {(dataDoctor.length > 0) &&
+                                                        <div>
+                                                            <Typography sx={{fontWeight: "bold", mt: 2}} align="right">
+                                                                Sub Total : Bs. {totalAmount}
+                                                            </Typography>
+                                                        </div>
+                                                    }
+                                                </Box>
+
+                                                <Typography sx={{mb: 3, mt: 3,  fontWeight: "bold"}}>
+                                                    Agregar item
+                                                </Typography>
+
+                                                <FormikProvider value={formik}>
+                                                    <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+
+                                                        <Box>
+                                                            <Grid container columnSpacing={3}>
+                                                                <Grid item md={6} xs={12} sx={{mb: 2}}>
+                                                                    <TextField
+                                                                        size='small'
+                                                                        fullWidth
+                                                                        autoComplete="description"
+                                                                        type="text"
+                                                                        label="Descripción"
+                                                                        // multiline
+                                                                        // minRows={4}
+                                                                        // maxRows={6}
+                                                                        {...getFieldProps('description')}
+                                                                        error={Boolean(touched.description && errors.description)}
+                                                                        helperText={touched.description && errors.description}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item md={2} xs={12} sx={{mb: 2}}>
+                                                                    <TextField
+                                                                        size='small'
+                                                                        fullWidth
+                                                                        autoComplete="amount"
+                                                                        type="text"
+                                                                        label="Precio"
+                                                                        // multiline
+                                                                        // minRows={4}
+                                                                        // maxRows={6}
+                                                                        {...getFieldProps('amount')}
+                                                                        error={Boolean(touched.amount && errors.amount)}
+                                                                        helperText={touched.amount && errors.amount}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item md={2} xs={12} sx={{mb: 2}}>
+                                                                    <TextField
+                                                                        size='small'
+                                                                        fullWidth
+                                                                        autoComplete="address"
+                                                                        type="text"
+                                                                        label="Cantidad"
+                                                                        // multiline
+                                                                        // minRows={4}
+                                                                        // maxRows={6}
+                                                                        {...getFieldProps('quantity')}
+                                                                        error={Boolean(touched.quantity && errors.quantity)}
+                                                                        helperText={touched.quantity && errors.quantity}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item md={2} xs={12} sx={{mb: 2}}>
+                                                                    <LoadingButton 
+                                                                        variant="contained" 
+                                                                        color="primary"
+                                                                        type="submit"
+                                                                        sx={{ minWidth: "100%", width: "100%"}}
+                                                                        // disabled={doctor === null || (doctor !== null && amount === "")}
+                                                                        // onClick={() => updateAmount()}
+                                                                        // loading={sending}
+                                                                        // disabled={textSearchData === "" || !permissions.consulta}
+                                                                    >
+                                                                        Agregar
+                                                                    </LoadingButton>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Box>
+
+                                                    </Form>
+                                                </FormikProvider>
+                                            </div>
+                                        }
+
+                                    </div>
+                                }
+                            </CardContent>
                         </Card>
                     }
 
                     {loading &&
-                        <Card sx={{py: 3, px: 5}}>
-                            <Loader />
+                        <Card>
+                            <CardContent>
+                                <Loader />
+                            </CardContent>
                         </Card>
                     }
                 </Grid>

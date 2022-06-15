@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 
 // material
-import { Box, Grid, Stack, ButtonGroup, Container, Typography,Alert,  Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Box, Grid, Stack, ButtonGroup, Container, Typography, Alert,  Card, CardContent, Hidden, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
@@ -252,7 +252,8 @@ function Inventario() {
             editable: false,
             field: 'articleId',     
             headerName: `Nombre`,
-            maxWidth: 200,
+            maxWidth: 250,
+            minWidth: 200,
             flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
@@ -276,7 +277,8 @@ function Inventario() {
             field: 'existence',    
             headerName: 'Existencia',
             sortable: false,
-            maxWidth: 200,
+            maxWidth: 220,
+            minWidth: 200,
             flex: 1,
             headerAlign: 'center',
             renderCell: (cellValues) => {
@@ -328,7 +330,8 @@ function Inventario() {
             field: 'price',    
             headerName: 'Precio',
             sortable: false,
-            maxWidth: 100,
+            maxWidth: 150,
+            minWidth: 100,
             flex: 1,
             headerAlign: 'center',
             editable: true,
@@ -345,7 +348,8 @@ function Inventario() {
             field: 'minStock',    
             headerName: 'Mínimo',
             sortable: false,
-            maxWidth: 90,
+            maxWidth: 120,
+            minWidth: 90,
             flex: 1,
             headerAlign: 'center',
             editable: true,
@@ -382,7 +386,8 @@ function Inventario() {
         { 
             field: 'almacen',     
             headerName: `Almacén`,
-            maxWidth: 100,
+            maxWidth: 130,
+            minWidth: 100,
             flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
@@ -396,7 +401,8 @@ function Inventario() {
         { 
             field: 'asignados',     
             headerName: `Transito`,
-            maxWidth: 100,
+            maxWidth: 150,
+            minWidth: 100,
             flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
@@ -499,7 +505,7 @@ function Inventario() {
                     </Typography>
 
                     <Grid container sx={{ mt: 3 }} columnSpacing={3}>
-                        <Grid item md={typeForm === "create" ? 8 : 12}>
+                        <Grid sx={{mb: 2}} item md={typeForm === "create" ? 8 : 12} xs={12}>
                             <Stack spacing={3}>
                                 <TextField
                                     size='small'
@@ -515,7 +521,7 @@ function Inventario() {
                             </Stack>
                         </Grid>
                         {typeForm === "create" &&
-                            <Grid item md={4}>
+                            <Grid sx={{mb: 2}} item md={4} xs={12}>
                                 <Stack spacing={3}>
                                     <TextField
                                         size='small'
@@ -535,8 +541,8 @@ function Inventario() {
                                 </Stack>
                             </Grid>
                         }
-                        <Grid item md={12}>
-                            <Stack spacing={3} sx={{my: 2}}>
+                        <Grid sx={{mb: 2}} item xs={12}>
+                            <Stack spacing={3}>
                                 <TextField
                                     size='small'
                                     fullWidth
@@ -581,132 +587,134 @@ function Inventario() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
+                        <CardContent>
 
-                        <Grid container justifyContent="space-between" columnSpacing={3} sx={{mb: 3}}>
-                            <Grid item lg={3}>
-                                <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="large">
-                                    Nuevo Artículo
-                                </Button>
-                            </Grid>
-                            <Grid item lg={4}>
-                                {data !== null
-                                ?
-                                    <ExcelFile
-                                        filename="inventario"
-                                        element={
-                                            <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                                Descargar Hoja de Inventario
-                                            </Button>
-                                        }
-                                    >
-                                        <ExcelSheet data={data} name="Inventario">
-                                            <ExcelColumn label="Producto" value={(col) => col.article.name} />
-                                            <ExcelColumn label="Existencia" value="existence" />
-                                            <ExcelColumn label="Precio (usd)" value="price" />
-                                            <ExcelColumn label="Stock mínimo" value="minStock" />
-                                            <ExcelColumn label="Almacén" value="almacen" />
-                                            <ExcelColumn label="Transito" value="asignados" />
-                                        </ExcelSheet>
-                                    </ExcelFile>
-                                :
-                                    <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                        Descargar Hoja de Inventario
+                            <Grid container justifyContent="space-between" columnSpacing={3}>
+                                <Grid sx={{mb: 2}} item md={3} xs={12}>
+                                    <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="normal">
+                                        Nuevo Artículo
                                     </Button>
-                                }
+                                </Grid>
+                                <Grid sx={{mb: 2}} item md={4} xs={12}>
+                                    {data !== null
+                                    ?
+                                        <ExcelFile
+                                            filename="inventario"
+                                            element={
+                                                <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="normal">
+                                                    Descargar Hoja de Inventario
+                                                </Button>
+                                            }
+                                        >
+                                            <ExcelSheet data={data} name="Inventario">
+                                                <ExcelColumn label="Producto" value={(col) => col.article.name} />
+                                                <ExcelColumn label="Existencia" value="existence" />
+                                                <ExcelColumn label="Precio (usd)" value="price" />
+                                                <ExcelColumn label="Stock mínimo" value="minStock" />
+                                                <ExcelColumn label="Almacén" value="almacen" />
+                                                <ExcelColumn label="Transito" value="asignados" />
+                                            </ExcelSheet>
+                                        </ExcelFile>
+                                    :
+                                        <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
+                                            Descargar Hoja de Inventario
+                                        </Button>
+                                    }
+                                </Grid>
                             </Grid>
-                        </Grid>
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
-
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{mb: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
-                    
-                        {data !== null && data.length > 0 !== "" &&
-                            <div className="inventario-content-table">
-
-                                <Alert sx={{mb: 3}} severity="info">
-                                    Puede modificar el valor de los elementos haciendo click.
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="success">
+                                    {alertSuccessMessage}
                                 </Alert>
-                                
-                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
-                                    <DataGrid
-                                        sx={{mb:4}}
-                                        rows={data}
-                                        columns={columns}
+                            }
 
-                                        // onCellEditStop={(params) => handleCellEditStop(params)}
-                                        // experimentalFeatures={{ newEditingApi: true }}
-                                        // onCellEditStart={(params) => handleCellEditStart(params)}
-                                        // processRowUpdate={processRowUpdate}
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{mb: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
+                        
+                            {data !== null && data.length > 0 !== "" &&
+                                <div className="inventario-content-table">
 
-                                        onCellEditCommit={(params) => handleCellEditStop(params)}
-                                        onCellFocusOut={(params)   => validateChanges(params)}
+                                    <Alert sx={{mb: 3}} severity="info">
+                                        Puede modificar el valor de los elementos haciendo click.
+                                    </Alert>
+                                    
+                                    <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
+                                        <DataGrid
+                                            sx={{mb:4}}
+                                            rows={data}
+                                            columns={columns}
 
-                                        page={0}
-                                        pageSize={6}
-                                        rowsPerPageOptions={[6,10,20]}
-                                        // autoPageSize
-                                        rowCount={data.length}
+                                            // onCellEditStop={(params) => handleCellEditStop(params)}
+                                            // experimentalFeatures={{ newEditingApi: true }}
+                                            // onCellEditStart={(params) => handleCellEditStart(params)}
+                                            // processRowUpdate={processRowUpdate}
 
-                                        disableColumnFilter
-                                        disableColumnMenu
-                                        autoHeight 
-                                        disableColumnSelector
-                                        disableSelectionOnClick
-                                        // checkboxSelection
-                                    />
+                                            onCellEditCommit={(params) => handleCellEditStop(params)}
+                                            onCellFocusOut={(params)   => validateChanges(params)}
+
+                                            page={0}
+                                            pageSize={6}
+                                            rowsPerPageOptions={[6,10,20]}
+                                            // autoPageSize
+                                            rowCount={data.length}
+
+                                            disableColumnFilter
+                                            disableColumnMenu
+                                            autoHeight 
+                                            disableColumnSelector
+                                            disableSelectionOnClick
+                                            // checkboxSelection
+                                        />
+                                    </div>
+
+                                    <ul style={{listStyle: "none"}}>
+                                        <li>
+                                            <Typography variant="h6" color="success">
+                                                <i className="mdi mdi-checkbox-blank" style={{ color: "#54D62C" }} />
+                                                <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                    <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                        Satisfactorio:
+                                                    </Typography> 
+                                                    Articulo con alta solvencia.
+                                                </Typography>
+                                            </Typography>
+                                        </li>
+                                        <li>
+                                            <Typography variant="h6" color="warning">
+                                                <i className="mdi mdi-checkbox-blank" style={{ color: "#FFC107" }} />
+                                                <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                    <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                        Advertencia:
+                                                    </Typography> 
+                                                    Articulo cerca del stock mínimo.
+                                                </Typography>
+                                            </Typography>
+                                        </li>
+                                        <li>
+                                            <Typography variant="h6" color="primary">
+                                                <i className="mdi mdi-checkbox-blank" />
+                                                <Typography sx={{ml: 2}} component="span" color="text.primary">
+                                                    <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
+                                                        Alerta:
+                                                    </Typography> 
+                                                    Articulo igual o por debajo del stock mínimo.
+                                                </Typography>
+                                            </Typography>
+                                        </li>
+                                    </ul>
                                 </div>
+                            }
 
-                                <ul style={{listStyle: "none"}}>
-                                    <li>
-                                        <Typography variant="h6" color="success">
-                                            <i className="mdi mdi-checkbox-blank" style={{ color: "#54D62C" }} />
-                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
-                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
-                                                    Satisfactorio:
-                                                </Typography> 
-                                                Articulo con alta solvencia.
-                                            </Typography>
-                                        </Typography>
-                                    </li>
-                                    <li>
-                                        <Typography variant="h6" color="warning">
-                                            <i className="mdi mdi-checkbox-blank" style={{ color: "#FFC107" }} />
-                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
-                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
-                                                    Advertencia:
-                                                </Typography> 
-                                                Articulo cerca del stock mínimo.
-                                            </Typography>
-                                        </Typography>
-                                    </li>
-                                    <li>
-                                        <Typography variant="h6" color="primary">
-                                            <i className="mdi mdi-checkbox-blank" />
-                                            <Typography sx={{ml: 2}} component="span" color="text.primary">
-                                                <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
-                                                    Alerta:
-                                                </Typography> 
-                                                Articulo igual o por debajo del stock mínimo.
-                                            </Typography>
-                                        </Typography>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-
-                        {loading &&
-                            <Loader />
-                        }
-                    
+                            {loading &&
+                                <Loader />
+                            }
+                        
+                        </CardContent>
                     </Card>
                 }
 
@@ -716,6 +724,7 @@ function Inventario() {
                     </Card>
                 }
             </Grid>
+
         </Container>
         </Page>
     );

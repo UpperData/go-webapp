@@ -6,7 +6,7 @@ import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton } from '@mui/lab';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
-import { Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert } from '@mui/material';
+import { CardContent, Hidden, Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import Loader from '../../../../components/Loader/Loader';
@@ -206,86 +206,88 @@ export default function PatientHistory() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
+                        <CardContent>
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{my: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
 
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{my: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
 
-                        {data !== null 
-                        ?
-                            <div>
-                                <Typography variant="h4">
-                                    Nombre: 
-                                    <Typography sx={{fontWeight: 800, ml: 1}} variant="h5" component="span">{data.nombre+" "+data.apellido}</Typography>
-                                    <Typography color="primary" variant="span" sx={{ml: 1}}>
-                                        {"( "+(data.document.nationality+"-"+data.document.number).toLocaleLowerCase()+" )"}
-                                    </Typography>
-                                </Typography>
-
-                                
-                                <Typography component="p" sx={{mb: 3, fontWeight: 700}}>
-                                
-                                    <Typography variant="span" sx={{mr: 1}}>
-                                        Edad:
-                                    </Typography>
-                                    <Typography variant="span" sx={{mr: 1}}>
-                                        {moment().diff(moment(data.edad.split("T")[0], "YYYY-MM-DD"), 'years')},
+                            {data !== null 
+                            ?
+                                <div>
+                                    <Typography variant="h4">
+                                        Nombre: 
+                                        <Typography sx={{fontWeight: 800, ml: 1}} variant="h5" component="span">{data.nombre+" "+data.apellido}</Typography>
+                                        <Typography color="primary" variant="span" sx={{ml: 1}}>
+                                            {"( "+(data.document.nationality+"-"+data.document.number).toLocaleLowerCase()+" )"}
+                                        </Typography>
                                     </Typography>
 
-                                    <Typography variant="span" sx={{mr: 1}}>
-                                        Sexo:
+                                    
+                                    <Typography component="p" sx={{mb: 3, fontWeight: 700}}>
+                                    
+                                        <Typography variant="span" sx={{mr: 1}}>
+                                            Edad:
+                                        </Typography>
+                                        <Typography variant="span" sx={{mr: 1}}>
+                                            {moment().diff(moment(data.edad.split("T")[0], "YYYY-MM-DD"), 'years')},
+                                        </Typography>
+
+                                        <Typography variant="span" sx={{mr: 1}}>
+                                            Sexo:
+                                        </Typography>
+                                        <Typography variant="span" sx={{mr: 1}}>
+                                            {data.document.gender === "H" ? "Masculino" : "Femenino"}
+                                        </Typography>
+
                                     </Typography>
-                                    <Typography variant="span" sx={{mr: 1}}>
-                                        {data.document.gender === "H" ? "Masculino" : "Femenino"}
-                                    </Typography>
+                                    
 
-                                </Typography>
-                                
+                                    <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>   
+                                        <DataGrid
+                                            sx={{mb:4}}
+                                            rows={data.appointments}
+                                            columns={columns}
 
-                                <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}>   
-                                    <DataGrid
-                                        sx={{mb:4}}
-                                        rows={data.appointments}
-                                        columns={columns}
+                                            page={0}
+                                            pageSize={6}
+                                            rowsPerPageOptions={[6,10,20]}
+                                            // autoPageSize
+                                            rowCount={data.length}
 
-                                        page={0}
-                                        pageSize={6}
-                                        rowsPerPageOptions={[6,10,20]}
-                                        // autoPageSize
-                                        rowCount={data.length}
+                                            disableColumnFilter
+                                            disableColumnMenu
+                                            autoHeight 
+                                            disableColumnSelector
+                                            disableSelectionOnClick
+                                            DataGridViewTextBoxColumn
 
-                                        disableColumnFilter
-                                        disableColumnMenu
-                                        autoHeight 
-                                        disableColumnSelector
-                                        disableSelectionOnClick
-                                        DataGridViewTextBoxColumn
-
-                                        getRowId={row => row.appoitnmentId}
-                                        // checkboxSelection
-                                    />
+                                            getRowId={row => row.appoitnmentId}
+                                            // checkboxSelection
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        :
-                            <Alert sx={{my: 3}} severity="info">
-                                No ha sido posible obtener la data solicitada.
-                            </Alert>
-                        }
+                            :
+                                <Alert sx={{my: 3}} severity="info">
+                                    No ha sido posible obtener la data solicitada.
+                                </Alert>
+                            }
 
+                        </CardContent>
                     </Card>
                 }
 
                 {loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
                         <Loader />
                     </Card>
                 }

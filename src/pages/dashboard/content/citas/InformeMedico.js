@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import * as Yup from 'yup';
 // material
-import { Radio, Input, Divider, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText, Alert } from '@mui/material';
+import { CardContent, Hidden, Radio, Input, Divider, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl, List, ListItem, ListItemButton, ListItemText, Alert } from '@mui/material';
 import {useLocation } from 'react-router-dom';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton } from '@mui/lab';
@@ -257,7 +257,7 @@ export default function InformeMedico() {
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
 
     const formattedMedicines = (medicines) => {
-        if(medicines.length > 0){
+        if(medicines !== null && medicines.length > 0){
             let newMedicinesList = [];
 
             for (let i = 0; i < medicines.length; i++) {
@@ -281,11 +281,12 @@ export default function InformeMedico() {
             let data        = res.data;
             if(data.result){
                 setlistDates(res.data.data);
+            }else{
+                setalertErrorMessage(res.data.data.message);
+                setlistDates([]);
             }
         }).catch((err) => {
-
             setlistDates([]);
-
         });
     }
 
@@ -330,62 +331,79 @@ export default function InformeMedico() {
         .then((res) => {
             let data        = res.data;
 
-            axios.get(urlGetPersonal)
-            .then((res) => {
-                let dataList = res.data.data;
-                if(dataList.length > 0){
+            if(data.result){
+                setlistDates(res.data.data);
+            
+                axios.get(urlGetPersonal)
+                .then((res) => {
+                    let dataList = res.data.data;
+                    if(dataList.length > 0){
 
-                    setdoctors(dataList[0].accountRoles);
-                    setnurses(dataList[1].accountRoles);
+                        setdoctors(dataList[0].accountRoles);
+                        setnurses(dataList[1].accountRoles);
 
-                    if(data.result){
+                        if(data.result){
 
-                        setlistDates(data.data);
-        
-                        // exams
-        
-                        axios.get(urlGetExams)
-                        .then((res) => {
-                            let data        = res.data;
-                            let dataList    = res.data.data;
-        
-                            // console.log(res.data);
-        
-                            if(data.result){
-                                setexamsList(res.data.data);
-        
-                                // medicines
-        
-                                axios.get(urlGetMedicines)
-                                .then((res) => {
-                                    let data        = res.data;
-                                    let dataList    = res.data.data;
-        
-                                    // console.log(res.data);
-        
-                                    if(data.result){
-                                        setmedicinesList(res.data.data);
-                                        formattedMedicines(res.data.data);
-        
-                                        setsearch(false);
-                                    }
-        
-                                }).catch((err) => {
-                                    console.error(err);
-                                });
-        
-                            }
-        
-                        }).catch((err) => {
-                            console.error(err);
-                        });
+                            setlistDates(data.data);
+            
+                            // exams
+            
+                            axios.get(urlGetExams)
+                            .then((res) => {
+                                let data        = res.data;
+                                let dataList    = res.data.data;
+            
+                                // console.log(res.data);
+            
+                                if(data.result){
+                                    setexamsList(res.data.data);
+            
+                                    // medicines
+            
+                                    axios.get(urlGetMedicines)
+                                    .then((res) => {
+                                        let data        = res.data;
+                                        let dataList    = res.data.data;
+            
+                                        // console.log(res.data);
+            
+                                        if(data.result){
+                                            setmedicinesList(res.data.data);
+                                            formattedMedicines(res.data.data);
+            
+                                            setsearch(false);
+                                        }
+            
+                                    }).catch((err) => {
+                                        console.error(err);
+                                    });
+            
+                                }
+            
+                            }).catch((err) => {
+                                console.error(err);
+                            });
+                        }
                     }
-                }
-            }).catch((err) => {
-                console.error(err);
-            });
+                }).catch((err) => {
+                    console.error(err);
+                });
+            }else{
+                setalertErrorMessage(res.data.data.message);
+                setlistDates([]);
+            }
+
         }).catch((err) => {
-            console.error(err);
+            let fetchError = err;
+            console.error(fetchError);
+            if(fetchError.response){
+                console.log(err.response);
+                setalertErrorMessage(err.response.data.message || err.response.data.data.message);
+                setlistDates([]);
+                setsending(false);
+                setloading(false);
+                // return Promise.reject(err.response.data.data);
+            }
         });
     }
 
@@ -517,446 +535,445 @@ export default function InformeMedico() {
             <FormikProvider value={formik}>
                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                     <Grid sx={{ pb: 3 }} item xs={12}>
-                        <Card sx={{py: 3, px: 5}}>
+                        <Card>
+                            <CardContent>
+                                {(loading || searchingData) &&
+                                    <Loader />
+                                }
 
-                            {(loading || searchingData) &&
-                                <Loader />
-                            }
+                                {alertSuccessMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="success">
+                                        {alertSuccessMessage}
+                                    </Alert>
+                                }
 
-                            {alertSuccessMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="success">
-                                    {alertSuccessMessage}
-                                </Alert>
-                            }
+                                {alertErrorMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="error">
+                                        {alertErrorMessage}
+                                    </Alert>
+                                }
 
-                            {alertErrorMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="error">
-                                    {alertErrorMessage}
-                                </Alert>
-                            }
+                                {!loading && !searchingData &&
+                                    <div>
 
-                            {!loading && !searchingData &&
-                                <div>
-
-                                    <Grid sx={{mb: 3}} container columnSpacing={3}>
-                                        <Grid item lg={3}>
-                                            <Button onClick={() => reset()} variant="contained" fullWidth>
-                                                Nuevo
-                                            </Button>
-                                        </Grid>
-                                        <Grid item lg={3}>
-
-                                            {dataToEdit !== null ?
-                                                <BlobProvider 
-                                                    document={<InformePdf data={{...dataToEdit, doctors, nurses}} />}
-                                                >
-                                                    {({ blob, url, loading, error }) => {
-                                                        console.log(blob);
-                                                        // Do whatever you need with blob here
-                                                        return <Button 
-                                                            onClick={() => printFile(blob)} 
-                                                            disabled={!permissions.imprime || typeForm === "create"} 
-                                                            variant="contained" 
-                                                            fullWidth
-                                                            color="secondary"
-                                                        >
-                                                            Imprimir
-                                                        </Button>
-                                                    }}
-                                                </BlobProvider>
-                                            :
-                                                <Button 
-                                                    disabled={!permissions.imprime || typeForm === "create"} 
-                                                    variant="contained" 
-                                                    fullWidth
-                                                    color="secondary"
-                                                >
-                                                    Imprimir
+                                        <Grid sx={{mb: 3}} container columnSpacing={3}>
+                                            <Grid item md={3} xs={6} sx={{ mb:2}}>
+                                                <Button onClick={() => reset()} variant="contained" fullWidth>
+                                                    Nuevo
                                                 </Button>
-                                            }
-
-                                        </Grid>
-                                        <Grid item lg={3}>
-                                            <Button 
-                                                disabled={
-                                                    // !permissions.imprime || 
-                                                    typeForm === "create"
-                                                } 
-                                                variant="contained" 
-                                                color="secondary" 
-                                                fullWidth    
-                                                className={dataToEdit !== null ? "pdf-download-link" : ""}
-                                            >   
+                                            </Grid>
+                                            <Grid item md={3} xs={6} sx={{ mb:2}}>
                                                 {dataToEdit !== null ?
-                                                    <PDFDownloadLink
+                                                    <BlobProvider 
                                                         document={<InformePdf data={{...dataToEdit, doctors, nurses}} />}
-                                                        fileName="cita.pdf"
                                                     >
-                                                        Descargar
-                                                    </PDFDownloadLink>
-                                                    :
-                                                    "Descargar"
-                                                }
-                                            </Button>
-                                        </Grid>
-                                        <Grid item lg={3}>
-                                            <Grid container columnSpacing={1}>
-                                                <Grid item lg={9}>
-                                                    <TextField
-                                                        label="Buscar"
-                                                        size="small"
-                                                        value={textSearchData}
-                                                        disabled={searchingData}
-                                                        onChange={(e) => settextSearchData(e.target.value)}
-                                                    />
-                                                </Grid>
-                                                <Grid item lg={3}>
-                                                    <LoadingButton 
+                                                        {({ blob, url, loading, error }) => {
+                                                            console.log(blob);
+                                                            // Do whatever you need with blob here
+                                                            return <Button 
+                                                                onClick={() => printFile(blob)} 
+                                                                disabled={!permissions.imprime || typeForm === "create"} 
+                                                                variant="contained" 
+                                                                fullWidth
+                                                                color="secondary"
+                                                            >
+                                                                Imprimir
+                                                            </Button>
+                                                        }}
+                                                    </BlobProvider>
+                                                :
+                                                    <Button 
+                                                        disabled={!permissions.imprime || typeForm === "create"} 
                                                         variant="contained" 
-                                                        color="primary"
-                                                        type="button"
-                                                        sx={{ minWidth: "100%", width: "100%"}}
-                                                        onClick={() => searchDataToEdit()}
-                                                        loading={searchingData}
-                                                        disabled={textSearchData === ""}
+                                                        fullWidth
+                                                        color="secondary"
                                                     >
-                                                        <i className="mdi mdi-magnify" />
-                                                    </LoadingButton>
+                                                        Imprimir
+                                                    </Button>
+                                                }
+
+                                            </Grid>
+                                            <Grid item md={3} xs={12} sx={{ mb:2}}>
+                                                <Button 
+                                                    disabled={
+                                                        // !permissions.imprime || 
+                                                        typeForm === "create"
+                                                    } 
+                                                    variant="contained" 
+                                                    color="secondary" 
+                                                    fullWidth    
+                                                    className={dataToEdit !== null ? "pdf-download-link" : ""}
+                                                >   
+                                                    {dataToEdit !== null ?
+                                                        <PDFDownloadLink
+                                                            document={<InformePdf data={{...dataToEdit, doctors, nurses}} />}
+                                                            fileName="cita.pdf"
+                                                        >
+                                                            Descargar
+                                                        </PDFDownloadLink>
+                                                        :
+                                                        "Descargar"
+                                                    }
+                                                </Button>
+                                            </Grid>
+                                            <Grid item md={3} xs={12}>
+                                                <Grid container columnSpacing={1}>
+                                                    <Grid item lg={9} xs={8}>
+                                                        <TextField
+                                                            label="Buscar"
+                                                            size="small"
+                                                            value={textSearchData}
+                                                            disabled={searchingData}
+                                                            onChange={(e) => settextSearchData(e.target.value)}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item lg={3} xs={4}>
+                                                        <LoadingButton 
+                                                            variant="contained" 
+                                                            color="primary"
+                                                            type="button"
+                                                            sx={{ minWidth: "100%", width: "100%", py: 1}}
+                                                            onClick={() => searchDataToEdit()}
+                                                            loading={searchingData}
+                                                            disabled={textSearchData === ""}
+                                                        >
+                                                            <i className="mdi mdi-magnify" />
+                                                        </LoadingButton>
+                                                    </Grid>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                    </Grid>
 
-                                    {(listDates.length > 0) || dataToEdit !== null  ?
-                                        <div>
-                                            {!searchingData 
-                                            ?
-                                                <Grid container columnSpacing={3}>
-                                                    <Grid item lg={12}>
-                                                        
-                                                        <Box sx={{ pb: 1 }}>
-                                                            <Typography variant="h6">
-                                                                Información General
-                                                            </Typography>
+                                        {(listDates.length > 0) || dataToEdit !== null  ?
+                                            <div>
+                                                {!searchingData 
+                                                ?
+                                                    <Grid container columnSpacing={3}>
+                                                        <Grid item lg={12}>
+                                                            
+                                                            <Box sx={{ pb: 1 }}>
+                                                                <Typography variant="h6">
+                                                                    Información General
+                                                                </Typography>
 
-                                                            {dataToEdit === null &&
-                                                                <Grid container columnSpacing={3} sx={{mt: 2, mb: 1}}>
-                                                                    <Grid item xs={12}>
-                                                                        <FormControl fullWidth size="small">
-                                                                            <InputLabel id="demo-simple-select-date">
-                                                                                ID Cita - Nombre Apellido
-                                                                            </InputLabel>
-                                                                            <Select
-                                                                                fullWidth
-                                                                                labelId="demo-simple-select-date"
-                                                                                id="demo-simple-select-date"
+                                                                {dataToEdit === null &&
+                                                                    <Grid container columnSpacing={3} sx={{mt: 2, mb: 1}}>
+                                                                        <Grid item xs={12}>
+                                                                            <FormControl fullWidth size="small">
+                                                                                <InputLabel id="demo-simple-select-date">
+                                                                                    ID Cita - Nombre Apellido
+                                                                                </InputLabel>
+                                                                                <Select
+                                                                                    fullWidth
+                                                                                    labelId="demo-simple-select-date"
+                                                                                    id="demo-simple-select-date"
 
-                                                                                value={values.appointmentId}
-                                                                                onChange={(e) => setFieldValue('appointmentId', `${e.target.value}`)}
-                                                                                
-                                                                                label="ID Cita - Nombre Apellido"
-                                                                                MenuProps={MenuProps}
+                                                                                    value={values.appointmentId}
+                                                                                    onChange={(e) => setFieldValue('appointmentId', `${e.target.value}`)}
+                                                                                    
+                                                                                    label="ID Cita - Nombre Apellido"
+                                                                                    MenuProps={MenuProps}
 
-                                                                                {...getFieldProps('appointmentId')}
-                                                                                error={Boolean(touched.appointmentId && errors.appointmentId)}
-                                                                                // helperText={touched.appointmentId && errors.appointmentId}
-                                                                            >
+                                                                                    {...getFieldProps('appointmentId')}
+                                                                                    error={Boolean(touched.appointmentId && errors.appointmentId)}
+                                                                                    // helperText={touched.appointmentId && errors.appointmentId}
+                                                                                >
 
-                                                                                {listDates !== null && listDates.map((item, key) => {
-                                                                                    let dataItem = item;
-                                                                                    return <MenuItem key={key} value={`${dataItem.appointments[0].appointmentId}`}>
-                                                                                            {dataItem.appointments[0].appointmentId} - {`${dataItem.nombre} ${dataItem.apellido} (${dataItem.document.nationality.toLowerCase()+"-"+dataItem.document.number})`}
-                                                                                            </MenuItem>
-                                                                                })}
+                                                                                    {listDates !== null && listDates.map((item, key) => {
+                                                                                        let dataItem = item;
+                                                                                        return <MenuItem key={key} value={`${dataItem.appointments[0].appointmentId}`}>
+                                                                                                {dataItem.appointments[0].appointmentId} - {`${dataItem.nombre} ${dataItem.apellido} (${dataItem.document.nationality.toLowerCase()+"-"+dataItem.document.number})`}
+                                                                                                </MenuItem>
+                                                                                    })}
 
-                                                                            </Select>
-                                                                        </FormControl>
-                                                                        {Boolean(touched.appointmentId && errors.appointmentId) &&
-                                                                            <Typography sx={{fontSize: 12, mt: .8}} color="primary">
-                                                                                {errors.appointmentId}
-                                                                            </Typography>
-                                                                        }
-                                                                    </Grid>
-                                                                </Grid>
-                                                            }
-                                                        </Box>
-
-                                                        {values.appointmentId !== "" &&
-                                                            <div>
-
-                                                                <Stack spacing={3} sx={{mt: 2}}>
-                                                                    <TextField
-                                                                        size='small'
-                                                                        fullWidth
-                                                                        autoComplete="description"
-                                                                        type="number"
-                                                                        label="Descripción"
-                                                                        multiline
-                                                                        rows={5}
-                                                                        // maxRows={10}
-
-                                                                        {...getFieldProps('description')}
-                                                                        error={Boolean(touched.description && errors.description)}
-                                                                        helperText={touched.description && errors.description}
-                                                                    />
-                                                                </Stack>
-
-                                                                <Grid sx={{mt:4}} container columnSpacing={3}>
-                                                                    <Grid item xs={6}>
-
-                                                                        <Typography sx={{mb: 1}} align="center" variant="h6">
-                                                                            ¿Se aplicaron medicamentos? 
-                                                                        </Typography>
-                                                                        <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
-                                                                            <Button disabled={medicinesInList.length <= 0} size="small" onClick={() => changeWithMedicine(true)} sx={{py: .81}} variant={values.withMedicine  ? "contained" : "outlined"} color="secondary">Si</Button>
-                                                                            <Button size="small" onClick={() => changeWithMedicine(false)} sx={{py: .81}} variant={!values.withMedicine ? "contained" : "outlined"} color="secondary">No</Button>
-                                                                        </ButtonGroup>
-
-                                                                        {values.withMedicine 
-                                                                            ?
-                                                                            <Card sx={{py: 3, px: 3}}>
-                                                                                <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
-                                                                                    Medicamentos Aplicados
+                                                                                </Select>
+                                                                            </FormControl>
+                                                                            {Boolean(touched.appointmentId && errors.appointmentId) &&
+                                                                                <Typography sx={{fontSize: 12, mt: .8}} color="primary">
+                                                                                    {errors.appointmentId}
                                                                                 </Typography>
-                                                                                {medicinesInList.length > 0
+                                                                            }
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                }
+                                                            </Box>
+
+                                                            {values.appointmentId !== "" &&
+                                                                <div>
+
+                                                                    <Stack spacing={3} sx={{mt: 2}}>
+                                                                        <TextField
+                                                                            size='small'
+                                                                            fullWidth
+                                                                            autoComplete="description"
+                                                                            type="number"
+                                                                            label="Descripción"
+                                                                            multiline
+                                                                            rows={5}
+                                                                            // maxRows={10}
+
+                                                                            {...getFieldProps('description')}
+                                                                            error={Boolean(touched.description && errors.description)}
+                                                                            helperText={touched.description && errors.description}
+                                                                        />
+                                                                    </Stack>
+
+                                                                    <Grid sx={{mt:4}} container columnSpacing={3}>
+                                                                        <Grid item xs={6}>
+
+                                                                            <Typography sx={{mb: 1}} align="center" variant="h6">
+                                                                                ¿Se aplicaron medicamentos? 
+                                                                            </Typography>
+                                                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                                                <Button disabled={medicinesInList.length <= 0} size="small" onClick={() => changeWithMedicine(true)} sx={{py: .81}} variant={values.withMedicine  ? "contained" : "outlined"} color="secondary">Si</Button>
+                                                                                <Button size="small" onClick={() => changeWithMedicine(false)} sx={{py: .81}} variant={!values.withMedicine ? "contained" : "outlined"} color="secondary">No</Button>
+                                                                            </ButtonGroup>
+
+                                                                            {values.withMedicine 
                                                                                 ?
-                                                                                    <List>
-                                                                                        <Scrollbar
-                                                                                            sx={{
-                                                                                                height: "auto",
-                                                                                                '& .simplebar-content': { maxHeight: 200 ,height: "auto", display: 'flex', flexDirection: 'column' }
-                                                                                            }}
-                                                                                        >
-                                                                                            {medicinesInList.map((medicine, key) => {
-                                                                                                let item = medicine;
-                                                                                                return <ListItem 
-                                                                                                        key={key}
-                                                                                                            // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                                                            disablePadding
-                                                                                                        >
-                                                                                                        <Grid container alignItems="center">
-                                                                                                            <Grid item xs={7}>
-                                                                                                                <Typography sx={{fontWeight: "bold"}}>
-                                                                                                                    {item.article.name}
-                                                                                                                </Typography>
-                                                                                                            </Grid>
-                                                                                                            <Grid item xs={5}>
-                                                                                                                <Grid container alignItems="center">
-                                                                                                                    <Grid item xs={4} sx={{px: .5}}>
-                                                                                                                        <Button 
-                                                                                                                            type="button" 
-                                                                                                                            size="small" 
-                                                                                                                            sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}}
-                                                                                                                            color="secondary" 
-                                                                                                                            variant="contained"
-                                                                                                                            disabled={sending || item.count === 0}
-                                                                                                                            onClick={() => handleMedicineCountCHange(item.id, item.count - 1)}
-                                                                                                                        >
-                                                                                                                            <Icon icon={CaretLeft} />
-                                                                                                                        </Button>
-                                                                                                                    </Grid>
-                                                                                                                    <Grid item xs={4}>
-                                                                                                                        <TextField
-                                                                                                                            hiddenLabel
-                                                                                                                            size='small'
-                                                                                                                            fullWidth
-                                                                                                                            autoComplete="lastname"
-                                                                                                                            type="number"
-                                                                                                                            label=""
-                                                                                                                            InputProps={{
-                                                                                                                                readOnly: true,
-                                                                                                                            }}
-                                                                                                                            value={item.count}
-                                                                                                                        />
-                                                                                                                    </Grid>
-                                                                                                                    <Grid item xs={4} sx={{px: .5}}>
-                                                                                                                        <Button 
-                                                                                                                            type="button" 
-                                                                                                                            size="small" 
-                                                                                                                            sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} 
-                                                                                                                            color="secondary" 
-                                                                                                                            variant="contained"
-                                                                                                                            disabled={sending || item.count >= item.quantity}
-                                                                                                                            onClick={() => handleMedicineCountCHange(item.id, item.count + 1)}
-                                                                                                                        >
-                                                                                                                            <Icon icon={CaretRight} />
-                                                                                                                        </Button>
+                                                                                <Card sx={{py: 3, px: 3}}>
+                                                                                    <Typography align="center" sx={{mb: 1, mt:2}} variant="h5">
+                                                                                        Medicamentos Aplicados
+                                                                                    </Typography>
+                                                                                    {medicinesInList.length > 0
+                                                                                    ?
+                                                                                        <List>
+                                                                                            <Scrollbar
+                                                                                                sx={{
+                                                                                                    height: "auto",
+                                                                                                    '& .simplebar-content': { maxHeight: 200 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                                                }}
+                                                                                            >
+                                                                                                {medicinesInList.map((medicine, key) => {
+                                                                                                    let item = medicine;
+                                                                                                    return <ListItem 
+                                                                                                            key={key}
+                                                                                                                // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                                                disablePadding
+                                                                                                            >
+                                                                                                            <Grid container alignItems="center">
+                                                                                                                <Grid item xs={7}>
+                                                                                                                    <Typography sx={{fontWeight: "bold"}}>
+                                                                                                                        {item.article.name}
+                                                                                                                    </Typography>
+                                                                                                                </Grid>
+                                                                                                                <Grid item xs={5}>
+                                                                                                                    <Grid container alignItems="center">
+                                                                                                                        <Grid item xs={4} sx={{px: .5}}>
+                                                                                                                            <Button 
+                                                                                                                                type="button" 
+                                                                                                                                size="small" 
+                                                                                                                                sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}}
+                                                                                                                                color="secondary" 
+                                                                                                                                variant="contained"
+                                                                                                                                disabled={sending || item.count === 0}
+                                                                                                                                onClick={() => handleMedicineCountCHange(item.id, item.count - 1)}
+                                                                                                                            >
+                                                                                                                                <Icon icon={CaretLeft} />
+                                                                                                                            </Button>
+                                                                                                                        </Grid>
+                                                                                                                        <Grid item xs={4}>
+                                                                                                                            <TextField
+                                                                                                                                hiddenLabel
+                                                                                                                                size='small'
+                                                                                                                                fullWidth
+                                                                                                                                autoComplete="lastname"
+                                                                                                                                type="number"
+                                                                                                                                label=""
+                                                                                                                                InputProps={{
+                                                                                                                                    readOnly: true,
+                                                                                                                                }}
+                                                                                                                                value={item.count}
+                                                                                                                            />
+                                                                                                                        </Grid>
+                                                                                                                        <Grid item xs={4} sx={{px: .5}}>
+                                                                                                                            <Button 
+                                                                                                                                type="button" 
+                                                                                                                                size="small" 
+                                                                                                                                sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} 
+                                                                                                                                color="secondary" 
+                                                                                                                                variant="contained"
+                                                                                                                                disabled={sending || item.count >= item.quantity}
+                                                                                                                                onClick={() => handleMedicineCountCHange(item.id, item.count + 1)}
+                                                                                                                            >
+                                                                                                                                <Icon icon={CaretRight} />
+                                                                                                                            </Button>
+                                                                                                                        </Grid>
                                                                                                                     </Grid>
                                                                                                                 </Grid>
                                                                                                             </Grid>
-                                                                                                        </Grid>
-                                                                                                        <Divider />
+                                                                                                            <Divider />
+                                                                                                        </ListItem>
+                                                                                                })}
+                                                                                            </Scrollbar>
+                                                                                        </List>
+                                                                                    :
+                                                                                        <Alert severity="info"> 
+                                                                                            Sin medicamentos
+                                                                                        </Alert>
+                                                                                    }
+                                                                                </Card>
+                                                                                :
+                                                                                <Card sx={{py: 3, px: 3}}>
+                                                                                    <Alert severity="info"> 
+                                                                                        No se requirió de medicamentos adicionales.
+                                                                                    </Alert>
+                                                                                </Card>
+                                                                            }
+
+                                                                        </Grid>
+                                                                        <Grid item xs={6}>
+
+                                                                            <Typography sx={{mb: 1}} align="center" variant="h6">
+                                                                                ¿Requiere exámenes médicos? 
+                                                                            </Typography>
+                                                                            <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
+                                                                                <Button size="small" onClick={() => changeWithExams(true)}  sx={{py: .81}} variant={values.withExams  ? "contained" : "outlined"} color="secondary">Si</Button>
+                                                                                <Button size="small" onClick={() => changeWithExams(false)} sx={{py: .81}} variant={!values.withExams ? "contained" : "outlined"} color="secondary">No</Button>
+                                                                            </ButtonGroup>
+
+                                                                            {values.withExams 
+                                                                                ?
+                                                                                <Card sx={{py: 3, px: 3}}>
+                                                                                    <Typography align="center" sx={{ mb: 1, mt:2 }} variant="h5">
+                                                                                        Exámenes Aplicados
+                                                                                    </Typography>
+                                                                                    <List>
+                                                                                        <Scrollbar
+                                                                                            sx={{
+                                                                                                height: 200,
+                                                                                                '& .simplebar-content': { maxHeight: 200 ,height: 200, display: 'flex', flexDirection: 'column' }
+                                                                                            }}
+                                                                                        >
+                                                                                            {examsList.map((exam, key) => {
+                                                                                                let item = exam;
+                                                                                                    return <ListItem 
+                                                                                                        key={key}
+                                                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                                        disablePadding
+                                                                                                    >
+                                                                                                        <ListItemButton 
+                                                                                                            selected={examsSelected.includes(item.id)} 
+                                                                                                            onClick={() => toggleValueToExams(item.id)}
+                                                                                                        >
+                                                                                                            <ListItemText primary={item.name} />
+                                                                                                        </ListItemButton>
                                                                                                     </ListItem>
                                                                                             })}
                                                                                         </Scrollbar>
                                                                                     </List>
+                                                                                </Card>
                                                                                 :
+                                                                                <Card sx={{py: 3, px: 3}}>
                                                                                     <Alert severity="info"> 
-                                                                                        Sin medicamentos
+                                                                                        Sin examenes requeridos.
                                                                                     </Alert>
-                                                                                }
-                                                                            </Card>
-                                                                            :
-                                                                            <Card sx={{py: 3, px: 3}}>
-                                                                                <Alert severity="info"> 
-                                                                                    No se requirió de medicamentos adicionales.
-                                                                                </Alert>
-                                                                            </Card>
-                                                                        }
+                                                                                </Card>
+                                                                            }
 
+                                                                        </Grid>
                                                                     </Grid>
-                                                                    <Grid item xs={6}>
 
-                                                                        <Typography sx={{mb: 1}} align="center" variant="h6">
-                                                                            ¿Requiere exámenes médicos? 
-                                                                        </Typography>
-                                                                        <ButtonGroup sx={{mb: 3}} fullWidth aria-label="outlined button group">
-                                                                            <Button size="small" onClick={() => changeWithExams(true)}  sx={{py: .81}} variant={values.withExams  ? "contained" : "outlined"} color="secondary">Si</Button>
-                                                                            <Button size="small" onClick={() => changeWithExams(false)} sx={{py: .81}} variant={!values.withExams ? "contained" : "outlined"} color="secondary">No</Button>
-                                                                        </ButtonGroup>
+                                                                    { values.withMedicine &&
+                                                                        <div>
 
-                                                                        {values.withExams 
-                                                                            ?
-                                                                            <Card sx={{py: 3, px: 3}}>
-                                                                                <Typography align="center" sx={{ mb: 1, mt:2 }} variant="h5">
-                                                                                    Exámenes Aplicados
-                                                                                </Typography>
-                                                                                <List>
-                                                                                    <Scrollbar
-                                                                                        sx={{
-                                                                                            height: 200,
-                                                                                            '& .simplebar-content': { maxHeight: 200 ,height: 200, display: 'flex', flexDirection: 'column' }
-                                                                                        }}
-                                                                                    >
-                                                                                        {examsList.map((exam, key) => {
-                                                                                            let item = exam;
-                                                                                                return <ListItem 
-                                                                                                    key={key}
-                                                                                                    // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                                                    disablePadding
-                                                                                                >
-                                                                                                    <ListItemButton 
-                                                                                                        selected={examsSelected.includes(item.id)} 
-                                                                                                        onClick={() => toggleValueToExams(item.id)}
-                                                                                                    >
-                                                                                                        <ListItemText primary={item.name} />
-                                                                                                    </ListItemButton>
-                                                                                                </ListItem>
-                                                                                        })}
-                                                                                    </Scrollbar>
-                                                                                </List>
-                                                                            </Card>
-                                                                            :
-                                                                            <Card sx={{py: 3, px: 3}}>
-                                                                                <Alert severity="info"> 
-                                                                                    Sin examenes requeridos.
-                                                                                </Alert>
-                                                                            </Card>
-                                                                        }
+                                                                            <Typography sx={{mt: 4}} variant="h6">
+                                                                                Posología
+                                                                            </Typography>
+                                                                            <Stack spacing={3} sx={{my: 1}}>
+                                                                                <TextField
 
-                                                                    </Grid>
-                                                                </Grid>
+                                                                                    size='small'
+                                                                                    fullWidth
+                                                                                    autoComplete="otherExams"
+                                                                                    type="text"
+                                                                                    label="Otros"
+                                                                                    multiline
+                                                                                    rows={4}
+                                                                                    // maxRows={4}
 
-                                                                { values.withMedicine &&
-                                                                    <div>
+                                                                                    {...getFieldProps('dosage')}
+                                                                                    error={Boolean(touched.dosage && errors.dosage)}
+                                                                                    helperText={touched.dosage && errors.dosage}
+                                                                                />
+                                                                            </Stack>
 
-                                                                        <Typography sx={{mt: 4}} variant="h6">
-                                                                            Posología
-                                                                        </Typography>
-                                                                        <Stack spacing={3} sx={{my: 1}}>
-                                                                            <TextField
+                                                                        </div>
+                                                                    }
 
-                                                                                size='small'
-                                                                                fullWidth
-                                                                                autoComplete="otherExams"
-                                                                                type="text"
-                                                                                label="Otros"
-                                                                                multiline
-                                                                                rows={4}
-                                                                                // maxRows={4}
+                                                                    { values.withExams &&
+                                                                        <div>
 
-                                                                                {...getFieldProps('dosage')}
-                                                                                error={Boolean(touched.dosage && errors.dosage)}
-                                                                                helperText={touched.dosage && errors.dosage}
-                                                                            />
-                                                                        </Stack>
+                                                                            <Typography sx={{mt: 4}} variant="h6">
+                                                                                Otros examenes
+                                                                            </Typography>
+                                                                            <Stack spacing={3} sx={{my: 1}}>
+                                                                                <TextField
 
-                                                                    </div>
-                                                                }
+                                                                                    size='small'
+                                                                                    fullWidth
+                                                                                    autoComplete="otherExams"
+                                                                                    type="text"
+                                                                                    label="Otros"
+                                                                                    multiline
+                                                                                    rows={2}
+                                                                                    // maxRows={4}
 
-                                                                { values.withExams &&
-                                                                    <div>
+                                                                                    {...getFieldProps('otherExams')}
+                                                                                    error={Boolean(touched.otherExams && errors.otherExams)}
+                                                                                    helperText={touched.otherExams && errors.otherExams}
+                                                                                />
+                                                                            </Stack>
 
-                                                                        <Typography sx={{mt: 4}} variant="h6">
-                                                                            Otros examenes
-                                                                        </Typography>
-                                                                        <Stack spacing={3} sx={{my: 1}}>
-                                                                            <TextField
+                                                                        </div>
+                                                                    }
 
-                                                                                size='small'
-                                                                                fullWidth
-                                                                                autoComplete="otherExams"
-                                                                                type="text"
-                                                                                label="Otros"
-                                                                                multiline
-                                                                                rows={2}
-                                                                                // maxRows={4}
+                                                                </div>
+                                                            }
 
-                                                                                {...getFieldProps('otherExams')}
-                                                                                error={Boolean(touched.otherExams && errors.otherExams)}
-                                                                                helperText={touched.otherExams && errors.otherExams}
-                                                                            />
-                                                                        </Stack>
-
-                                                                    </div>
-                                                                }
-
-                                                            </div>
-                                                        }
-
+                                                        </Grid>
                                                     </Grid>
-                                                </Grid>
+                                                :
+                                                    <Loader />
+                                                }
+                                                
+
+                                                {typeForm === "create" && values.appointmentId !== "" && !searchingData &&
+                                                    <LoadingButton
+                                                        fullWidth
+                                                        size="large"
+                                                        type="submit"
+                                                        variant="contained"
+                                                        loading={sending}
+                                                        color="primary"
+                                                        sx={{mt: 3}}
+                                                    >
+                                                        Guardar
+                                                    </LoadingButton>
+                                                }
+
+                                                {typeForm === "edit" && values.appointmentId !== "" && !searchingData &&
+                                                    <LoadingButton
+                                                        fullWidth
+                                                        size="large"
+                                                        type="submit"
+                                                        variant="contained"
+                                                        loading={sending}
+                                                        color="secondary"
+                                                        sx={{mt: 3}}
+                                                    >
+                                                        Editar
+                                                    </LoadingButton>
+                                                }
+                                            </div>  
                                             :
-                                                <Loader />
-                                            }
-                                            
-
-                                            {typeForm === "create" && values.appointmentId !== "" && !searchingData &&
-                                                <LoadingButton
-                                                    fullWidth
-                                                    size="large"
-                                                    type="submit"
-                                                    variant="contained"
-                                                    loading={sending}
-                                                    color="primary"
-                                                    sx={{mt: 3}}
-                                                >
-                                                    Guardar
-                                                </LoadingButton>
-                                            }
-
-                                            {typeForm === "edit" && values.appointmentId !== "" && !searchingData &&
-                                                <LoadingButton
-                                                    fullWidth
-                                                    size="large"
-                                                    type="submit"
-                                                    variant="contained"
-                                                    loading={sending}
-                                                    color="secondary"
-                                                    sx={{mt: 3}}
-                                                >
-                                                    Editar
-                                                </LoadingButton>
-                                            }
-                                        </div>  
-                                        :
-                                        <Alert severity="info">
-                                            No se han encontrado citas agendadas.
-                                        </Alert>
-                                    }
-                                </div>
-                            }
-
+                                            <Alert severity="info">
+                                                No se han encontrado citas agendadas.
+                                            </Alert>
+                                        }
+                                    </div>
+                                }
+                            </CardContent>
                         </Card>
                     </Grid>
                 </Form>

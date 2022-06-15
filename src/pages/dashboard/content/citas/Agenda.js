@@ -8,7 +8,7 @@ import { useFormik, Form, FormikProvider } from 'formik';
 import { LoadingButton, DatePicker, LocalizationProvider  } from '@mui/lab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useSelector } from "react-redux";
-import { Link, Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert, Divider, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { CardContent, Hidden, Link, Box, Grid, Container, Typography, Card, Button, Modal, TextField, Alert, Divider, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 // import { DataGrid } from '@mui/x-data-grid';
 
 import Scrollbar from "../../../../components/Scrollbar";
@@ -106,8 +106,8 @@ export default function Agenda() {
                 let dataList = res.data.data;
 
                 if(dataList.length > 0){
-                    setdoctors(dataList[0].accountRoles);
-                    setnurses(dataList[1].accountRoles);
+                    setdoctors( dataList.find(item => item.roleId === 6).accountRoles);
+                    setnurses(  dataList.find(item => item.roleId === 7).accountRoles);
                 }
 
                 setsearch(false);
@@ -145,12 +145,19 @@ export default function Agenda() {
     let doctorInDateSelected    = "";
     let nurseInDateSelected     = "";
 
-    if(appoinmentSelected !== null && doctors !== null && nurses !== null){
-        doctorInDateSelected = doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
-        doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
-    
-        nurseInDateSelected = nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.nurses.employeeId));
-        nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
+    if(appoinmentSelected !== null){
+        if(doctors !== null && nurses !== null){
+            console.log(doctors);
+            doctorInDateSelected = doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
+            if(doctorInDateSelected !== undefined){
+                doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
+            }
+
+            nurseInDateSelected = nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.nurses.employeeId));
+            if(nurseInDateSelected !== undefined){
+                nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
+            }
+        }
     }
     
     return (
@@ -164,36 +171,27 @@ export default function Agenda() {
 
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
-                    <Card sx={{py: 3, px: 5}}>
+                    <Card>
+                        <CardContent>
 
-                        {alertSuccessMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="success">
-                                {alertSuccessMessage}
-                            </Alert>
-                        }
+                            {alertSuccessMessage !== "" &&
+                                <Alert sx={{my: 3}} severity="success">
+                                    {alertSuccessMessage}
+                                </Alert>
+                            }
 
-                        {alertErrorMessage !== "" &&
-                            <Alert sx={{my: 3}} severity="error">
-                                {alertErrorMessage}
-                            </Alert>
-                        }
-
-                        {/* form */}
-
-                        {/* 
-                            <FormikProvider value={formik}>
-                                <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-                                    
-                                </Form>
-                            </FormikProvider>
-                        */}
+                            {alertErrorMessage !== "" &&
+                                <Alert sx={{my: 3}} severity="error">
+                                    {alertErrorMessage}
+                                </Alert>
+                            }
 
                             <Box>
-                                <Grid sx={{mb: 3}} container columnSpacing={3}>
+                                <Grid container columnSpacing={3}>
 
-                                    <Grid item lg={4}>
+                                    <Grid sx={{mb: 2}} item md={4} xs={12}>
                                         <Grid container columnSpacing={1}>
-                                            <Grid item lg={9}>
+                                            <Grid item md={9}>
                                                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                     <DatePicker
                                                         label="Buscar fecha"
@@ -215,7 +213,7 @@ export default function Agenda() {
                                                     />
                                                 </LocalizationProvider>
                                             </Grid>
-                                            <Grid item lg={3}>
+                                            <Grid item md={3}>
                                                 <LoadingButton 
                                                     variant="contained" 
                                                     color="primary"
@@ -230,52 +228,52 @@ export default function Agenda() {
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                    <Grid item lg={4}>
-                                    {appoinmentSelected !== null ?
-                                        <BlobProvider 
-                                            document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
-                                        >
-                                            {({ blob, url, loading, error }) => {
-                                                console.log(blob);
-                                                // Do whatever you need with blob here
-                                                return <Button 
-                                                    onClick={() => printFile(blob)} 
-                                                    // disabled={!permissions.imprime || typeForm === "create"} 
+                                    <Grid sx={{mb: 2}} item md={4} xs={6}>
+                                        {appoinmentSelected !== null ?
+                                                <BlobProvider 
+                                                    document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
+                                                >
+                                                    {({ blob, url, loading, error }) => {
+                                                        console.log(blob);
+                                                        // Do whatever you need with blob here
+                                                        return <Button 
+                                                            onClick={() => printFile(blob)} 
+                                                            // disabled={!permissions.imprime || typeForm === "create"} 
+                                                            variant="contained" fullWidth
+                                                        >
+                                                            Imprimir
+                                                        </Button>
+                                                    }}
+                                                </BlobProvider>
+                                            :
+                                                <Button 
+                                                    disabled
                                                     variant="contained" fullWidth
                                                 >
                                                     Imprimir
                                                 </Button>
-                                            }}
-                                        </BlobProvider>
-                                    :
+                                            }
+                                    </Grid>
+                                    <Grid sx={{mb: 2}} item md={4} xs={6}>
                                         <Button 
-                                            disabled
-                                            variant="contained" fullWidth
-                                        >
-                                            Imprimir
+                                            disabled={appoinmentSelected === null} 
+                                            variant="contained" 
+                                            color="secondary" 
+                                            fullWidth    
+                                            className={appoinmentSelected !== null ? "pdf-download-link" : ""}
+                                        >   
+                                            {appoinmentSelected !== null ?
+                                                <PDFDownloadLink
+                                                    document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
+                                                    fileName="cita_agenda.pdf"
+                                                >
+                                                    Descargar
+                                                </PDFDownloadLink>
+                                                :
+                                                "Descargar"
+                                            }
                                         </Button>
-                                    }
-                                </Grid>
-                                <Grid item lg={4}>
-                                    <Button 
-                                        disabled={appoinmentSelected === null} 
-                                        variant="contained" 
-                                        color="secondary" 
-                                        fullWidth    
-                                        className={appoinmentSelected !== null ? "pdf-download-link" : ""}
-                                    >   
-                                        {appoinmentSelected !== null ?
-                                            <PDFDownloadLink
-                                                document={<AgendaPdf data={{...data, date: dateSearch, appointmentTypes, doctors, nurses}} />}
-                                                fileName="cita_agenda.pdf"
-                                            >
-                                                Descargar
-                                            </PDFDownloadLink>
-                                            :
-                                            "Descargar"
-                                        }
-                                    </Button>
-                                </Grid>
+                                    </Grid>
 
                                 </Grid>
 
@@ -297,8 +295,8 @@ export default function Agenda() {
                             
                             {data.rows.length > 0 && !search &&
                                 <Box>
-                                    <Grid sx={{mb: 3}} container columnSpacing={3}>
-                                        <Grid item lg={4}>
+                                    <Grid container columnSpacing={3}>
+                                        <Grid item lg={4} xs={12} sx={{mb: 2}}>
 
                                             <Typography fontWeight="700" sx={{mb: 3}}>
                                                 Lista de citas disponibles:
@@ -306,8 +304,8 @@ export default function Agenda() {
                                             {data.rows.length > 0 &&
                                                 <Scrollbar
                                                     sx={{
-                                                        height: 320,
-                                                        '& .simplebar-content': { maxHeight: 320 ,height: 320, display: 'flex', flexDirection: 'column' }
+                                                        height: "auto",
+                                                        '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
                                                     }}
                                                 >
                                                 {data.rows.map((date, key) => {
@@ -346,24 +344,49 @@ export default function Agenda() {
                                             }
 
                                         </Grid>
-                                        <Grid item lg={8}>
-                                            <Grid sx={{mb: 1}} container columnSpacing={3}>
-                                                <Grid item lg={3}>
-                                                    <Typography color="primary" sx={{fontSize: 50}}>
-                                                        <i className='mdi mdi-alarm' />
-                                                    </Typography>
+                                        <Grid item lg={8} xs={12} sx={{mb: 2}}>
+                                            <Hidden mdDown>
+                                                <Grid sx={{mb: 1}} container columnSpacing={3}>
+                                                    <Grid item md={3}>
+                                                        <Typography color="primary" sx={{fontSize: 50}}>
+                                                            <i className='mdi mdi-alarm' />
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item md={4}>
+                                                        <Typography sx={{fontSize: 50, fontWeight: 700}}>
+                                                            {appoinmentSelected.foreignId} 
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item md={5}>
+                                                        <Typography sx={{fontSize: 50, fontWeight: 700}}>
+                                                            {moment(appoinmentSelected.hourAppointment).format("hh:mm")}
+                                                        </Typography>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid item lg={4}>
-                                                    <Typography sx={{fontSize: 50, fontWeight: 700}}>
-                                                        {appoinmentSelected.foreignId} 
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item lg={5}>
-                                                    <Typography sx={{fontSize: 50, fontWeight: 700}}>
-                                                        {moment(appoinmentSelected.hourAppointment).format("hh:mm")}
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
+                                            </Hidden>
+
+                                            <Hidden mdUp>
+                                                <>
+                                                    <Divider />
+                                                    <Grid sx={{mb: 1, pt: 3}} container columnSpacing={3}>
+                                                        <Grid item lg={3} xs={2}>
+                                                            <Typography color="primary" sx={{fontSize: 30}}>
+                                                                <i className='mdi mdi-alarm' />
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item lg={4} xs={5}>
+                                                            <Typography sx={{fontSize: 30, fontWeight: 700}}>
+                                                                {appoinmentSelected.foreignId} 
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item lg={5} xs={5}>
+                                                            <Typography sx={{fontSize: 30, fontWeight: 700}}>
+                                                                {moment(appoinmentSelected.hourAppointment).format("hh:mm")}
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                </>
+                                            </Hidden>
 
                                             <Typography>
                                                 <Typography component="span">
@@ -384,7 +407,8 @@ export default function Agenda() {
                                             </Box>
 
                                             <Typography sx={{mb: 2}}>
-                                                
+
+                                            <Hidden mdDown>
                                                 <Link component={RouterLink} to={"/dashboard/CITaS/historyByPatient/"+appoinmentSelected.patient.id} sx={{ textDecoration: "none", color: "#000" }}>
                                                     <Typography color="text.body" component="span" >
                                                         Paciente: <Typography component="span" sx={{fontWeight: 700}}>
@@ -392,6 +416,18 @@ export default function Agenda() {
                                                         </Typography>
                                                     </Typography>
                                                 </Link>
+                                            </Hidden>
+
+                                            <Hidden mdUp>
+                                                <Link component={RouterLink} to={"/dashboard/CITaS/historyByPatient/"+appoinmentSelected.patient.id} sx={{ textDecoration: "none", color: "#000" }}>
+                                                    <Typography color="text.body" component="h6" >
+                                                        Paciente
+                                                    </Typography>
+                                                    <Typography component="span" sx={{fontWeight: 700}}>
+                                                        {appoinmentSelected.patient.nombre+" "+appoinmentSelected.patient.apellido} (71 años) – ver
+                                                    </Typography>
+                                                </Link>
+                                            </Hidden>
                                                 
 
                                             </Typography>
@@ -438,12 +474,15 @@ export default function Agenda() {
                                 </Box>
                             }
 
+                        </CardContent>
                     </Card>
                 }
 
                 {loading &&
-                    <Card sx={{py: 3, px: 5}}>
-                        <Loader />
+                    <Card>
+                        <CardContent>  
+                            <Loader />
+                        </CardContent>
                     </Card>
                 }
             </Grid>
