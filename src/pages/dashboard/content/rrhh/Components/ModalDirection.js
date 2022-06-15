@@ -216,7 +216,7 @@ function ModalDirection(props) {
 
                 
                             <Grid container columnSpacing={3}>
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Estado
@@ -245,7 +245,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Municipio
@@ -275,7 +275,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={12}>
+                                <Grid sx={{my:1}} item md={12} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Parroquia
@@ -307,7 +307,7 @@ function ModalDirection(props) {
                                 </Grid>
 
                                 
-                                <Grid sx={{my:1}} item lg={12}>
+                                <Grid sx={{my:1}} item md={12} xs={12}>
                                     
                                     <TextField
                                         size='small'
@@ -324,7 +324,7 @@ function ModalDirection(props) {
                                 
                             </Grid>
 
-                            <Box sx={{mt: 3}}>
+                            <Box sx={{mt: 3, display: "flex"}}>
                                 <LoadingButton type="submit" loading={isSubmitting} disabled={(values.address === "" || values.parroquia === "" || parroquias.length === 0)} sx={{px:3, mx:2}} color="primary" variant="contained" size="large">
                                     Agregar
                                 </LoadingButton>

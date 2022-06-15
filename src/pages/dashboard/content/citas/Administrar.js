@@ -349,8 +349,8 @@ export default function AdministrarCita() {
 
             if(dataList.length > 0){
 
-                setdoctors(dataList[0].accountRoles);
-                setnurses(dataList[1].accountRoles);
+                setdoctors( dataList.find(item => item.roleId === 6).accountRoles);
+                setnurses(  dataList.find(item => item.roleId === 7).accountRoles);
 
                 // Tipo de paciente
                 axios.get(urlGetPatientType)
@@ -458,12 +458,12 @@ export default function AdministrarCita() {
                                 
                                 <Box>
                                     <Grid container columnSpacing={3}>
-                                        <Grid item lg={3} xs={4} sx={{mb: 2}}>
+                                        <Grid item lg={3} xs={6} sx={{mb: 2}}>
                                             <Button onClick={() => reset()} variant="outlined" fullWidth>
                                                 Nuevo
                                             </Button>
                                         </Grid>
-                                        <Grid item lg={3} xs={4} sx={{mb: 2}}>
+                                        <Grid item lg={3} xs={6} sx={{mb: 2}}>
                                             {dataToEdit !== null ?
                                                 <BlobProvider 
                                                     document={<CitaPdf data={{...dataToEdit, doctors, nurses}} />}
@@ -489,7 +489,7 @@ export default function AdministrarCita() {
                                                 </Button>
                                             }
                                         </Grid>
-                                        <Grid item lg={3} xs={4} sx={{mb: 2}}>
+                                        <Grid item lg={3} xs={12} sx={{mb: 2}}>
                                             <Button 
                                                 disabled={!permissions.imprime || typeForm === "create"} 
                                                 variant="contained" 
@@ -547,9 +547,13 @@ export default function AdministrarCita() {
                                     {!searchingData && !loading &&
                                         <div>
 
+                                            <Typography variant="h5" sx={{mb: 2}}>
+                                                Información de la cita
+                                            </Typography>
+
                                             <div>
                                                 <Grid container columnSpacing={3}>
-                                                    <Grid item lg={3}>
+                                                    <Grid item md={3} xs={12} sx={{mb: 2}}>
                                                         {appointmentTypes.length > 0 &&
                                                             <Stack spacing={3}>
                                                                 <ButtonGroup fullWidth aria-label="outlined button group">
@@ -579,27 +583,27 @@ export default function AdministrarCita() {
                                                             */
                                                         }
                                                     </Grid>
-                                                    <Grid item lg={2}>
+                                                    <Grid item md={2} xs={12} sx={{mb: 2}}>
                                                         <TextField
                                                             label="Id"
                                                             size="small"
-
+                                                            fullWidth
                                                             {...getFieldProps('foreignId')}
                                                             error={Boolean(touched.foreignId && errors.foreignId)}
                                                             helperText={touched.foreignId && errors.foreignId}
                                                         />
                                                     </Grid>
-                                                    <Grid item lg={2}>
+                                                    <Grid item md={2} xs={12} sx={{mb: 2}}>
                                                         <TextField
                                                             label="Núm. Siniestro"
                                                             size="small"
-
+                                                            fullWidth
                                                             {...getFieldProps('siniestroId')}
                                                             error={Boolean(touched.siniestroId && errors.siniestroId)}
                                                             helperText={touched.siniestroId && errors.siniestroId}
                                                         />
                                                     </Grid>
-                                                    <Grid item lg={3}>
+                                                    <Grid item md={3} xs={12} sx={{mb: 2}}>
                                                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                             <DatePicker
                                                                 label="Fecha Cita"
@@ -621,7 +625,7 @@ export default function AdministrarCita() {
                                                             />
                                                         </LocalizationProvider>
                                                     </Grid>
-                                                    <Grid item lg={2}>
+                                                    <Grid item md={2} xs={12} sx={{mb: 2}}>
                                                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                             <TimePicker
                                                                 label="Hora"
@@ -632,6 +636,7 @@ export default function AdministrarCita() {
                                                                 renderInput={(params) => <TextField 
                                                                                         {...params} 
                                                                                         size='small' 
+                                                                                        fullWidth
                                                                                         {...getFieldProps('hourAppointment')}
                                                                                         helperText={touched.hourAppointment && errors.hourAppointment} 
                                                                                         error={Boolean(touched.hourAppointment && errors.hourAppointment)} 
@@ -644,7 +649,7 @@ export default function AdministrarCita() {
 
                                             <div>
                                                 <Grid sx={{ my:3 }} container columnSpacing={3}>
-                                                    <Grid lg={3} item>
+                                                    <Grid sx={{mb: 2}} md={3} xs={12} item>
                                                         {direction === null &&
                                                             <Button sx={{py: 1.5}} onClick={() => setshowModalAddDirection(true)} variant="contained" color="secondary" fullWidth>
                                                                 Agregar dirección
@@ -657,7 +662,7 @@ export default function AdministrarCita() {
                                                             </Button>
                                                         }
                                                     </Grid>
-                                                    <Grid lg={9} item>
+                                                    <Grid sx={{mb: 2}} md={9} xs={12} item>
                                                         {direction === null &&
                                                             <div>
                                                                 <Alert severity="info">
@@ -669,7 +674,7 @@ export default function AdministrarCita() {
                                                         {direction !== null &&
                                                             <div>
                                                                 <Grid container columnSpacing={3}> 
-                                                                    <Grid item lg={2}>
+                                                                    <Grid item xs={6} md={2}>
                                                                         <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                             Estado
                                                                         </Typography>
@@ -677,7 +682,7 @@ export default function AdministrarCita() {
                                                                             {direction.estado.name}
                                                                         </Typography>
                                                                     </Grid>
-                                                                    <Grid item lg={4}>
+                                                                    <Grid item xs={6} md={4}>
                                                                         <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                             Municipio
                                                                         </Typography>
@@ -686,7 +691,7 @@ export default function AdministrarCita() {
                                                                         </Typography>
                                                                     </Grid>
                                                                     {direction.ciudad &&
-                                                                        <Grid item lg={3}>
+                                                                        <Grid item xs={6} md={3}>
                                                                             <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                                 Ciudad
                                                                             </Typography>
@@ -695,7 +700,7 @@ export default function AdministrarCita() {
                                                                             </Typography>
                                                                         </Grid>
                                                                     }
-                                                                    <Grid item lg={3}>
+                                                                    <Grid item xs={6} md={3}>
                                                                         <Typography sx={{ mb:0, fontWeight: "bold" }}>
                                                                             Parroquia
                                                                         </Typography>
@@ -899,92 +904,96 @@ export default function AdministrarCita() {
                                             </Typography>
 
                                             <Grid container columnSpacing={3}>
-                                                <Grid item lg={6}>
-                                                    <Card sx={{p: 3}}>
-                                                        <Typography sx={{mb: 3}} align="center" variant="h6">
-                                                            Seleccionar Médico
-                                                        </Typography>
+                                                <Grid sx={{mb: 2}} item md={6} xs={12}>
+                                                    <Card>
+                                                        <CardContent>
+                                                            <Typography sx={{mb: 3}} align="center" variant="h6">
+                                                                Seleccionar Médico
+                                                            </Typography>
 
-                                                        <List>
-                                                            {doctors.length > 0 &&
-                                                                
-                                                                    <Scrollbar
-                                                                        sx={{
-                                                                            height: "auto",
-                                                                            maxHeight: 320,
-                                                                            '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
-                                                                        }}
-                                                                    >
-                                                                    {doctors.map((doctor, key) => {
-                                                                        let item = doctor;
-                                                                        if(item.account.employeeFiles.length > 0){
+                                                            <List>
+                                                                {doctors.length > 0 &&
+                                                                    
+                                                                        <Scrollbar
+                                                                            sx={{
+                                                                                height: "auto",
+                                                                                maxHeight: 320,
+                                                                                '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                            }}
+                                                                        >
+                                                                        {doctors.map((doctor, key) => {
+                                                                            let item = doctor;
+                                                                            if(item.account.employeeFiles.length > 0){
+                                                                                return <ListItem 
+                                                                                        // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
+                                                                                        disablePadding
+                                                                                        key={key}
+                                                                                    >
+                                                                                        <ListItemButton 
+                                                                                            selected={doctorsSelected.includes(item.account.employeeFiles[0].id)} 
+                                                                                            onClick={() => toggleValueToList(item.account.employeeFiles[0].id, doctorsSelected, setdoctorsSelected)}
+                                                                                        >
+                                                                                            <Typography color="primary" component="span" sx={{mr: 2}}>
+                                                                                                <i className='mdi mdi-checkbox-blank-circle' />
+                                                                                            </Typography>
+                                                                                            <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`}  />
+                                                                                        </ListItemButton>
+                                                                                    </ListItem>
+                                                                            }
+
+                                                                            return ""
+                                                                        })}
+                                                                        </Scrollbar>
+                                                                    
+                                                                }
+                                                            </List>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                                <Grid sx={{mb: 2}} item md={6} xs={12}>
+                                                    <Card>
+                                                        <CardContent>   
+                                                            <Typography sx={{mb: 3}} align="center" variant="h6">
+                                                                Enfermera
+                                                            </Typography>
+
+                                                            <List>
+                                                                {nurses.length > 0 &&
+                                                                    
+                                                                        <Scrollbar
+                                                                            sx={{
+                                                                                height: "auto",
+                                                                                maxHeight: 320,
+                                                                                '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
+                                                                            }}
+                                                                        >
+                                                                        {nurses.map((nurse, key) => {
+                                                                            let item = nurse;
+                                                                            if(item.account.employeeFiles.length > 0){
                                                                             return <ListItem 
                                                                                     // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
                                                                                     disablePadding
                                                                                     key={key}
                                                                                 >
                                                                                     <ListItemButton 
-                                                                                        selected={doctorsSelected.includes(item.account.employeeFiles[0].id)} 
-                                                                                        onClick={() => toggleValueToList(item.account.employeeFiles[0].id, doctorsSelected, setdoctorsSelected)}
+                                                                                        selected={nursesSelected.includes(item.account.employeeFiles[0].id)} 
+                                                                                        onClick={() => toggleValueToList(item.account.employeeFiles[0].id, nursesSelected, setnursesSelected)}
                                                                                     >
                                                                                         <Typography color="primary" component="span" sx={{mr: 2}}>
                                                                                             <i className='mdi mdi-checkbox-blank-circle' />
                                                                                         </Typography>
-                                                                                        <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`}  />
+                                                                                        <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`} />
                                                                                     </ListItemButton>
                                                                                 </ListItem>
-                                                                        }
+                                                                            }
 
-                                                                        return ""
-                                                                    })}
-                                                                    </Scrollbar>
-                                                                
-                                                            }
-                                                        </List>
-                                                    </Card>
-                                                </Grid>
-                                                <Grid item lg={6}>
-                                                    <Card sx={{p: 3}}>
-                                                        <Typography sx={{mb: 3}} align="center" variant="h6">
-                                                            Enfermera
-                                                        </Typography>
-
-                                                        <List>
-                                                            {nurses.length > 0 &&
-                                                                
-                                                                    <Scrollbar
-                                                                        sx={{
-                                                                            height: "auto",
-                                                                            maxHeight: 320,
-                                                                            '& .simplebar-content': { maxHeight: 320 ,height: "auto", display: 'flex', flexDirection: 'column' }
-                                                                        }}
-                                                                    >
-                                                                    {nurses.map((nurse, key) => {
-                                                                        let item = nurse;
-                                                                        if(item.account.employeeFiles.length > 0){
-                                                                        return <ListItem 
-                                                                                // sx={{ background: membershipsSelected.includes("Drafts") ? "primary" : "" }} 
-                                                                                disablePadding
-                                                                                key={key}
-                                                                            >
-                                                                                <ListItemButton 
-                                                                                    selected={nursesSelected.includes(item.account.employeeFiles[0].id)} 
-                                                                                    onClick={() => toggleValueToList(item.account.employeeFiles[0].id, nursesSelected, setnursesSelected)}
-                                                                                >
-                                                                                    <Typography color="primary" component="span" sx={{mr: 2}}>
-                                                                                        <i className='mdi mdi-checkbox-blank-circle' />
-                                                                                    </Typography>
-                                                                                    <ListItemText primary={`${item.account.employeeFiles[0].fisrtName} ${item.account.employeeFiles[0].lastName}`} />
-                                                                                </ListItemButton>
-                                                                            </ListItem>
-                                                                        }
-
-                                                                        return ""
-                                                                    })}
-                                                                    </Scrollbar>
-                                                                
-                                                            }
-                                                        </List>
+                                                                            return ""
+                                                                        })}
+                                                                        </Scrollbar>
+                                                                    
+                                                                }
+                                                            </List>
+                                                        </CardContent>
                                                     </Card>
                                                 </Grid>
                                             </Grid>

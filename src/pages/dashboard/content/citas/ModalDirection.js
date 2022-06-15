@@ -233,7 +233,7 @@ function ModalDirection(props) {
 
                 
                             <Grid container columnSpacing={3}>
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Estado
@@ -262,7 +262,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Ciudad
@@ -292,7 +292,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Municipio
@@ -322,7 +322,7 @@ function ModalDirection(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Parroquia

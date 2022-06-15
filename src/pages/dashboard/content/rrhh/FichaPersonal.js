@@ -1,7 +1,7 @@
 import {useState} from "react"
 import * as Yup from 'yup';
 // material
-import { Radio, LinearProgress, Alert , Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { CardContent, Hidden, Radio, LinearProgress, Alert , Input, ButtonGroup, RadioGroup, FormControlLabel, InputBase, Box, Stack, Grid, Container, Typography, Card, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { styled, alpha } from '@mui/material/styles';
@@ -423,483 +423,484 @@ export default function FichaPersonal() {
             <FormikProvider value={formik}>
                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                     <Grid sx={{ pb: 3 }} item xs={12}>
-                        <Card sx={{py: 3, px: 5}}>
+                        <Card>
+                            <CardContent>
+                                {alertSuccessMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="success">
+                                        {alertSuccessMessage}
+                                    </Alert>
+                                }
 
-                            {alertSuccessMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="success">
-                                    {alertSuccessMessage}
-                                </Alert>
-                            }
+                                {alertErrorMessage !== "" &&
+                                    <Alert sx={{mb: 3}} severity="error">
+                                        {alertErrorMessage}
+                                    </Alert>
+                                }
 
-                            {alertErrorMessage !== "" &&
-                                <Alert sx={{mb: 3}} severity="error">
-                                    {alertErrorMessage}
-                                </Alert>
-                            }
-
-                            <Grid sx={{mb: 3}} container columnSpacing={3}>
-                                <Grid item lg={3}>
-                                    <Button 
-                                        onClick={() => resetAllForm()} 
-                                        variant="outlined" 
-                                        fullWidth
-                                    >
-                                        Nuevo
-                                    </Button>
-                                </Grid>
-                                <Grid item lg={3}>
-                                    {dataToEdit !== null ?
-                                        <BlobProvider 
-                                            document={<FichaPersonalPrint data={dataToEdit} />}
+                                <Grid container columnSpacing={3}>
+                                    <Grid item md={3} xs={6} sx={{mb: 2}}>
+                                        <Button 
+                                            onClick={() => resetAllForm()} 
+                                            variant="outlined" 
+                                            fullWidth
                                         >
-                                            {({ blob, url, loading, error }) => {
-                                                console.log(blob);
-                                                // Do whatever you need with blob here
-                                                return <Button 
-                                                    onClick={() => printFile(blob)} 
-                                                    disabled={!permissions.imprime || typeForm === "create"} 
-                                                    variant="contained" fullWidth
-                                                >
-                                                    Imprimir
-                                                </Button>
-                                            }}
-                                        </BlobProvider>
-                                    :
+                                            Nuevo
+                                        </Button>
+                                    </Grid>
+                                    <Grid item md={3} xs={6} sx={{mb: 2}}>
+                                        {dataToEdit !== null ?
+                                            <BlobProvider 
+                                                document={<FichaPersonalPrint data={dataToEdit} />}
+                                            >
+                                                {({ blob, url, loading, error }) => {
+                                                    console.log(blob);
+                                                    // Do whatever you need with blob here
+                                                    return <Button 
+                                                        onClick={() => printFile(blob)} 
+                                                        disabled={!permissions.imprime || typeForm === "create"} 
+                                                        variant="contained" fullWidth
+                                                    >
+                                                        Imprimir
+                                                    </Button>
+                                                }}
+                                            </BlobProvider>
+                                        :
+                                            <Button 
+                                                disabled={!permissions.imprime || typeForm === "create"} 
+                                                variant="contained" fullWidth
+                                            >
+                                                Imprimir
+                                            </Button>
+                                        }
+                                    </Grid>
+                                    <Grid item md={3} xs={12} sx={{mb: 2}}>
                                         <Button 
                                             disabled={!permissions.imprime || typeForm === "create"} 
-                                            variant="contained" fullWidth
-                                        >
-                                            Imprimir
+                                            variant="contained" 
+                                            color="secondary" 
+                                            fullWidth    
+                                            className={dataToEdit !== null ? "pdf-download-link" : ""}
+                                        >   
+                                            {dataToEdit !== null ?
+                                                <PDFDownloadLink
+                                                    document={<FichaPersonalPrint data={dataToEdit} />}
+                                                    fileName="ficha-personal.pdf"
+                                                >
+                                                    Descargar
+                                                </PDFDownloadLink>
+                                                :
+                                                "Descargar"
+                                            }
                                         </Button>
-                                    }
-                                </Grid>
-                                <Grid item lg={3}>
-                                    <Button 
-                                        disabled={!permissions.imprime || typeForm === "create"} 
-                                        variant="contained" 
-                                        color="secondary" 
-                                        fullWidth    
-                                        className={dataToEdit !== null ? "pdf-download-link" : ""}
-                                    >   
-                                        {dataToEdit !== null ?
-                                            <PDFDownloadLink
-                                                document={<FichaPersonalPrint data={dataToEdit} />}
-                                                fileName="ficha-personal.pdf"
-                                            >
-                                                Descargar
-                                            </PDFDownloadLink>
-                                            :
-                                            "Descargar"
-                                        }
-                                    </Button>
-                                </Grid>
-                                <Grid item lg={3}>
-                                    <Grid container columnSpacing={1}>
-                                        <Grid item lg={9}>
-                                            <TextField
-                                                label="Buscar"
-                                                size="small"
-                                                value={textSearchData}
-                                                onChange={(e) => settextSearchData(e.target.value)}
-                                                disabled={!permissions.consulta}
-                                            />
-                                        </Grid>
-                                        <Grid item lg={3}>
-                                            <LoadingButton 
-                                                variant="contained" 
-                                                color="primary"
-                                                type="button"
-                                                sx={{ minWidth: "100%", width: "100%"}}
-                                                onClick={() => searchPersonalData(setFieldValue)}
-                                                loading={searchingData}
-                                                disabled={textSearchData === "" || !permissions.consulta}
-                                            >
-                                                <i className="mdi mdi-magnify" />
-                                            </LoadingButton>
+                                    </Grid>
+                                    <Grid item md={3} xs={12} sx={{mb: 2}}>
+                                        <Grid container columnSpacing={1}>
+                                            <Grid item md={9} xs={8}>
+                                                <TextField
+                                                    label="Buscar"
+                                                    size="small"
+                                                    value={textSearchData}
+                                                    onChange={(e) => settextSearchData(e.target.value)}
+                                                    disabled={!permissions.consulta}
+                                                />
+                                            </Grid>
+                                            <Grid item md={3} xs={4}>
+                                                <LoadingButton 
+                                                    variant="contained" 
+                                                    color="primary"
+                                                    type="button"
+                                                    sx={{ minWidth: "100%", width: "100%"}}
+                                                    onClick={() => searchPersonalData(setFieldValue)}
+                                                    loading={searchingData}
+                                                    disabled={textSearchData === "" || !permissions.consulta}
+                                                >
+                                                    <i className="mdi mdi-magnify" />
+                                                </LoadingButton>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
 
-                            {!searchingData &&
-                                <div>
-                                    <Grid container columnSpacing={3}>
-                                        <Grid item lg={5}>
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                <ButtonGroup fullWidth aria-label="outlined button group">
-                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "H")} variant={values.gender === "H"  ? "contained" : "outlined"}>Hombre</Button>
-                                                    <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "M")} variant={values.gender === "M"  ? "contained" : "outlined"}>Mujer</Button>
-                                                </ButtonGroup>
-                                            </Stack>
-
-                                            {touched.gender && errors.gender &&
-                                                <Alert sx={{mb: 3}} severity="error">
-                                                    {errors.gender}
-                                                </Alert>
-                                            }
-
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                    <TextField
-                                                        size='small'
-                                                        fullWidth
-                                                        autoComplete="name"
-                                                        type="text"
-                                                        label="Nombres"
-
-                                                        {...getFieldProps('name')}
-                                                        error={Boolean(touched.name && errors.name)}
-                                                        helperText={touched.name && errors.name}
-                                                    />         
-                                                </Stack>
-
+                                {!searchingData &&
+                                    <div>
+                                        <Grid container columnSpacing={3}>
+                                            <Grid item md={5} xs={12}>
                                                 <Stack spacing={3} sx={{my: 2}}>
-                                                    <TextField
-                                                        size='small'
-                                                        fullWidth
-                                                        autoComplete="lastname"
-                                                        type="text"
-                                                        label="Apellidos"
-
-                                                        {...getFieldProps('lastname')}
-                                                        error={Boolean(touched.lastname && errors.lastname)}
-                                                        helperText={touched.lastname && errors.lastname}
-                                                    />
+                                                    <ButtonGroup fullWidth aria-label="outlined button group">
+                                                        <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "H")} variant={values.gender === "H"  ? "contained" : "outlined"}>Hombre</Button>
+                                                        <Button sx={{py: .81}} onClick={() => setFieldValue("gender", "M")} variant={values.gender === "M"  ? "contained" : "outlined"}>Mujer</Button>
+                                                    </ButtonGroup>
                                                 </Stack>
 
-                                                {civilStatusTypesList.length > 0 &&
-                                                    <Stack spacing={3} sx={{my: 2}}>
-                                                        <ButtonGroup fullWidth aria-label="outlined button group">
-                                                        
-                                                            {civilStatusTypesList.map((item, key) => {
-                                                                let datacivilstatusitem = item;
-                                                                return  <Button key={key} onClick={() => setFieldValue("civilStatus", item.id)} variant={values.civilStatus === item.id  ? "contained" : "outlined"} sx={{py: .81}}>
-                                                                            {datacivilstatusitem.name}
-                                                                        </Button>
-                                                            })}
-                                                            
-                                                        </ButtonGroup>
-                                                    </Stack>
-                                                }
-
-                                                {touched.civilStatus && errors.civilStatus &&
+                                                {touched.gender && errors.gender &&
                                                     <Alert sx={{mb: 3}} severity="error">
-                                                        {errors.civilStatus}
+                                                        {errors.gender}
                                                     </Alert>
                                                 }
 
                                                 <Stack spacing={3} sx={{my: 2}}>
-                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <DatePicker
-                                                            label="Fecha Nacimiento"
-                                                            value={formik.values.birthday}
-                                                            onChange={(value) => {
-                                                                formik.setFieldValue('birthday', value);
-                                                            }}
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            autoComplete="name"
+                                                            type="text"
+                                                            label="Nombres"
+
+                                                            {...getFieldProps('name')}
+                                                            error={Boolean(touched.name && errors.name)}
+                                                            helperText={touched.name && errors.name}
+                                                        />         
+                                                    </Stack>
+
+                                                    <Stack spacing={3} sx={{my: 2}}>
+                                                        <TextField
+                                                            size='small'
+                                                            fullWidth
+                                                            autoComplete="lastname"
+                                                            type="text"
+                                                            label="Apellidos"
+
+                                                            {...getFieldProps('lastname')}
+                                                            error={Boolean(touched.lastname && errors.lastname)}
+                                                            helperText={touched.lastname && errors.lastname}
+                                                        />
+                                                    </Stack>
+
+                                                    {civilStatusTypesList.length > 0 &&
+                                                        <Stack spacing={3} sx={{my: 2}}>
+                                                            <ButtonGroup fullWidth aria-label="outlined button group">
                                                             
-                                                            renderInput={
-                                                                (params) => <TextField 
-                                                                            fullWidth
-                                                                            size='small' 
-                                                                            {...getFieldProps('birthday')}
-                                                                            helperText={touched.birthday && errors.birthday} 
-                                                                            error={Boolean(touched.birthday && errors.birthday)} 
-                                                                            {...params} 
-                                                                />
-                                                            }
-                                                        />
-                                                    </LocalizationProvider>
+                                                                {civilStatusTypesList.map((item, key) => {
+                                                                    let datacivilstatusitem = item;
+                                                                    return  <Button key={key} onClick={() => setFieldValue("civilStatus", item.id)} variant={values.civilStatus === item.id  ? "contained" : "outlined"} sx={{py: .81}}>
+                                                                                {datacivilstatusitem.name}
+                                                                            </Button>
+                                                                })}
+                                                                
+                                                            </ButtonGroup>
+                                                        </Stack>
+                                                    }
+
+                                                    {touched.civilStatus && errors.civilStatus &&
+                                                        <Alert sx={{mb: 3}} severity="error">
+                                                            {errors.civilStatus}
+                                                        </Alert>
+                                                    }
+
+                                                    <Stack spacing={3} sx={{my: 2}}>
+                                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                            <DatePicker
+                                                                label="Fecha Nacimiento"
+                                                                value={formik.values.birthday}
+                                                                onChange={(value) => {
+                                                                    formik.setFieldValue('birthday', value);
+                                                                }}
+                                                                
+                                                                renderInput={
+                                                                    (params) => <TextField 
+                                                                                fullWidth
+                                                                                size='small' 
+                                                                                {...getFieldProps('birthday')}
+                                                                                helperText={touched.birthday && errors.birthday} 
+                                                                                error={Boolean(touched.birthday && errors.birthday)} 
+                                                                                {...params} 
+                                                                    />
+                                                                }
+                                                            />
+                                                        </LocalizationProvider>
+                                                    </Stack>
+                                            </Grid>
+
+                                            <Grid item md={4} xs={12}>
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <TextField
+                                                        size='small'
+                                                        fullWidth
+                                                        autoComplete="email"
+                                                        type="email"
+                                                        label="Email"
+                                                        {...getFieldProps('email')}
+                                                        error={Boolean(touched.email && errors.email)}
+                                                        helperText={touched.email && errors.email}
+                                                    />
                                                 </Stack>
-                                        </Grid>
 
-                                        <Grid item lg={4}>
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                <TextField
-                                                    size='small'
-                                                    fullWidth
-                                                    autoComplete="email"
-                                                    type="email"
-                                                    label="Email"
-                                                    {...getFieldProps('email')}
-                                                    error={Boolean(touched.email && errors.email)}
-                                                    helperText={touched.email && errors.email}
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <Grid container columnSpacing={1}>
+                                                        <Grid item xs={9}>
+                                                            <TextField
+                                                                size='small'
+                                                                fullWidth
+                                                                autoComplete="phoneNumber"
+                                                                type="text"
+                                                                label="Teléfono"
+                                                                {...getFieldProps('phoneNumber')}
+                                                                error={Boolean(touched.phoneNumber && errors.phoneNumber)}
+                                                                helperText={touched.phoneNumber && errors.phoneNumber}
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Select
+                                                                size="small"
+                                                                fullWidth
+                                                                value={typePhone}
+                                                                onChange={(e) => setTypePhone(e.target.value)}
+                                                                displayEmpty
+                                                                inputProps={{ 'aria-label': 'Without label' }}
+                                                            >
+                                                                {phoneTypesList.map((item, key) => {
+                                                                    let itemPhoneType = item;
+                                                                    return  <MenuItem key={key} value={item.id}>
+                                                                                {item.name}
+                                                                            </MenuItem>
+                                                                })}
+                                                            </Select>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Stack>
+
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <Grid container columnSpacing={1}>
+                                                        <Grid item xs={9}>
+                                                            <TextField
+                                                                size='small'
+                                                                fullWidth
+                                                                autoComplete="cedula"
+                                                                type="text"
+                                                                label="Cédula"
+                                                                {...getFieldProps('cedula')}
+                                                                error={Boolean(touched.cedula && errors.cedula)}
+                                                                helperText={touched.cedula && errors.cedula}
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Select
+                                                                size="small"
+                                                                fullWidth
+                                                                value={typeDni}
+                                                                onChange={(e) => settypeDni(e.target.value)}
+                                                                displayEmpty
+                                                                inputProps={{ 'aria-label': 'Without label' }}
+                                                            >
+                                                                <MenuItem value="V">V</MenuItem>
+                                                                <MenuItem value="E">E</MenuItem>
+                                                            </Select>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Stack>
+
+
+                                                <UploaderImg 
+                                                    file={photoCedula}
+                                                    id="uploader-foto-cedula" 
+                                                    onChange={(data) => setphotoCedula(data)} 
+                                                    showPreview 
+                                                    returnFileType="base64" 
+                                                    renderType="Linear" 
+                                                    placeholder="Adjuntar cédula"
                                                 />
-                                            </Stack>
 
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                <Grid container columnSpacing={1}>
-                                                    <Grid item xs={9}>
-                                                        <TextField
-                                                            size='small'
-                                                            fullWidth
-                                                            autoComplete="phoneNumber"
-                                                            type="text"
-                                                            label="Teléfono"
-                                                            {...getFieldProps('phoneNumber')}
-                                                            error={Boolean(touched.phoneNumber && errors.phoneNumber)}
-                                                            helperText={touched.phoneNumber && errors.phoneNumber}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={3}>
-                                                        <Select
-                                                            size="small"
-                                                            fullWidth
-                                                            value={typePhone}
-                                                            onChange={(e) => setTypePhone(e.target.value)}
-                                                            displayEmpty
-                                                            inputProps={{ 'aria-label': 'Without label' }}
-                                                        >
-                                                            {phoneTypesList.map((item, key) => {
-                                                                let itemPhoneType = item;
-                                                                return  <MenuItem key={key} value={item.id}>
-                                                                            {item.name}
-                                                                        </MenuItem>
-                                                            })}
-                                                        </Select>
-                                                    </Grid>
+
+                                                <Stack spacing={3} sx={{my: 2}}>
+                                                    <ButtonGroup fullWidth aria-label="outlined button group">
+                                                        <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(true)}   variant={selectedStatusAccount ? "contained" : "outlined"}>Activo</Button>
+                                                        <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(false)} variant={!selectedStatusAccount ? "contained" : "outlined"}>Inactivo</Button>
+                                                    </ButtonGroup>
+                                                </Stack>
+                                            </Grid>
+
+                                            <Grid item md={3} xs={12}>
+                                                <UploaderImg 
+                                                    file={photo}
+                                                    id="uploader-foto-ficha" 
+                                                    onChange={(data) => setphoto(data)} 
+                                                    showPreview 
+                                                    returnFileType="base64" 
+                                                    renderType="Stack" 
+                                                    placeholder="Explorar"
+                                                />
+                                            </Grid>
+                                        </Grid>
+
+                                        <div id="content-list-data-user">
+                                            <Grid container columnSpacing={3}>
+                                                <Grid md={3} xs={12} item sx={{ mb:2 }}>
+                                                    {cargo === null &&
+                                                        <Button sx={{py: 1.5}} onClick={() => setshowModalAddCargo(true)} variant="contained" color="secondary" fullWidth>
+                                                            Agregar cargo
+                                                        </Button>
+                                                    }
+
+                                                    {cargo !== null &&
+                                                        <Button sx={{py: 1.5}} onClick={() => setcargo(null)} variant="contained" color="primary" fullWidth>
+                                                            Eliminar cargo
+                                                        </Button>
+                                                    }
                                                 </Grid>
-                                            </Stack>
+                                                <Grid md={9} xs={12} item sx={{ mb:2 }}>
+                                                    {cargo === null &&
+                                                        <div>
+                                                            <Alert severity="info">
+                                                                No se ha seleccionado un cargo
+                                                            </Alert>
+                                                        </div>
+                                                    }
 
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                <Grid container columnSpacing={1}>
-                                                    <Grid item xs={9}>
-                                                        <TextField
-                                                            size='small'
-                                                            fullWidth
-                                                            autoComplete="cedula"
-                                                            type="text"
-                                                            label="Cédula"
-                                                            {...getFieldProps('cedula')}
-                                                            error={Boolean(touched.cedula && errors.cedula)}
-                                                            helperText={touched.cedula && errors.cedula}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={3}>
-                                                        <Select
-                                                            size="small"
-                                                            fullWidth
-                                                            value={typeDni}
-                                                            onChange={(e) => settypeDni(e.target.value)}
-                                                            displayEmpty
-                                                            inputProps={{ 'aria-label': 'Without label' }}
-                                                        >
-                                                            <MenuItem value="V">V</MenuItem>
-                                                            <MenuItem value="E">E</MenuItem>
-                                                        </Select>
-                                                    </Grid>
+                                                    {cargo !== null &&
+                                                        <div>
+                                                            <Grid container columnSpacing={3}> 
+                                                                <Grid item md={4} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Dirección
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {cargo.direccion.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item md={4} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Departamento
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {cargo.departamento.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item md={4} xs={12}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Cargo
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {cargo.cargo.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </div>
+                                                    }
                                                 </Grid>
-                                            </Stack>
+                                            </Grid>
 
+                                            <Grid container columnSpacing={3}>
+                                                <Grid md={3} xs={12} item sx={{ mb:2 }}>
+                                                    {direction === null &&
+                                                        <Button sx={{py: 1.5}} onClick={() => setshowModalAddDirection(true)} variant="contained" color="secondary" fullWidth>
+                                                            Agregar dirección
+                                                        </Button>
+                                                    }
 
-                                            <UploaderImg 
-                                                file={photoCedula}
-                                                id="uploader-foto-cedula" 
-                                                onChange={(data) => setphotoCedula(data)} 
-                                                showPreview 
-                                                returnFileType="base64" 
-                                                renderType="Linear" 
-                                                placeholder="Adjuntar cédula"
+                                                    {direction !== null &&
+                                                        <Button sx={{py: 1.5}} onClick={() => setdirection(null)} variant="contained" color="primary" fullWidth>
+                                                            Eliminar dirección
+                                                        </Button>
+                                                    }
+                                                </Grid>
+                                                <Grid md={9} xs={12} item sx={{ mb:2 }}>
+                                                    {direction === null &&
+                                                        <div>
+                                                            <Alert severity="info">
+                                                                No se ha seleccionado una dirección
+                                                            </Alert>
+                                                        </div>
+                                                    }
+
+                                                    {direction !== null &&
+                                                        <div>
+                                                            <Grid container columnSpacing={3}> 
+                                                                <Grid item md={2} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Estado
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {direction.estado.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item md={3} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Municipio
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {direction.municipio.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item md={3} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Parroquia
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {direction.parroquia.name}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item md={3} xs={6}>
+                                                                    <Typography sx={{ mb:0, fontWeight: "bold" }}>
+                                                                        Dirección
+                                                                    </Typography>
+                                                                    <Typography>
+                                                                        {direction.address}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </div>
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                        </div>
+
+                                        <Stack spacing={3} sx={{mt: 3}}>
+                                            <TextField
+                                                size='small'
+                                                fullWidth
+                                                autoComplete="observation"
+                                                type="text"
+                                                label="Observación"
+                                                multiline
+                                                minRows={4}
+                                                maxRows={6}
+                                                {...getFieldProps('observation')}
+                                                error={Boolean(touched.observation && errors.observation)}
+                                                helperText={touched.observation && errors.observation}
                                             />
+                                        </Stack>
 
+                                        {progress > 0 &&
+                                            <LinearProgress sx={{mt: 3}} color="success" variant="determinate" value={progress} />
+                                        }
 
-                                            <Stack spacing={3} sx={{my: 2}}>
-                                                <ButtonGroup fullWidth aria-label="outlined button group">
-                                                    <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(true)}   variant={selectedStatusAccount ? "contained" : "outlined"}>Activo</Button>
-                                                    <Button sx={{py: .81}} onClick={() => setselectedStatusAccount(false)} variant={!selectedStatusAccount ? "contained" : "outlined"}>Inactivo</Button>
-                                                </ButtonGroup>
-                                            </Stack>
-                                        </Grid>
+                                        {typeForm === "create" &&
+                                            <LoadingButton
+                                                fullWidth
+                                                size="large"
+                                                type="submit"
+                                                variant="contained"
+                                                loading={sending}
+                                                color="primary"
+                                                sx={{mt: 3}}
+                                                disabled={!permissions.crea}
+                                            >
+                                                Guardar
+                                            </LoadingButton>
+                                        }
 
-                                        <Grid item lg={3}>
-                                            <UploaderImg 
-                                                file={photo}
-                                                id="uploader-foto-ficha" 
-                                                onChange={(data) => setphoto(data)} 
-                                                showPreview 
-                                                returnFileType="base64" 
-                                                renderType="Stack" 
-                                                placeholder="Explorar"
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                        {typeForm === "edit" &&
+                                            <LoadingButton
+                                                fullWidth
+                                                size="large"
+                                                type="submit"
+                                                variant="contained"
+                                                loading={sending}
+                                                color="secondary"
+                                                sx={{mt: 3}}
+                                                disabled={!permissions.edita}
+                                            >
+                                                Editar
+                                            </LoadingButton>
+                                        }
 
-                                    <div id="content-list-data-user">
-                                        <Grid sx={{ my:3 }} container columnSpacing={3}>
-                                            <Grid lg={3} item>
-                                                {cargo === null &&
-                                                    <Button sx={{py: 1.5}} onClick={() => setshowModalAddCargo(true)} variant="contained" color="secondary" fullWidth>
-                                                        Agregar cargo
-                                                    </Button>
-                                                }
-
-                                                {cargo !== null &&
-                                                    <Button sx={{py: 1.5}} onClick={() => setcargo(null)} variant="contained" color="primary" fullWidth>
-                                                        Eliminar cargo
-                                                    </Button>
-                                                }
-                                            </Grid>
-                                            <Grid lg={9} item>
-                                                {cargo === null &&
-                                                    <div>
-                                                        <Alert severity="info">
-                                                            No se ha seleccionado un cargo
-                                                        </Alert>
-                                                    </div>
-                                                }
-
-                                                {cargo !== null &&
-                                                    <div>
-                                                        <Grid container columnSpacing={3}> 
-                                                            <Grid item lg={4}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Dirección
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {cargo.direccion.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={4}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Departamento
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {cargo.departamento.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={4}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Cargo
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {cargo.cargo.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </div>
-                                                }
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid sx={{ my:3 }} container columnSpacing={3}>
-                                            <Grid lg={3} item>
-                                                {direction === null &&
-                                                    <Button sx={{py: 1.5}} onClick={() => setshowModalAddDirection(true)} variant="contained" color="secondary" fullWidth>
-                                                        Agregar dirección
-                                                    </Button>
-                                                }
-
-                                                {direction !== null &&
-                                                    <Button sx={{py: 1.5}} onClick={() => setdirection(null)} variant="contained" color="primary" fullWidth>
-                                                        Eliminar dirección
-                                                    </Button>
-                                                }
-                                            </Grid>
-                                            <Grid lg={9} item>
-                                                {direction === null &&
-                                                    <div>
-                                                        <Alert severity="info">
-                                                            No se ha seleccionado una dirección
-                                                        </Alert>
-                                                    </div>
-                                                }
-
-                                                {direction !== null &&
-                                                    <div>
-                                                        <Grid container columnSpacing={3}> 
-                                                            <Grid item lg={2}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Estado
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {direction.estado.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={3}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Municipio
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {direction.municipio.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={3}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Parroquia
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {direction.parroquia.name}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item lg={3}>
-                                                                <Typography sx={{ mb:0, fontWeight: "bold" }}>
-                                                                    Dirección
-                                                                </Typography>
-                                                                <Typography>
-                                                                    {direction.address}
-                                                                </Typography>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </div>
-                                                }
-                                            </Grid>
-                                        </Grid>
                                     </div>
+                                }
 
-                                    <Stack spacing={3} sx={{mt: 3}}>
-                                        <TextField
-                                            size='small'
-                                            fullWidth
-                                            autoComplete="observation"
-                                            type="text"
-                                            label="Observación"
-                                            multiline
-                                            minRows={4}
-                                            maxRows={6}
-                                            {...getFieldProps('observation')}
-                                            error={Boolean(touched.observation && errors.observation)}
-                                            helperText={touched.observation && errors.observation}
-                                        />
-                                    </Stack>
-
-                                    {progress > 0 &&
-                                        <LinearProgress sx={{mt: 3}} color="success" variant="determinate" value={progress} />
-                                    }
-
-                                    {typeForm === "create" &&
-                                        <LoadingButton
-                                            fullWidth
-                                            size="large"
-                                            type="submit"
-                                            variant="contained"
-                                            loading={sending}
-                                            color="primary"
-                                            sx={{mt: 3}}
-                                            disabled={!permissions.crea}
-                                        >
-                                            Guardar
-                                        </LoadingButton>
-                                    }
-
-                                    {typeForm === "edit" &&
-                                        <LoadingButton
-                                            fullWidth
-                                            size="large"
-                                            type="submit"
-                                            variant="contained"
-                                            loading={sending}
-                                            color="secondary"
-                                            sx={{mt: 3}}
-                                            disabled={!permissions.edita}
-                                        >
-                                            Editar
-                                        </LoadingButton>
-                                    }
-
-                                </div>
-                            }
-
-                            {searchingData &&
-                                <Loader />
-                            }
+                                {searchingData &&
+                                    <Loader />
+                                }
+                            </CardContent>
                         </Card>
                     </Grid>
                 </Form>

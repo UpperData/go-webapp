@@ -200,7 +200,7 @@ function Cargo(props) {
                     <FormikProvider value={formik}>
                         <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                             <Grid container columnSpacing={3}>
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Dirección
@@ -228,7 +228,7 @@ function Cargo(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={6}>
+                                <Grid sx={{my:1}} item md={6} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Departamento
@@ -257,7 +257,7 @@ function Cargo(props) {
                                     </FormControl>
                                 </Grid>
 
-                                <Grid sx={{my:1}} item lg={12}>
+                                <Grid sx={{my:1}} item md={12} xs={12}>
                                     <FormControl fullWidth size="small">
                                         <InputLabel id="demo-simple-select-autowidth-label">
                                             Cargo
@@ -313,7 +313,7 @@ function Cargo(props) {
                                 */}
                             </Grid>
 
-                            <Box sx={{mt: 3}}>
+                            <Box sx={{mt: 3, display: "flex"}}>
                                 <LoadingButton type="submit" loading={isSubmitting} disabled={(values.cargo === "" || subDepartmentList.length === 0 || cargoList.length === 0)} sx={{px:3, mx:2}} color="primary" variant="contained" size="large">
                                     Agregar
                                 </LoadingButton>
