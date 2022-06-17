@@ -344,21 +344,21 @@ export default function Agenda() {
                                             }
 
                                         </Grid>
-                                        <Grid item lg={8} xs={12} sx={{mb: 2}}>
+                                        <Grid item lg={8} xs={12} sx={{mb: 3}}>
                                             <Hidden mdDown>
-                                                <Grid sx={{mb: 1}} container columnSpacing={3}>
-                                                    <Grid item md={3}>
-                                                        <Typography color="primary" sx={{fontSize: 50}}>
+                                                <Grid sx={{mb: 2}} container columnSpacing={3}>
+                                                    <Grid item md={2}>
+                                                        <Typography color="primary" sx={{fontSize: 40}}>
                                                             <i className='mdi mdi-alarm' />
                                                         </Typography>
                                                     </Grid>
-                                                    <Grid item md={4}>
-                                                        <Typography sx={{fontSize: 50, fontWeight: 700}}>
+                                                    <Grid item md={5}>
+                                                        <Typography sx={{fontSize: 40, fontWeight: 700}}>
                                                             {appoinmentSelected.foreignId} 
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item md={5}>
-                                                        <Typography sx={{fontSize: 50, fontWeight: 700}}>
+                                                        <Typography sx={{fontSize: 40, fontWeight: 700}} align="right">
                                                             {moment(appoinmentSelected.hourAppointment).format("hh:mm")}
                                                         </Typography>
                                                     </Grid>

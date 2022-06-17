@@ -95,6 +95,10 @@ const styles = StyleSheet.create({
     marginBottom: 30
     // marginLeft: 'auto',
     // marginRight: 'auto'
+  },
+  photo: {
+    width: 100,
+    marginLeft: 15
   }
 });
 
@@ -118,47 +122,58 @@ export function FichaPersonalPrint(props) {
 
             {props.data !== null &&
                 <View>
-                  <View style={{ borderBottom: '1px solid #000', marginBottom: 15,  flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
 
-                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
-                      <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
-                        Nombre:
-                      </Text>
-                      <Text style={{ ...styles.text, marginLeft: 3 }}>
-                        {props.data !== null && (props.data.fisrtName+" "+props.data.lastName)}
-                      </Text>
+                  <View style={{ flexDirection: 'row', alignItems: "center", justifyContent: "space-between", marginBottom: 15 }}>
+                    <View style={{ borderBottom: '1px solid #000', height: 19,  flexDirection: 'row', justifyContent: "space-between", flex: 1 }}>
+
+                      <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                          Nombre:
+                        </Text>
+                        <Text style={{ ...styles.text, marginLeft: 3 }}>
+                          {props.data !== null && (props.data.fisrtName+" "+props.data.lastName)}
+                        </Text>
+                      </View>
+
+                      {props.data.documentId !== null && props.data.documentId.hasOwnProperty("birthday") &&
+                        <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                          <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                            Edad:
+                          </Text>
+                          <Text style={{ ...styles.text, marginLeft: 3 }}>
+                            {props.data !== null && actualDay.diff(moment(props.data.documentId.birthday.split("T")[0], "YYYY-MM-DD"), "years") + " años"}
+                          </Text>
+                        </View>
+                      }
+
+                      <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                          Sexo:
+                        </Text>
+                        <Text style={{ ...styles.text, marginLeft: 3 }}>
+                          {props.data.documentId.gender === "M" ? "Mujer" : "Hombre"}
+                        </Text>
+                      </View>
+
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
-                      <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
-                        Edad:
-                      </Text>
-                      <Text style={{ ...styles.text, marginLeft: 3 }}>
-                        {props.data !== null && actualDay.diff(moment(props.data.documentId.birthday.split("T")[0], "YYYY-MM-DD"), "years") + " años"}
-                      </Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
-                      <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
-                        Sexo:
-                      </Text>
-                      <Text style={{ ...styles.text, marginLeft: 3 }}>
-                        {props.data.documentId.gender === "M" ? "Mujer" : "Hombre"}
-                      </Text>
-                    </View>
-
+                    {props.data.photo &&
+                      < Image style={styles.photo} src={`data:image/jpeg;base64,`+props.data.photo} />
+                    }
                   </View>
 
                   <View style={{ borderBottom: '1px solid #000', marginBottom: 20,  flexDirection: 'row', alignItems: "center", justifyContent: "flex-start" }}>
                     
-                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
-                      <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
-                        Estado civil:
-                      </Text>
-                      <Text style={{ ...styles.text, marginLeft: 3 }}>
-                        {props.data !== null && (props.data.documentId.civilStatus.name)}
-                      </Text>
-                    </View>
+                    {props.data.documentId !== null && props.data.documentId.hasOwnProperty("birthday") &&
+                      <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                        <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                          Estado civil:
+                        </Text>
+                        <Text style={{ ...styles.text, marginLeft: 3 }}>
+                          {props.data !== null && (props.data.documentId.civilStatus.name)}
+                        </Text>
+                      </View>
+                    }
 
                     <View style={{ flexDirection: 'row', alignItems: "center", marginLeft: 12 }}>
                       <Text style={{ ...styles.text, fontFamily: "Helvetica-Bold" }}>

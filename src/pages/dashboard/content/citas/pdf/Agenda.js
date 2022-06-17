@@ -60,14 +60,28 @@ const styles = StyleSheet.create({
     borderLeft: '1px solid #000',
   },
   td: {
-    width: "25%",
+    // width: "20%",
+    height: "100%",
     borderRight: '1px solid #000',
     padding: 5,
+    flex: 1
   },
   th: {
-    width: "25%",
+    // width: "20%",
     borderRight: '1px solid #000',
     padding: 5,
+    flex: 1
+  },
+  tdw: {
+    // width: "20%",
+    height: "100%",
+    borderRight: '1px solid #000',
+    padding: 5
+  },
+  thw: {
+    // width: "20%",
+    borderRight: '1px solid #000',
+    padding: 5
   },
   logo: {
     width: 200,
@@ -108,10 +122,10 @@ export function AgendaPdf(props) {
                   </View>
 
                   <View style={{ ...styles.theader, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
-                    <Text style={{ ...styles.th, ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                    <Text style={{ ...styles.thw, ...styles.text, fontFamily: "Helvetica-Bold", width: 50, maxWidth: 50 }}>
                       Hora
                     </Text>
-                    <Text style={{ ...styles.th, ...styles.text, fontFamily: "Helvetica-Bold" }}>
+                    <Text style={{ ...styles.thw, ...styles.text, fontFamily: "Helvetica-Bold", width: 75, maxWidth: 75 }}>
                       Tipo
                     </Text>
                     <Text style={{ ...styles.th, ...styles.text, fontFamily: "Helvetica-Bold" }}>
@@ -119,6 +133,9 @@ export function AgendaPdf(props) {
                     </Text>
                     <Text style={{ ...styles.th, ...styles.text, fontFamily: "Helvetica-Bold" }}>
                       Paciente
+                    </Text>
+                    <Text style={{ ...styles.thw, ...styles.text, fontFamily: "Helvetica-Bold", width: 150, maxWidth: 150 }}>
+                      Dirección
                     </Text>
                   </View>
                   {Array.isArray(props.data.rows) && props.data.rows.length > 0 && props.data.rows.map((item, key) => {
@@ -128,10 +145,10 @@ export function AgendaPdf(props) {
                     doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
 
                     return  <View key={key} style={{ ...styles.tcell, flexDirection: 'row', alignItems: "center", justifyContent: "space-between" }}>
-                              <Text style={{ ...styles.td, ...styles.text, fontFamily: "Helvetica" }}>
+                              <Text style={{ ...styles.tdw, ...styles.text, fontFamily: "Helvetica", width: 50, maxWidth: 50 }}>
                                 {moment(item.hourAppointment).format("hh:mm")}
                               </Text>
-                              <Text style={{ ...styles.td, ...styles.text, fontFamily: "Helvetica" }}>
+                              <Text style={{ ...styles.tdw, ...styles.text, fontFamily: "Helvetica", width: 75, maxWidth: 75 }}>
                                 {props.data.appointmentTypes.find(type => type.id === Number(item.appointmentTypeId)).name}
                               </Text>
                               <Text style={{ ...styles.td, ...styles.text, fontFamily: "Helvetica" }}>
@@ -139,6 +156,9 @@ export function AgendaPdf(props) {
                               </Text>
                               <Text style={{ ...styles.td, ...styles.text, fontFamily: "Helvetica" }}>
                                 {item.patient.nombre+" "+item.patient.apellido}
+                              </Text>
+                              <Text style={{ ...styles.tdw, ...styles.text, fontFamily: "Helvetica", width: 150, maxWidth: 150 }}>
+                                {item.address.estado.name+","+item.address.ciudad.name+","+item.address.address}
                               </Text>
                             </View>
                   })}
