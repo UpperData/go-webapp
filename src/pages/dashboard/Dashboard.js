@@ -28,6 +28,7 @@ import Agenda from './content/citas/Agenda';
 import PatientHistory from './content/citas/PatientHistory';
 import Membership from './content/usuarios-y-permisos/Membership';
 import Bills from './content/finanzas/Recibos';
+import Cargos from './content/rrhh/Cargos';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -130,6 +131,7 @@ function Dashboard() {
 
                 {/* rrhh */}
                 <Route path="rRHH/EmPloyEE/FILE"            element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
+                <Route path="RRhH/Cargos"                   element={<PrivateRoute><Cargos /></PrivateRoute>}/>
 
                 {/* citas */}
                 <Route path="appointment/admin"                 element={<PrivateRoute><AdministrarCita /></PrivateRoute>}/>
