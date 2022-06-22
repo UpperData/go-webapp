@@ -29,6 +29,7 @@ import PatientHistory from './content/citas/PatientHistory';
 import Membership from './content/usuarios-y-permisos/Membership';
 import Bills from './content/finanzas/Recibos';
 import Cargos from './content/rrhh/Cargos';
+import AccountGroups from './content/usuarios-y-permisos/AccountGroups';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -123,10 +124,10 @@ function Dashboard() {
                 {/* users */}
                 <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
                 <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
-                    <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                    <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                    {/* <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
+                <Route path="GroUP/aCCOunT"    element={<PrivateRoute><AccountGroups /></PrivateRoute>}/>
                 <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
-                <Route path="account/activate/"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                    {/* <Route path="account/activate/"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
                 <Route path="Permissions/MeMbership/"    element={<PrivateRoute><Membership /></PrivateRoute>}/>
 
                 {/* rrhh */}

@@ -128,6 +128,7 @@ function Cargos() {
             }
         }).catch((err) => {
             console.error(err);
+            setsending(false);
         });
     }
 
@@ -210,6 +211,7 @@ function Cargos() {
             }
         }).catch((err) => {
             console.error(err);
+            setsending(false);
         });
     }
 
