@@ -30,6 +30,7 @@ import Membership from './content/usuarios-y-permisos/Membership';
 import Bills from './content/finanzas/Recibos';
 import Cargos from './content/rrhh/Cargos';
 import AccountGroups from './content/usuarios-y-permisos/AccountGroups';
+import CurrencyExchange from './content/finanzas/CurrencyExchange';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -146,6 +147,7 @@ function Dashboard() {
             
                 {/* finanzas */}
                 <Route path="finace/vouCHer/"           element={<PrivateRoute><Bills /></PrivateRoute>}/>
+                <Route path="FinaNces/ChangeType"       element={<PrivateRoute><CurrencyExchange /></PrivateRoute>}/>
             </Route>
             
             <Route path="*"       element={<Page404 />} />
