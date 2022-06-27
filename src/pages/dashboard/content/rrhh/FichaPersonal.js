@@ -694,6 +694,8 @@ export default function FichaPersonal() {
                                                     file={photoCedula}
                                                     id="uploader-foto-cedula" 
                                                     onChange={(data) => setphotoCedula(data)} 
+                                                    maxsize={2}
+                                                    accept=".jpg, .jpeg, .png"
                                                     showPreview 
                                                     returnFileType="base64" 
                                                     renderType="Linear" 
@@ -715,6 +717,8 @@ export default function FichaPersonal() {
                                                     id="uploader-foto-ficha" 
                                                     onChange={(data) => setphoto(data)} 
                                                     showPreview 
+                                                    maxsize={2}
+                                                    accept=".jpg, .jpeg, .png"
                                                     returnFileType="base64" 
                                                     renderType="Stack" 
                                                     placeholder="Explorar"

@@ -10,6 +10,9 @@ import { AuthProvider } from './auth/AuthProvider'
 import { GoogleReCaptchaProvider} from 'react-google-recaptcha-v3';
 
 import './styles/app.scss'
+import 'react-toastify/dist/ReactToastify.css';
+
+import { ToastContainer } from 'react-toastify';
 
 // store
 import store from './store/store';
@@ -26,7 +29,7 @@ ReactDOM.render(
     <AuthProvider>
       <HelmetProvider>
         <BrowserRouter>
-
+          <ToastContainer />
           <App />
           
         </BrowserRouter>

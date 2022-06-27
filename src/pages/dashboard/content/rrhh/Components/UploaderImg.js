@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { Modal, Input,Box, Typography, Card, TextField,  Grid, ButtonGroup, Button, FormControl, Stack } from '@mui/material';
 
+import { toast } from 'react-toastify';
+
 import { Icon } from '@iconify/react';
 import Delete from "@iconify/icons-ic/delete"
 
@@ -150,24 +152,31 @@ function UploaderImg(props) {
             // Eventhandler for file input. 
             let type = filesSelected[0].name.split('.').pop();
 
-            /*
                 if((props.accept && props.accept.includes(type)) || props.accept === undefined){
-                console.log('formato aceptado');
-            */
-                // console.log(filesSelected[0].size);
-
-                // if((props.size && filesSelected[0].size <= Number(props.size) * 1024) || props.size === undefined){
+                    console.log('formato aceptado');
                 
-                convertTo(filesSelected);
+                    // console.log(filesSelected[0].size);
 
-                /*
+                    let maxsize = props.maxsize;
+                    console.log(maxsize);
+
+                    if((maxsize && filesSelected[0].size <= maxsize) || maxsize === undefined){
+                        
+                        console.log(filesSelected[0].size);
+                        convertTo(filesSelected);
+                    
                     }else{
-                        seterrorMessage('El tamaño de archivo es demasiado grande');
-                        setpreview(null);
-                        props.setBinary(null);
-                        props.onChange(null);
+
+                        toast.error("El tamaño del archivo es superior al permitido 2mb");
+                        // seterrorMessage('El tamaño de archivo es demasiado grande');
+                        // setpreview(null);
+                        // props.setBinary(null);
+                        // props.onChange(null);
                     }
-                */
+                }else{
+                    toast.error(`Formato ${type} no permitido para este archivo.`);
+                }
+                
 
             /*
                 }else{
