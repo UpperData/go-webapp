@@ -689,7 +689,6 @@ export default function FichaPersonal() {
                                                     </Grid>
                                                 </Stack>
 
-
                                                 <UploaderImg 
                                                     file={photoCedula}
                                                     id="uploader-foto-cedula" 
@@ -701,7 +700,6 @@ export default function FichaPersonal() {
                                                     renderType="Linear" 
                                                     placeholder="Adjuntar cédula"
                                                 />
-
 
                                                 <Stack spacing={3} sx={{my: 2}}>
                                                     <ButtonGroup fullWidth aria-label="outlined button group">

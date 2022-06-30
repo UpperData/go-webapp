@@ -153,21 +153,26 @@ function UploaderImg(props) {
             let type = filesSelected[0].name.split('.').pop();
 
                 if((props.accept && props.accept.includes(type)) || props.accept === undefined){
-                    console.log('formato aceptado');
                 
                     // console.log(filesSelected[0].size);
 
                     let maxsize = props.maxsize;
-                    console.log(maxsize);
+                    // console.log(maxsize * 1024);
+                    // console.log(filesSelected[0].size);
 
-                    if((maxsize && filesSelected[0].size <= maxsize) || maxsize === undefined){
+                    let sizeInBytes = filesSelected[0].size;
+                    let sizeInMB = (sizeInBytes / (1024*1024)).toFixed(2);
+                    // console.log("size: "+sizeInMB);
+
+                    if((maxsize && sizeInMB <= maxsize) || maxsize === undefined){
                         
+                        // console.log('convirtiendo archivo');
                         console.log(filesSelected[0].size);
                         convertTo(filesSelected);
                     
                     }else{
 
-                        toast.error("El tamaño del archivo es superior al permitido 2mb");
+                        toast.error("El tamaño del archivo es superior al permitido (2mb)");
                         // seterrorMessage('El tamaño de archivo es demasiado grande');
                         // setpreview(null);
                         // props.setBinary(null);

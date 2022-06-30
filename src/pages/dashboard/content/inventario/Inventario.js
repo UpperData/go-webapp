@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 
 // material
-import { Box, Grid, Stack, ButtonGroup, Container, Typography, Alert,  Card, CardContent, Hidden, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Box, Grid, Stack, ButtonGroup, Tooltip, Container, Typography, Alert,  Card, CardContent, Hidden, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 import { LoadingButton } from '@mui/lab';
 import { alpha, styled } from '@mui/material/styles';
@@ -52,6 +52,7 @@ function Inventario() {
     const [loading, setloading]                         = useState(true);
     const [search, setsearch]                           = useState(true);
     const [data, setdata]                               = useState(null);
+    const [list, setlist]                               = useState([]);
 
     const [openSaveChanges, setopenSaveChanges]         = useState(false);
     const [sending, setsending]                         = useState(false);
@@ -180,6 +181,9 @@ function Inventario() {
             setitemToEdit(null);
 
             setdata(res);
+            setlist(res.items);
+
+            setsending(false);
             setloading(false);
 
         }).catch((err) => {
@@ -219,7 +223,7 @@ function Inventario() {
             list[index]     = item;
 
 
-            setdata(list);
+            setlist(list);
             setcount(count * 20);
         }
     }
@@ -339,9 +343,12 @@ function Inventario() {
             renderCell: (cellValues) => {
                 let data = cellValues;
                 let price = data.row.price;
-                return <Typography>
-                    $ {price}
-                </Typography>
+                let dolarValue = data.row.dolarValue;
+                return <Tooltip title={`USD $${dolarValue}`} placement="top">
+                            <Typography>
+                                Bs. {price}
+                            </Typography>
+                        </Tooltip>
             }
         },
         { 
@@ -435,10 +442,12 @@ function Inventario() {
             // config
         ).then((res) => {
 
-            setsending(false);
+            // setsending(false);
             setchangeInputStock(false);
 
             setalertSuccessMessage(res.data.message);
+            getList();
+
             setTimeout(() => {
                 setalertSuccessMessage("");
             }, 2000);
@@ -474,6 +483,8 @@ function Inventario() {
             editItemData(dataToEdit);
         }
     }
+
+    let items = list !== null ? list.filter(item => item.hasOwnProperty("id")) : [];
 
     return (
         <Page title="Inventario | CEMA">
@@ -584,7 +595,6 @@ function Inventario() {
                 </RootStyle>
             </Modal>
             
-
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
                     <Card>
@@ -596,32 +606,36 @@ function Inventario() {
                                         Nuevo Artículo
                                     </Button>
                                 </Grid>
-                                <Grid sx={{mb: 2}} item md={4} xs={12}>
-                                    {data !== null
-                                    ?
-                                        <ExcelFile
-                                            filename="inventario"
-                                            element={
-                                                <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="normal">
-                                                    Descargar Hoja de Inventario
-                                                </Button>
-                                            }
-                                        >
-                                            <ExcelSheet data={data} name="Inventario">
-                                                <ExcelColumn label="Producto" value={(col) => col.article.name} />
-                                                <ExcelColumn label="Existencia" value="existence" />
-                                                <ExcelColumn label="Precio (usd)" value="price" />
-                                                <ExcelColumn label="Stock mínimo" value="minStock" />
-                                                <ExcelColumn label="Almacén" value="almacen" />
-                                                <ExcelColumn label="Transito" value="asignados" />
-                                            </ExcelSheet>
-                                        </ExcelFile>
-                                    :
-                                        <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                            Descargar Hoja de Inventario
-                                        </Button>
-                                    }
-                                </Grid>
+                                
+                                    <Grid sx={{mb: 2}} item md={4} xs={12}>
+                                        {data !== null
+                                        ?
+                                            <ExcelFile
+                                                filename="inventario"
+                                                element={
+                                                    <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="normal">
+                                                        Descargar Hoja de Inventario
+                                                    </Button>
+                                                }
+                                            >
+                                                <ExcelSheet data={list} name="Inventario">
+                                                    
+                                                        <ExcelColumn label="Producto" value={(col) => col.article.name} />
+                                                        <ExcelColumn label="Existencia" value="existence" />
+                                                        <ExcelColumn label="Precio (usd)" value="price" />
+                                                        <ExcelColumn label="Stock mínimo" value="minStock" />
+                                                        <ExcelColumn label="Almacén" value="almacen" />
+                                                        <ExcelColumn label="Transito" value="asignados" />
+                                                    
+                                                </ExcelSheet>
+                                            </ExcelFile>
+                                        :
+                                            <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
+                                                Descargar Hoja de Inventario
+                                            </Button>
+                                        }
+                                    </Grid>
+                                
                             </Grid>
 
                             {alertSuccessMessage !== "" &&
@@ -642,11 +656,26 @@ function Inventario() {
                                     <Alert sx={{mb: 3}} severity="info">
                                         Puede modificar el valor de los elementos haciendo click.
                                     </Alert>
+
+                                    <Grid container columnSpacing={3} justifyContent="end">
+                                        <Grid md="auto" item xs={12} sx={{mb: 2}}>
+                                            Total 
+                                            <Typography sx={{fontWeight: "bold", ml: 1}} component="span">
+                                                Bs {data.bolivaresTotalInventory}
+                                            </Typography> 
+                                        </Grid>
+                                        <Grid md="auto" item xs={12} sx={{mb: 2}}>
+                                            Total 
+                                            <Typography sx={{fontWeight: "bold", ml: 1}} component="span">
+                                                USD ${data.dolarTotalInventory}
+                                            </Typography> 
+                                        </Grid>
+                                    </Grid>
                                     
                                     <div style={{display: 'table', tableLayout:'fixed', width:'100%'}}> 
                                         <DataGrid
                                             sx={{mb:4}}
-                                            rows={data}
+                                            rows={items}
                                             columns={columns}
 
                                             // onCellEditStop={(params) => handleCellEditStop(params)}
@@ -661,7 +690,7 @@ function Inventario() {
                                             pageSize={6}
                                             rowsPerPageOptions={[6,10,20]}
                                             // autoPageSize
-                                            rowCount={data.length}
+                                            rowCount={items.length}
 
                                             disableColumnFilter
                                             disableColumnMenu

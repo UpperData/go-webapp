@@ -74,7 +74,7 @@ function Cargos() {
             case "cargo":
                 url = urlCreateCargo;
                 data = {
-                    departamentId:  selectedDepartment,
+                    departamentId:  selectedDirection,
                     name:           cargo
                 };
                 break;
@@ -388,7 +388,7 @@ function Cargos() {
                             <Grid item xs={12} md={6} sx={{my: 2}}>
                                 <Stack sx={{mb: 2}}>
                                     <CargoSelect 
-                                        id={selectedDepartment}
+                                        id={selectedDirection}
                                         disabled={sending}
                                         reset={resetCargo} 
                                         cancelReset={() => cancelReset("cargo")}

@@ -111,7 +111,7 @@ function CurrencyExchange() {
             sortable: false,
             renderCell: (cellValues) => {
                 let dataItem = cellValues.row.value;
-                return <span>USD <Typography variant="span" sx={{fontWeight: "bold"}}>$ {dataItem}</Typography></span>
+                return <span>Bs. <Typography variant="span" sx={{fontWeight: "bold"}}>{dataItem}</Typography></span>
             }
         },
         { 
@@ -188,7 +188,7 @@ function CurrencyExchange() {
                                             </Grid>
                                             <Grid item md={5} xs={12} sx={{mb: 2}}>
                                                 <Typography align="center" component="h2" variant="h2" sx={{fontWeight: "bold", mb: 0}}>
-                                                    USD ${currentType !== null ? currentType.value : ""}
+                                                    Bs. {currentType !== null ? currentType.value : ""}
                                                 </Typography>
                                                 <Typography align="center" component="h2" variant="h5" sx={{fontWeight: "bold", mb: 0}}>
                                                     Cambio actual
