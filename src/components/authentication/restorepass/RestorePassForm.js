@@ -83,11 +83,22 @@ export default function RestorePassForm() {
                 setsecretQuestions(res.data.data);
                 setvalidEmail(true);
                 setverify(false);
+              }else{
+                setverify(false);
+                setvalidEmail(false);
+                setalertErrorMessage(res.data.data.message);
               }
 
           }).catch((err) => {
-                let error = err.response;
-                console.log(error);
+              let error = err.response;
+              if(error){
+                  if(error.data){
+                      console.error(error.data.data);
+                      setalertErrorMessage(error.data.data.message);
+                  }
+              }
+
+              setverify(false);
           });
         }
     }).catch((err) => {
@@ -162,6 +173,7 @@ export default function RestorePassForm() {
 
       } catch(e) {
         setformErrors(e);
+        console.log("Ha ocurrido un error al validar usuario");
       }
     }
   });
