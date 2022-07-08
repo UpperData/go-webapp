@@ -153,9 +153,9 @@ export default function RestorePassForm() {
         }).then((res) => {
 
             setsending(false);
-            if(res.data.data !== null){
-              if(res.data.data.result){
-                setalertSuccessMessage(res.data.data.message);
+            if(res.data !== null){
+              if(res.data.result){
+                setalertSuccessMessage(res.data.message);
                 setsuccess(true);
               }
             }
