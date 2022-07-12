@@ -10,6 +10,7 @@ export const handleLogin = (data) => dispatch => {
 
 export const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem("role");
     delete axios.defaults.headers.common["Authorization"];
 
     return dispatch => {

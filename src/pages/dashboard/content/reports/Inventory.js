@@ -18,7 +18,7 @@ import Loader from '../../../../components/Loader/Loader';
 import { PDFDownloadLink, BlobProvider } from "@react-pdf/renderer";
 
 import ExportExcel from "react-export-excel"
-import { AppointmentsPdf } from './pdf/Appointments';
+import { InventoryPdf } from './pdf/Inventory';
 
 const ExcelFile     = ExportExcel.ExcelFile;
 const ExcelSheet    = ExportExcel.ExcelSheet;
@@ -82,9 +82,14 @@ function Inventory() {
             let url = types[appointmenttype].url;
             axios.get(url).then((res) => {
                 console.log(res);
-
-                setdata(res);
-                setsearch(false);
+                
+                if(Array.isArray(res)){
+                    setdata(res);
+                    setsearch(false);
+                }else{
+                    setdata(res.rows);
+                    setsearch(false);
+                }
 
             }).catch((err) => {
                 console.error(err);
@@ -203,48 +208,7 @@ function Inventory() {
                                             })}
                                         </Select>
                                     </FormControl>
-                                </Grid>
-                                {/* 
-                                <Grid item md={4} sx={{ mb:2 }}>
-                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <DatePicker
-                                            label="Desde"
-                                            value={dateFrom}
-                                            onChange={(value) => changeDateFrom(value)}
-                                            renderInput={
-                                                (params) => <TextField 
-                                                            fullWidth
-                                                            size='small' 
-                                                            // {...getFieldProps('dateAppointment')}
-                                                            // helperText={touched.dateAppointment && errors.dateAppointment} 
-                                                            // error={Boolean(touched.dateAppointment && errors.dateAppointment)} 
-                                                            {...params} 
-                                                />
-                                            }
-                                        />
-                                    </LocalizationProvider>
-                                </Grid>
-                                <Grid item md={4} sx={{ mb:2 }}>
-                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <DatePicker
-                                            label="Hasta"
-                                            value={dateTo}
-                                            onChange={(value) => setdateTo(value)}
-                                            shouldDisableDate={(date) => isBefore(date, new Date(dateFrom))}
-                                            renderInput={
-                                                (params) => <TextField 
-                                                            fullWidth
-                                                            size='small' 
-                                                            // {...getFieldProps('dateAppointment')}
-                                                            // helperText={touched.dateAppointment && errors.dateAppointment} 
-                                                            // error={Boolean(touched.dateAppointment && errors.dateAppointment)} 
-                                                            {...params} 
-                                                />
-                                            }
-                                        />
-                                    </LocalizationProvider>
-                                </Grid>
-                                */}
+                                </Grid>       
                             </Grid>
 
                             {appointmenttype === "" &&
@@ -261,42 +225,37 @@ function Inventory() {
                                             <Grid justifyContent="end"  container columnSpacing={3}> 
                                                 <Grid item md={3} sx={{ mb:2 }}>
                                                     <ExcelFile
-                                                        filename="Reporte de citas"
+                                                        filename={`Reporte de inventario ${types[appointmenttype].name}`}
                                                         element={
                                                             <Button variant="contained" fullWidth color="primary">
                                                                 Descargar Excel
                                                             </Button>
                                                         }
                                                     >
-                                                        <ExcelSheet data={data.rows} name={`Reporte de citas desde: ${moment(new Date(dateFrom)).format("DD/MM/YYYY")} hasta: ${moment(new Date(dateTo)).format("DD/MM/YYYY")}`}>
+                                                        <ExcelSheet data={data} name={`Reporte de inventario ${types[appointmenttype].name}`}>
                                                             
-                                                            <ExcelColumn label="#" value="id" />
-                                                            <ExcelColumn label="Fecha" value={(col)     => moment(col.fecha).format("DD/MM/YYYY")} />
-                                                            <ExcelColumn label="Hora" value={(col)      => moment(col.hora).format("hh:mm A")} />    
-                                                            <ExcelColumn label="Nombre del paciente" value={(col)  => col.patient.nombre+" "+ col.patient.apellido} />
+                                                            <ExcelColumn label="Artículo"   value={(col)        => col.article.name} />
+                                                            <ExcelColumn label="Precio"     value={(col)        => col.price} />
+                                                            <ExcelColumn label="Existencia" value={(col)        => col.existence} />    
+                                                            <ExcelColumn label="Min stock"  value={(col)        => col.minStock} />
                                                                                                                     
                                                         </ExcelSheet>
                                                     </ExcelFile>
                                                 </Grid>
                                                 <Grid item md={3} sx={{ mb:2 }}>
-                                                    {
-                                                    /*
-                                                    dateFrom && dateTo &&
-                                                        <Button 
-                                                            variant="contained" 
-                                                            color="primary" 
-                                                            fullWidth    
-                                                            className={data !== null ? "pdf-download-link" : ""}
-                                                        >   
-                                                            <PDFDownloadLink
-                                                                document={<AppointmentsPdf data={{ rows: data.rows, from: dateFrom, to: dateTo, appointment: types[appointmenttype] }} />}
-                                                                fileName="reporte_de_citas.pdf"
-                                                            >
-                                                                Descargar Pdf
-                                                            </PDFDownloadLink>
-                                                        </Button>
-                                                      */
-                                                    }
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="primary" 
+                                                        fullWidth    
+                                                        className={data !== null ? "pdf-download-link" : ""}
+                                                    >   
+                                                        <PDFDownloadLink
+                                                            document={<InventoryPdf data={{ rows: data, appointment: types[appointmenttype] }} />}
+                                                            fileName="inventario.pdf"
+                                                        >
+                                                            Descargar Pdf
+                                                        </PDFDownloadLink>
+                                                    </Button>
                                                 </Grid>
                                             </Grid>
 
