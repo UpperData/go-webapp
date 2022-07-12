@@ -73,7 +73,7 @@ export default function FichaPersonal() {
     let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
     let permissions                             = getPermissions(location, MenuPermissionList);
 
-    console.log("Permissions:", permissions);
+    // console.log("Permissions:", permissions);
 
     const LoginSchema =     Yup.object().shape({
 
@@ -169,7 +169,7 @@ export default function FichaPersonal() {
                 }
 
                 console.log(data);
-                setsending(true);
+                // setsending(true);
 
                 const config = {
                     onUploadProgress: progressEvent => {
@@ -241,8 +241,9 @@ export default function FichaPersonal() {
 
                 }else if(typeForm === "edit"){
 
-                    data.id = idToEdit;
+                    data.id = dataToEdit.id;
 
+                    
                     axios.put(
                         urlEdit,
                         data,
@@ -286,6 +287,7 @@ export default function FichaPersonal() {
                             // return Promise.reject(err.response.data.data);
                         }
                     });
+                    
 
                 }
                 
@@ -300,7 +302,7 @@ export default function FichaPersonal() {
 
     const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
     // console.log(errors);
-    console.log(permissions);
+    // console.log(permissions);
 
     // ---------------------------------------- formik ----------------------------------
 
