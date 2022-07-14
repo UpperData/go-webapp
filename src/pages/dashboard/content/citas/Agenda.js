@@ -147,13 +147,13 @@ export default function Agenda() {
 
     if(appoinmentSelected !== null){
         if(doctors !== null && nurses !== null){
-            console.log(doctors);
-            doctorInDateSelected = doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
+            // console.log(doctors);
+            doctorInDateSelected = doctors.find(doctor => doctor.account.employeeFiles.length > 0 && doctor.account.employeeFiles[0] && Number(doctor.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.doctor.employeeId));
             if(doctorInDateSelected !== undefined){
                 doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
             }
 
-            nurseInDateSelected = nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.nurses.employeeId));
+            nurseInDateSelected = nurses.find(nurse => nurse.account.employeeFiles.length > 0 && nurse.account.employeeFiles[0] && Number(nurse.account.employeeFiles[0].id) === Number(appoinmentSelected.medialPersonal.nurses.employeeId));
             if(nurseInDateSelected !== undefined){
                 nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
             }

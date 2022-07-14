@@ -59,19 +59,20 @@ const styles = StyleSheet.create({
 
 export function CitaPdf(props) {
 
-  console.log("pdf props", props.data);
-
   let actualDay = moment();
 
-  
   let doctorInDateSelected    = "";
-  doctorInDateSelected = props.data.doctors.find(doctor => Number(doctor.account.employeeFiles[0].id) === Number(props.data.medialPersonal.doctor.employeeId));
-  doctorInDateSelected = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
+  doctorInDateSelected        = props.data.doctors.find(doctor => doctor.account.employeeFiles.length > 0 && doctor.account.employeeFiles[0] && (Number(doctor.account.employeeFiles[0].id) === Number(props.data.medialPersonal.doctor.employeeId)));
+  if(doctorInDateSelected !== undefined){
+    doctorInDateSelected        = doctorInDateSelected.account.employeeFiles[0].fisrtName+" "+doctorInDateSelected.account.employeeFiles[0].lastName;
+  }
 
-  let nurseInDateSelected    = "";
-  nurseInDateSelected = props.data.nurses.find(nurse => Number(nurse.account.employeeFiles[0].id) === Number(props.data.medialPersonal.nurses.employeeId));
-  nurseInDateSelected = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
-
+  let nurseInDateSelected     = "";
+  nurseInDateSelected         = props.data.nurses.find(nurse => nurse.account.employeeFiles.length > 0 && nurse.account.employeeFiles[0] && (Number(nurse.account.employeeFiles[0].id) === Number(props.data.medialPersonal.nurses.employeeId)));
+  if(nurseInDateSelected !== undefined){
+    nurseInDateSelected         = nurseInDateSelected.account.employeeFiles[0].fisrtName+" "+nurseInDateSelected.account.employeeFiles[0].lastName;
+  }
+  
   return (
     <Document>
       <Page size="A4" style={styles.page}>

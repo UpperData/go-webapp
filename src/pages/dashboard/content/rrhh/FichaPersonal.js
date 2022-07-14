@@ -169,7 +169,7 @@ export default function FichaPersonal() {
                 }
 
                 console.log(data);
-                // setsending(true);
+                setsending(true);
 
                 const config = {
                     onUploadProgress: progressEvent => {
