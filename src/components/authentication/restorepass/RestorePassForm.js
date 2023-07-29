@@ -236,7 +236,7 @@ export default function RestorePassForm() {
                       onClick={() => validateEmail(values.email)}
                       type="button"
                       loading={verify}
-                      disabled={captchaTkn === ""}
+                      // disabled={captchaTkn === ""}
                     >
                       Validar
                     </LoadingButton>
@@ -245,12 +245,12 @@ export default function RestorePassForm() {
             }
 
             <Box sx={{mt:3}}>
-              {!validEmail &&
+              {/* !validEmail &&
                 <ReCAPTCHA
                   sitekey={process.env.REACT_APP_GOOGLE_KEY_CAPTCHA}
                   onChange={(value) => onChangeCaptcha(value)}
                 />     
-              }
+              */}
             </Box>
 
             {validEmail &&

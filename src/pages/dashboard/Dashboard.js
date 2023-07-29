@@ -99,21 +99,21 @@ function Dashboard() {
     return (
         <Routes>
 
-            <Route path="/dashboard" element={<DashboardLayout />} >
+            <Route path="/dashboard"                    element={<DashboardLayout />} >
                 {/* dashboard */}
-                <Route path="app"    element={<PrivateRoute><Home /></PrivateRoute>}/>
-                <Route path=""       element={<Navigate to="/dashboard/app" replace />}/>
+                <Route path="app"                       element={<PrivateRoute><Home /></PrivateRoute>}/>
+                <Route path=""                          element={<Navigate to="/dashboard/app" replace />}/>
 
                 {/* config */}
-                <Route path="ACcoUNt/securE"    element={<PrivateRoute><Security /></PrivateRoute>}/>
-                <Route path="ACcoUNt/prOfile"    element={<PrivateRoute><Perfil /></PrivateRoute>}/>
+                <Route path="ACcoUNt/securE"            element={<PrivateRoute><Security /></PrivateRoute>}/>
+                <Route path="ACcoUNt/prOfile"           element={<PrivateRoute><Perfil /></PrivateRoute>}/>
 
                 {/* users */}
-                <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
-                <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
-                    <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                    <Route path="GroUP/aCCOunT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
-                <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
+                <Route path="admin/ACCounT"             element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
+                <Route path="rEstoRe/PAssWord"          element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
+                    <Route path="aCtivE/ACCounT"        element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                    <Route path="GroUP/aCCOunT"         element={<PrivateRoute><InConstruction /></PrivateRoute>}/>
+                <Route path="grant/acCOUnT"             element={<PrivateRoute><Permissions /></PrivateRoute>}/>
                 
                 {/* rrhh */}
                 <Route path="rRHH/EmPloyEE/FILE"        element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
@@ -127,11 +127,11 @@ function Dashboard() {
                 <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
             </Route>
 
-            <Route path="*"       element={<Page404 />} />
-            <Route path="/verify/email" element={<VerifyEmail />} />
-            <Route path="/session-expired" element={<TokenExpired />} />
-            <Route path="/login"  element={<Navigate to="/dashboard/app" replace />}/>
-            <Route path="/"       element={<Navigate to="/dashboard/app" replace />}/>
+            <Route path="*"                             element={<Page404 />} />
+            <Route path="/verify/email"                 element={<VerifyEmail />} />
+            <Route path="/session-expired"              element={<TokenExpired />} />
+            <Route path="/login"                        element={<Navigate to="/dashboard/app" replace />}/>
+            <Route path="/"                             element={<Navigate to="/dashboard/app" replace />}/>
         </Routes>
     )
 }

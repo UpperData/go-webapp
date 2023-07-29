@@ -129,10 +129,12 @@ export default function LoginForm() {
               ¿Olvidó su password?
             </Link>
           </Stack>
-          <ReCAPTCHA
-            sitekey={process.env.REACT_APP_GOOGLE_KEY_CAPTCHA}
-            onChange={(value) => onChangeCaptcha(value)}
-          />
+          {/* 
+            <ReCAPTCHA
+              sitekey={process.env.REACT_APP_GOOGLE_KEY_CAPTCHA}
+              onChange={(value) => onChangeCaptcha(value)}
+            />
+          */}
           <LoadingButton
             fullWidth
             size="large"
@@ -141,7 +143,7 @@ export default function LoginForm() {
             loading={isSubmitting}
             color="primary"
             sx={{mt: 5}}
-            disabled={captchaTkn === ""}
+            // disabled={captchaTkn === ""}
           >
             Iniciar sesión
           </LoadingButton>
