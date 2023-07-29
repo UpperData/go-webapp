@@ -112,12 +112,14 @@ export default function AccountPopover() {
   }
 
   let photoURL = "";
-  if(userData.people.photo !== null && userData.people.photo !== ""){
-    photoURL = `data:image/png;base64, ${userData.people.photo}`;
-  }else if(userData.people.document.gender === "H"){
-    photoURL = "/static/usermen.png";
-  }else if(userData.people.document.gender === "M"){
-    photoURL = "/static/userwomen.png";
+  if(userData.people && (userData.people.photo !== null && userData.people.photo !== "")){
+      photoURL = `data:image/png;base64, ${userData.people.photo}`;
+  }else if(userData.people && (userData.people.document.gender === "H")){
+      photoURL = "/static/usermen.png";
+  }else if(userData.people && (userData.people.document.gender === "M")){
+      photoURL = "/static/userwomen.png";
+  }else{
+      photoURL = "/static/usermen.png";
   }
 
   return (
@@ -217,15 +219,19 @@ export default function AccountPopover() {
         sx={{ width: 220 }}
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
-          <Typography variant="subtitle1" noWrap>
-            {userData.people.firstName ? (userData.people.firstName+' '+userData.people.lastName) : userData.account.name}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {userData.account.email}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'primary.main' }} noWrap>
-            {dashboard.role.name}
-          </Typography>
+          {userData.people &&
+            <>
+              <Typography variant="subtitle1" noWrap>
+                {userData.people.firstName ? (userData.people.firstName+' '+userData.people.lastName) : userData.account.name}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                {userData.account.email}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'primary.main' }} noWrap>
+                {dashboard.role.name}
+              </Typography>
+            </>
+          }
         </Box>
 
         <Divider sx={{ my: 1 }} />

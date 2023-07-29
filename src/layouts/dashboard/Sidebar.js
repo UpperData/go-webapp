@@ -65,12 +65,14 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
   console.log(userData);
 
   let photoURL = "";
-  if(userData.people.photo !== null && userData.people.photo !== ""){
-    photoURL = `data:image/png;base64, ${userData.people.photo}`;
-  }else if(userData.people.document.gender === "H"){
-    photoURL = "/static/usermen.png";
-  }else if(userData.people.document.gender === "M"){
-    photoURL = "/static/userwomen.png";
+  if(userData.people && (userData.people.photo !== null && userData.people.photo !== "")){
+      photoURL = `data:image/png;base64, ${userData.people.photo}`;
+  }else if(userData.people && (userData.people.document.gender === "H")){
+      photoURL = "/static/usermen.png";
+  }else if(userData.people && (userData.people.document.gender === "M")){
+      photoURL = "/static/userwomen.png";
+  }else{
+      photoURL = "/static/usermen.png";
   }
 
   const renderContent = (
@@ -93,7 +95,11 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
             <Box sx={{ ml: 2 }}>
 
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {userData.people.firstName ? (userData.people.firstName+' '+userData.people.lastName) : userData.account.name}
+              {userData.people &&
+                <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+                  {userData.people.firstName ? (userData.people.firstName+' '+userData.people.lastName) : userData.account.name}
+                </Typography>
+              }
               </Typography>
               
               <Typography variant="body2" sx={{ fontSize: 10, fontWeight: 800 }}>

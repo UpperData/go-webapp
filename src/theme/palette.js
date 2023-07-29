@@ -29,27 +29,27 @@ const GREY = {
 };
 
 const PRIMARY = {
-  lighter: alpha('#D0302A', 0.2),
-  light: alpha('#D0302A', 0.4),
-  main: '#D0302A',
-  dark: darken('#D0302A', 0.5),
-  darker: darken('#D0302A', 0.7),
+  lighter: alpha('#B01721', 0.2),
+  light: alpha('#B01721', 0.4),
+  main: '#B01721',
+  dark: darken('#B01721', 0.5),
+  darker: darken('#B01721', 0.7),
   contrastText: '#fff'
 };
 const SECONDARY = {
-  lighter: alpha('#273F68', 0.2),
-  light: alpha('#273F68', 0.4),
-  main: '#273F68',
-  dark: darken('#273F68', 0.5),
-  darker: darken('#273F68', 0.7),
+  lighter: alpha('#464E52', 0.2),
+  light: alpha('#464E52', 0.4),
+  main: '#464E52',
+  dark: darken('#464E52', 0.5),
+  darker: darken('#464E52', 0.7),
   contrastText: '#fff'
 };
 const INFO = {
-  lighter: alpha('#52A3D8', 0.4),
+  lighter: alpha('#00376E', 0.4),
   light: '#7CB9E1',
-  main: '#52A3D8',
-  dark: darken('#52A3D8', 0.5),
-  darker: darken('#52A3D8', 0.7),
+  main: '#00376E',
+  dark: darken('#00376E', 0.5),
+  darker: darken('#00376E', 0.7),
   contrastText: '#fff'
 };
 const SUCCESS = {
@@ -63,9 +63,9 @@ const SUCCESS = {
 const WARNING = {
   lighter: '#FFF7CD',
   light: '#FFE16A',
-  main: '#FFC107',
-  dark: '#B78103',
-  darker: '#7A4F01',
+  main: '#F18A24',
+  dark: darken('#F18A24', 0.5),
+  darker: darken('#F18A24', 0.7),
   contrastText: GREY[800]
 };
 
@@ -104,7 +104,7 @@ const CHART_COLORS = {
 };
 
 const palette = {
-  common: { black: '#000', white: '#fff' },
+  common: { black: '#18171D', white: '#fff' },
   primary: { ...PRIMARY },
   secondary: { ...SECONDARY },
   info: { ...INFO },

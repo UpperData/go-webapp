@@ -21,12 +21,14 @@ export default function Perfil() {
     console.log(userData);
 
     let photoURL = "";
-    if(userData.people.photo !== null && userData.people.photo !== ""){
+    if(userData.people && (userData.people.photo !== null && userData.people.photo !== "")){
         photoURL = `data:image/png;base64, ${userData.people.photo}`;
-    }else if(userData.people.document.gender === "H"){
+    }else if(userData.people && (userData.people.document.gender === "H")){
         photoURL = "/static/usermen.png";
-    }else if(userData.people.document.gender === "M"){
+    }else if(userData.people && (userData.people.document.gender === "M")){
         photoURL = "/static/userwomen.png";
+    }else{
+        photoURL = "/static/usermen.png";
     }
 
     return (
