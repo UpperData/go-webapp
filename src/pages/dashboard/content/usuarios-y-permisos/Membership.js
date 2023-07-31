@@ -315,10 +315,10 @@ export default function Membership() {
     console.log(data);
 
     return (
-        <Page title="Membresías | CEMA">
+        <Page title="Membresías | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Membresías
                 </Typography>
             </Box>

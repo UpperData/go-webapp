@@ -99,8 +99,8 @@ function Info() {
                         </Hidden>
                         <Hidden mdDown>
                             <Grid item md={5} xs={0}>
-                                <Box sx={{width: "80%", maxWidth: "250px", margin: "auto"}}>
-                                    <img src="/static/info.png" alt="Informacion de perfil" />
+                                <Box sx={{width: "100%", maxWidth: "450px", margin: "auto"}}>
+                                    <img src="/assets/svgimg/mechanic-info.svg" alt="Informacion de perfil" />
                                 </Box>
                             </Grid>
                         </Hidden>

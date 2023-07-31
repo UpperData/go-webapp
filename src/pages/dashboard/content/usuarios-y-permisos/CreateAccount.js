@@ -181,10 +181,10 @@ export default function CreateAccount() {
     }
 
     return (
-        <Page title="Crear cuenta | CEMA">
+        <Page title="Crear cuenta | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Crear Cuenta
                 </Typography>
             </Box>
@@ -381,7 +381,9 @@ export default function CreateAccount() {
                                 </Grid>
                                 <Hidden mdDown>
                                     <Grid item md={5} xs={12}>
-                                        <img src="/static/createapp.png" alt="Create img" />
+                                        {/* 
+                                            <img src="/static/createapp.png" alt="Create img" />
+                                        */}
                                     </Grid>
                                 </Hidden>
                             </Grid>

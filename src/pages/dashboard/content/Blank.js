@@ -80,7 +80,7 @@ export default function Blank() {
     }, []);
 
     return (
-        <Page title="Restaurar password | CEMA">
+        <Page title="Restaurar password | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

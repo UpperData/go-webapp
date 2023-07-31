@@ -21,7 +21,7 @@ const RootStyle = styled(Page)(({ theme }) => ({
 
 export default function Page404() {
   return (
-    <RootStyle title="404 Page Not Found | CEMA">
+    <RootStyle title="404 Page Not Found | RepuestosGo">
       <Container>
         <MotionContainer initial="initial" open>
           <Box sx={{ maxWidth: 580, margin: 'auto', textAlign: 'center' }}>

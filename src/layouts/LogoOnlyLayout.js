@@ -29,7 +29,11 @@ export default function LogoOnlyLayout() {
           <Grid item xs={6} md={4}>
             
               <RouterLink to="/">
-                <img src="/static/isotipo.png" width="100px" alt="logo" />
+                <img 
+                  src="/assets/img/logo/LOGOb.png"  
+                  width="400px" 
+                  alt="logo" 
+                />
               </RouterLink>
             
           </Grid>

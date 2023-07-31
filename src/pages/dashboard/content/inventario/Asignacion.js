@@ -508,10 +508,10 @@ function Asignacion() {
     }
 
     return (
-        <Page title="Roles | CEMA">
+        <Page title="Roles | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Asignación
                 </Typography>
             </Box>

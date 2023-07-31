@@ -47,7 +47,7 @@ export default function EcommerceShop() {
   };
 
   return (
-    <Page title="Dashboard: Products | CEMA">
+    <Page title="Dashboard: Products | RepuestosGo">
       <Container>
         <Typography variant="h4" sx={{ mb: 5 }}>
           Products

@@ -60,7 +60,7 @@ export default function VerifyEmail() {
 
   if(isVerify){
     return (
-      <RootStyle title="Verificación de email | CEMA">
+      <RootStyle title="Verificación de email | RepuestosGo">
         <Container>
           <MotionContainer initial="initial" open>
             <Box
@@ -75,7 +75,7 @@ export default function VerifyEmail() {
                 </Typography>
               </motion.div>
               <Typography sx={{ color: 'text.secondary' }}>
-                Ahora puede iniciar sesión utilizando su correo y aprovechar al máximo las funciones de CEMA.
+                Ahora puede iniciar sesión utilizando su correo y aprovechar al máximo las funciones de RepuestosGo.
               </Typography>
 
               <motion.div variants={varBounceIn}>
@@ -97,7 +97,7 @@ export default function VerifyEmail() {
   }
     
   return (
-      <RootStyle title="Verificación de email | CEMA">
+      <RootStyle title="Verificación de email | RepuestosGo">
         <Container>
           <MotionContainer initial="initial" open>
             <Box

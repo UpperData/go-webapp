@@ -22,7 +22,7 @@ const RootStyle = styled(Page)(({ theme }) => ({
 
 export default function InConstruction() {
   return (
-    <RootStyle title="CEMA">
+    <RootStyle title="RepuestosGo">
         <Container>
             <Card sx={{ margin: 'auto', textAlign: 'center', py: 5 }}>
                 <motion.div variants={varBounceIn}>

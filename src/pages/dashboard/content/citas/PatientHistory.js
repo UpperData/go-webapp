@@ -196,7 +196,7 @@ export default function PatientHistory() {
     ];
 
     return (
-        <Page title="Historia del paciente | CEMA">
+        <Page title="Historia del paciente | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

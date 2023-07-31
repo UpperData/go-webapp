@@ -155,7 +155,7 @@ function Appointment() {
     ];
 
     return (
-        <Page title="Reportes - Atención Medica | CEMA">
+        <Page title="Reportes - Atención Medica | RepuestosGo">
             <Container maxWidth="xl">
                 <Box sx={{ pb: 3 }}>
                     <Typography variant="h4">

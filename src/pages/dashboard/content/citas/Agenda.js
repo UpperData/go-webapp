@@ -161,7 +161,7 @@ export default function Agenda() {
     }
     
     return (
-        <Page title="Agenda | CEMA">
+        <Page title="Agenda | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
                 <Typography variant="h4">

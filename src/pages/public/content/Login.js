@@ -61,7 +61,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 export default function Login() {
   return (
-    <RootStyle title="Login | CEMA">
+    <RootStyle title="Login | RepuestosGo">
       {/* 
       <AuthLayout>
         
@@ -77,18 +77,25 @@ export default function Login() {
         <div>
           <SectionStyle>
             
-            <Typography color="primary.main" variant="h1" sx={{ px: 5, mt: 5, mb: 1, fontWeight: 900 }}>
-              CEMA
-            </Typography>
-            <Typography color="body1" variant="h5" sx={{ px: 5 }}>
-                Es momento de hacer un plan de salud para ti y tu familia, inicie sesión ahora mismo y hágalo realidad.
-            </Typography>
-            
             <SectionStyleInto sx={{ py: 2 }}>
               <div className="text-center">
-                <img src="/static/mobiledoctor.png" className='mx-auto w-100' style={{maxWidth: "400px", minWidth: "400px"}} alt="login" />
+                <img src="/assets/img/logo/LOGOb.png" className='mx-auto w-100' style={{maxWidth: "320px", minWidth: "320px"}} alt="login" />
               </div>
             </SectionStyleInto>
+
+            <Typography variant="h5" sx={{ px: 5, textAlign: 'center' }}>
+                Tu solución inteligente, segura, rápida y al mejor precio.
+            </Typography>
+
+            <SectionStyleInto sx={{ py: 2 }}>
+              <div className="text-center">
+                <img src="/assets/svgimg/art-home-1.svg" className='mx-auto w-100' style={{maxWidth: "500px", minWidth: "400px"}} alt="login" />
+              </div>
+            </SectionStyleInto>
+
+            {/* 
+            
+            */}
 
           </SectionStyle>
         </div>

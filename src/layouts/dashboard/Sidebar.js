@@ -68,11 +68,11 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
   if(userData.people && (userData.people.photo !== null && userData.people.photo !== "")){
       photoURL = `data:image/png;base64, ${userData.people.photo}`;
   }else if(userData.people && (userData.people.document.gender === "H")){
-      photoURL = "/static/usermen.png";
+      photoURL = "/assets/svgimg/user-circle.svg";
   }else if(userData.people && (userData.people.document.gender === "M")){
-      photoURL = "/static/userwomen.png";
+      photoURL = "/assets/svgimg/user-circle.svg";
   }else{
-      photoURL = "/static/usermen.png";
+      photoURL = "/assets/svgimg/user-circle.svg";
   }
 
   const renderContent = (

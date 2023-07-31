@@ -49,10 +49,15 @@ const IconWrapperStyle = styled('div')(({ theme }) => ({
 
 export default function Home() {
   return (
-    <Page title="Dashboard | CEMA">
+    <Page title="Dashboard | RepuestosGo">
       <Container maxWidth="xl">
         <Box sx={{ pb: 3 }}>
-          <Typography variant="h4">CEMA online - Dashboard</Typography>
+          <Typography 
+            variant="h4" 
+            color="white.main"
+          >
+            RepuestosGo - Dashboard
+          </Typography>
         </Box>
 
         {/*
@@ -67,18 +72,18 @@ export default function Home() {
           <Card sx={{py: 3, px: 5}}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={5}>
-                <img src="/static/bannercema.png" alt="Banner" />
+                <img src="/assets/svgimg/art-welcome.svg" alt="Banner" />
               </Grid>
               <Grid item xs={12} md={7}>
-                <Typography color="secondary" align='left' variant="h3">
-                  ¡Comienza a generar un plan de salud en CEMA ONLINE!
+                <Typography color="info" align='left' variant="h3">
+                  La plataforma confiable en repuestos de calidad
                 </Typography>
                 <Typography color="text.secondary" align='left' variant="p">
                   Visualice estadísticas en tiempo real y optimize al máximo su tiempo navegando de manera rápida por el panel administrativo utilizando los accesos directos.
                 </Typography>
 
                 <Box sx={{pt: 2}}>
-                  <Button LinkComponent={Link} variant="outlined" to="/dashboard/ACcoUNt/prOfile">
+                  <Button LinkComponent={Link} variant="contained" to="/dashboard/ACcoUNt/prOfile">
                     Perfil
                   </Button>
                 </Box>

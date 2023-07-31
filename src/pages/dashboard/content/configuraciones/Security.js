@@ -42,10 +42,10 @@ export default function Security() {
     };
 
     return (
-        <Page title="Seguridad | CEMA">
+        <Page title="Seguridad | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Seguridad
                 </Typography>
             </Box>

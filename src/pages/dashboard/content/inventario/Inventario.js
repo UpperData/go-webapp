@@ -487,10 +487,10 @@ function Inventario() {
     let items = list !== null ? list.filter(item => item.hasOwnProperty("id")) : [];
 
     return (
-        <Page title="Inventario | CEMA">
+        <Page title="Inventario | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Inventario
                 </Typography>
             </Box>

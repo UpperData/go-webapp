@@ -25,7 +25,7 @@ const RootStyle = styled(Page)(({ theme }) => ({
 export default function RestorePassSuccess() {
 
     return (
-      <RootStyle title="Restauración de password | CEMA">
+      <RootStyle title="Restauración de password | RepuestosGo">
         <Container>
           <MotionContainer initial="initial" open>
             <Box

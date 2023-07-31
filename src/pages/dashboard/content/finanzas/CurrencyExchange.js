@@ -128,7 +128,7 @@ function CurrencyExchange() {
     ];
 
     return (
-        <Page title="Tipo de Cambio | CEMA">
+        <Page title="Tipo de Cambio | RepuestosGo">
             <Container maxWidth="xl">
                 <Box sx={{ pb: 3 }}>
                     <Typography variant="h4">

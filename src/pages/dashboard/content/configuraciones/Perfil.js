@@ -24,18 +24,18 @@ export default function Perfil() {
     if(userData.people && (userData.people.photo !== null && userData.people.photo !== "")){
         photoURL = `data:image/png;base64, ${userData.people.photo}`;
     }else if(userData.people && (userData.people.document.gender === "H")){
-        photoURL = "/static/usermen.png";
+        photoURL = "/assets/svgimg/user-circle.svg";
     }else if(userData.people && (userData.people.document.gender === "M")){
-        photoURL = "/static/userwomen.png";
+        photoURL = "/assets/svgimg/user-circle.svg";
     }else{
-        photoURL = "/static/usermen.png";
+        photoURL = "/assets/svgimg/user-circle.svg";
     }
 
     return (
-        <Page title="Perfil | CEMA">
+        <Page title="Perfil | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Perfil
                 </Typography>
             </Box>
@@ -44,11 +44,19 @@ export default function Perfil() {
                 <Grid sx={{ pb: 3 }} item xs={12} md={4}>
                     <Card>
                         <CardContent>
-                            <Avatar
-                                alt={dataPeople.firstName ? (dataPeople.firstName+" "+dataPeople.lastName) : "photo"}
-                                src={photoURL}
-                                sx={{ width: 200, height: 200, margin: "auto" }}
-                            />
+                            {dataPeople ?
+                                <Avatar
+                                    alt={dataPeople.firstName ? (dataPeople.firstName+" "+dataPeople.lastName) : "photo"}
+                                    src={photoURL}
+                                    sx={{ width: 200, height: 200, margin: "auto" }}
+                                />
+                                :
+                                <Avatar
+                                    // alt={dataPeople.firstName ? (dataPeople.firstName+" "+dataPeople.lastName) : "photo"}
+                                    src="/assets/svgimg/user-circle.svg"
+                                    sx={{ width: 200, height: 200, margin: "auto" }}
+                                />
+                            }
                         </CardContent>
                     </Card>
                 </Grid>
@@ -57,9 +65,11 @@ export default function Perfil() {
 
                     <Card>
                         <CardContent>
-                            <Typography variant="h3" sx={{mb: 0}}>
-                                {dataPeople.firstName ? (dataPeople.firstName+" "+dataPeople.lastName) : userData.account.name}
-                            </Typography>
+                            {dataPeople &&
+                                <Typography variant="h3" sx={{mb: 0}}>
+                                    {dataPeople.firstName ? (dataPeople.firstName+" "+dataPeople.lastName) : userData.account.name}
+                                </Typography>
+                            }
                             <Typography variant="h6" color="text.secondary" sx={{mb: 0}}>
                                 <Typography color="primary" variant="span" sx={{mr: 1}}>
                                 <i className="mdi mdi-email" />
@@ -69,36 +79,35 @@ export default function Perfil() {
                             <Box sx={{py: 1}} />
                             <Divider />
                             <Box sx={{py: 1}} />
-
-                            {dataPeople.document.hasOwnProperty("birthday") &&
-                                <Typography variant="h6">
-                                    Fecha de nacimiento: 
-                                    <Typography color="primary" variant="span" sx={{mx: 1}}>
-                                        <i className="mdi mdi-cake-variant-outline" />
-                                    </Typography>
-                                    {dataPeople.document.hasOwnProperty("birthday") ? dataPeople.document.birthday.split("T")[0] : ""}
-                                </Typography>
-                                }
-                                <Typography variant="h6">
-                                    Género: 
-                                    {dataPeople.document.gender === "H" ?
-                                        <span><Typography color="primary" variant="span" sx={{mx: 1}}><i className="mdi mdi-human-male" /></Typography>Hombre</span>
-                                    :
-                                        <span><Typography color="primary" variant="span" sx={{mx: 1}}><i className="mdi mdi-human-female" /></Typography>Mujer</span>
+                            {dataPeople &&
+                                <>
+                                    {dataPeople.document.hasOwnProperty("birthday") &&
+                                        <Typography variant="h6">
+                                            Fecha de nacimiento: 
+                                            <Typography color="primary" variant="span" sx={{mx: 1}}>
+                                                <i className="mdi mdi-cake-variant-outline" />
+                                            </Typography>
+                                            {dataPeople.document.hasOwnProperty("birthday") ? dataPeople.document.birthday.split("T")[0] : ""}
+                                        </Typography>
                                     }
-                                </Typography>
-                                
-                                <Typography variant="h6">
-                                    Documento de identificación:
-                                    <Typography color="primary" variant="span" sx={{mx: 1}}>
-                                        <i className="mdi mdi-card-account-details-outline" />
+                                    <Typography variant="h6">
+                                        Género: 
+                                        {dataPeople.document.gender === "H" ?
+                                            <span><Typography color="primary" variant="span" sx={{mx: 1}}><i className="mdi mdi-human-male" /></Typography>Hombre</span>
+                                        :
+                                            <span><Typography color="primary" variant="span" sx={{mx: 1}}><i className="mdi mdi-human-female" /></Typography>Mujer</span>
+                                        }
                                     </Typography>
-                                    {dataPeople.document.nationality.toLowerCase()} - {dataPeople.document.hasOwnProperty("number") ? dataPeople.document.number : dataPeople.document.numbre}
-                                </Typography>
-                                
-                                {/* 
-                                    <Divider sx={{mt: 2}} />
-                                */}
+                                    
+                                    <Typography variant="h6">
+                                        Documento de identificación:
+                                        <Typography color="primary" variant="span" sx={{mx: 1}}>
+                                            <i className="mdi mdi-card-account-details-outline" />
+                                        </Typography>
+                                        {dataPeople.document.nationality.toLowerCase()} - {dataPeople.document.hasOwnProperty("number") ? dataPeople.document.number : dataPeople.document.numbre}
+                                    </Typography>
+                                </>
+                            }
                         </CardContent>
                     </Card>
 

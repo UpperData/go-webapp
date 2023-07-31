@@ -62,7 +62,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 export default function RestorePasswordUser() {
   return (
-    <RootStyle title="Restaurar password | CEMA">
+    <RootStyle title="Restaurar password | RepuestosGo">
       {/* 
       <AuthLayout>
         
@@ -77,9 +77,26 @@ export default function RestorePasswordUser() {
       <MHidden width="mdDown" minHeight="">
         <div>
           <SectionStyle>
+
+            <SectionStyleInto sx={{ py: 2 }}>
+              <div className="text-center">
+                <img src="/assets/img/logo/LOGOb.png" className='mx-auto w-100' style={{maxWidth: "320px", minWidth: "320px"}} alt="login" />
+              </div>
+            </SectionStyleInto>
+
+            <Typography variant="h5" sx={{ px: 5, textAlign: 'center' }}>
+                Tu solución inteligente, segura, rápida y al mejor precio.
+            </Typography>
+
+            <SectionStyleInto sx={{ py: 2 }}>
+              <div className="text-center">
+                <img src="/assets/svgimg/art-home-1.svg" className='mx-auto w-100' style={{maxWidth: "500px", minWidth: "400px"}} alt="login" />
+              </div>
+            </SectionStyleInto>
             
+            {/* 
             <Typography color="primary.main" variant="h1" sx={{ px: 5, mt: 5, mb: 1, fontWeight: 900 }}>
-              CEMA
+              RepuestosGo
             </Typography>
             <Typography color="body1" variant="h5" sx={{ px: 5 }}>
                 Recupera tus datos de inicio de sesión y comienza a hacer un plan de salud para ti y tu familia.
@@ -90,6 +107,7 @@ export default function RestorePasswordUser() {
                 <img src="/static/password.png" className='mx-auto w-100' style={{maxWidth: "400px", minWidth: "400px"}} alt="login" />
               </div>
             </SectionStyleInto>
+            */}
 
           </SectionStyle>
         </div>

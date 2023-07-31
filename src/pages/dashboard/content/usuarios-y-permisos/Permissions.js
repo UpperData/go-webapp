@@ -352,10 +352,10 @@ function Permissions() {
     }
 
     return (
-        <Page title="Permisos | CEMA">
+        <Page title="Permisos | RepuestosGo">
         <Container maxWidth="xl">
             <Box sx={{ pb: 3 }}>
-                <Typography variant="h4">
+                <Typography variant="h4" color="white.main">
                     Gestión de Permisos
                 </Typography>
             </Box>

@@ -169,7 +169,7 @@ function Inventory() {
     ];
 
     return (
-        <Page title="Reportes - Inventario | CEMA">
+        <Page title="Reportes - Inventario | RepuestosGo">
             <Container maxWidth="xl">
                 <Box sx={{ pb: 3 }}>
                     <Typography variant="h4">

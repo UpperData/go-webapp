@@ -57,12 +57,13 @@ const ContentStyle = styled('div')(({ theme }) => ({
 
 export default function TokenExpired() {
   return (
-    <RootStyle title="Sesión expirada | CEMA">
+    <RootStyle title="Sesión expirada | RepuestosGo">
       <Container className='' maxWidth="sm">
         <ContentStyle>
 
-          <img src="/static/virus.png" style={{width: "100%", maxWidth: "400px"}} alt="logo" />
-
+          {/* 
+            <img src="/static/virus.png" style={{width: "100%", maxWidth: "400px"}} alt="logo" />
+          */}
           <Stack>
             <Typography variant="h3" gutterBottom align='center'>
               Su sesión ha expirado

@@ -3,7 +3,7 @@
 const account = {
   displayName: 'Jaydon Frankie',
   email: 'demo@minimals.cc',
-  photoURL: '/static/mock-images/avatars/avatar_default.jpg'
+  photoURL: '/assets/svgimg/user-circle.svg'
 };
 
 export default account;

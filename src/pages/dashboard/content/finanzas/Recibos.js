@@ -484,7 +484,7 @@ export default function Bills() {
     }
 
     return (
-        <Page title="Recibos | CEMA">
+        <Page title="Recibos | RepuestosGo">
             <Modal
                 open={showModalCancelBill}
                 onClose={() => setshowModalCancelBill(false)}
