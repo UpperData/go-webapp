@@ -61,11 +61,63 @@ function AdmTiendas() {
             headerName: `Nombre`,
             field: 'name',     
             flex: 1,
-            minWidth: 120,
+            // minWidth: 120,
             sortable: false,
             renderCell: (cellValues) => {
                 let dataItem = cellValues.row.name;
                 return dataItem
+            },
+        },
+        { 
+            headerName: `Dirección`,
+            field: 'address',     
+            flex: 1,
+            // minWidth: 120,
+            sortable: false,
+            renderCell: (cellValues) => {
+                let dataItem = cellValues.row.address;
+                return dataItem
+            },
+        },
+        { 
+            headerName: `Rif`,
+            field: 'storeTypeId',     
+            flex: 1,
+            // minWidth: 120,
+            sortable: false,
+            renderCell: (cellValues) => {
+                let dataItem = `${cellValues.row.fiscalInfo.rif.sigla}-${cellValues.row.fiscalInfo.rif.number}`;
+                return dataItem
+            },
+        },
+        { 
+            headerName: `Status`,
+            field: 'isActived',     
+            flex: 1,
+            // minWidth: 120,
+            sortable: false,
+            renderCell: (cellValues) => {
+                let dataItem = cellValues.row.isActived ? 'Activa' : 'Inactiva';
+                return dataItem
+            },
+        },
+        { 
+            headerName: ``,   
+            flex: 1,
+            innerWidth: 50,
+            width: 120,
+            maxWidth: 120,
+            sortable: false,
+            renderCell: (cellValues) => {
+                let dataItem = cellValues.row.isActived ? 'Desactivar' : 'Activar';
+                return <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    // onClick={() => setshowModalCreate(true)}
+                >
+                    {dataItem}
+                </Button>
             },
         },
     ];
@@ -74,6 +126,8 @@ function AdmTiendas() {
         setshowModalCreate(false);
         getData();
     }
+
+    console.log(list);
 
     return (
         <Page title="Contratos | RepuestosGo">
