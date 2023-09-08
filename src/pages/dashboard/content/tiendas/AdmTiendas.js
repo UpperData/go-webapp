@@ -30,6 +30,7 @@ function AdmTiendas() {
     const [showModalCreate, setshowModalCreate] = useState(false);
 
     const [list, setlist]                       = useState([]);
+    const [storeToEdit, setstoreToEdit]            = useState(null);
 
     const getData = () => {
         const url = '/adMin/SToRE/get/*';
@@ -55,6 +56,11 @@ function AdmTiendas() {
             }
         }
     });
+
+    const editStore = (storedata) => {
+        setstoreToEdit(storedata);
+        setshowModalCreate(true);
+    }
 
     let columns = [
         { 
@@ -103,22 +109,21 @@ function AdmTiendas() {
         },
         { 
             headerName: ``,   
+            field: 'id', 
             flex: 1,
             innerWidth: 50,
             width: 120,
             maxWidth: 120,
             sortable: false,
-            renderCell: (cellValues) => {
-                let dataItem = cellValues.row.isActived ? 'Desactivar' : 'Activar';
-                return <Button 
-                    variant="contained" 
-                    color="primary" 
-                    fullWidth 
-                    // onClick={() => setshowModalCreate(true)}
-                >
-                    {dataItem}
-                </Button>
-            },
+            renderCell: (cellValues) =>  <Button 
+                variant="contained" 
+                color="primary" 
+                fullWidth 
+                onClick={() => editStore(cellValues.row)}
+            >
+                Editar
+            </Button>
+            
         },
     ];
 
@@ -192,6 +197,7 @@ function AdmTiendas() {
                                             show={showModalCreate}     
                                             handleShowModal={(show) => setshowModalCreate(show)}    
                                             reset={() => resetList()}
+                                            edit={storeToEdit}
                                             // storeId={storeSelected}       
                                         />
                                 </div>

@@ -6,7 +6,7 @@ import {
 import { toast } from 'react-toastify';
 import { base64toBlob, toBase64 } from '../../../../../utils/functions';
 
-function ImageUploader({onChange}) {  
+function ImageUploader({onChange, value}) {  
     const validTypesList = ['image/jpeg', 'image/jpg', 'image/png','image/gif','image/bmp'];
     const [file, setfile] = useState(null);
     const [urlPreview, seturlPreview] = useState(null);
@@ -36,9 +36,9 @@ function ImageUploader({onChange}) {
 
     return (
         <div>
-            {urlPreview &&
+            {value && value !== "" &&
                 <Box sx={{pb: 2, width: '75%', margin: 'auto'}}>
-                    <img src={urlPreview} alt='preview' />
+                    <img src={value} alt='preview' />
                 </Box>
             }
 

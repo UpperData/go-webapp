@@ -56,17 +56,29 @@ const docTypesList = [
     }
 ];
 
-function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () => {}  }) {
+function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () => {}, edit = null  }) {
 
     const [loading, setloading] = useState(true);
     const [sending, setsending] = useState(false);
     const [usersList, setusersList] = useState([]);
 
     const [showModalAddDirection,   setshowModalAddDirection] = useState(false);
-    const [direction, setdirection] = useState(null);
+    const [direction, setdirection] = useState(
+        edit ? 
+        {
+            ciudad: {id: edit.parroquium.province.state.id, name: edit.parroquium.province.state.name},
+            estado: {id: edit.parroquium.province.state.id, name: edit.parroquium.province.state.name},
+            municipio: {id: edit.parroquium.province.id, name: edit.parroquium.province.name},
+            parroquia: {id: edit.parroquium.id, name: edit.parroquium.name}
+        }
+        :
+        null
+    );
+
+    console.log(edit);
 
     const formSchema = Yup.object().shape({
-        accountId:      Yup.string().required('Seleccione una cuenta'),
+        accountId:      Yup.string().nullable().required('Seleccione una cuenta'),
         logo:           Yup.string().required('Debe cargar el logo de la tienda'),
         name:           Yup.string().required('Debe ingresar un nombre'),
         description:    Yup.string().required('Debe ingresar una descripción'),
@@ -81,7 +93,29 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
     });
 
     const formik = useFormik({
-        initialValues: {
+        enableReinitialize: true,
+        initialValues: edit ?
+        {
+            accountId:          edit.id,
+            logo:               edit.logo && edit.logo !== 'null' ? edit.logo : '',
+            name:               edit.name,
+            description:        edit.description,
+            phone:              edit.phone,
+            address:            edit.address,
+            parroquiaId:        edit.parroquiaId,
+
+            // fiscal info
+            sigla:              edit.fiscalInfo.rif.sigla.toUpperCase(),
+            number:             edit.fiscalInfo.rif.number,
+
+            isActived:          edit.isActived,
+            isItHaveBuild:      edit.isItHaveBuild,
+            deliveryInfo:       {
+                deliveryInfo: true
+            }
+        }
+        :
+        {
             accountId:          '',
             logo:               '',
             name:               '',
@@ -125,23 +159,45 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
             setsending(true);
             console.log(data);
 
-            const url = '/admIn/sTORE/Create';
-            axios.post(url, data).then((res) => {
+            if(!edit){
+                const url = '/admIn/sTORE/Create';
+                axios.post(url, data).then((res) => {
 
-                console.log(res.data);
-                setsending(false);
-                resetForm();
-                toast.success('Tienda creada satisfactoriamente!');
-                reset();
+                    console.log(res.data);
+                    setsending(false);
+                    resetForm();
+                    toast.success('Tienda creada satisfactoriamente!');
+                    reset();
 
-            }).catch((err) => {
+                }).catch((err) => {
 
-                console.error(err);
-                toast.error('Ha ocurrido un error inesperado');
-                setsending(false);
+                    console.error(err);
+                    toast.error('Ha ocurrido un error inesperado');
+                    setsending(false);
 
-            });
-            
+                });
+            }else{
+
+                delete data.accountId;
+                data.id = edit.id;
+
+                const url = '/admin/store/Edit';
+                axios.put(url, data).then((res) => {
+
+                    console.log(res.data);
+                    setsending(false);
+                    resetForm();
+                    toast.success('Tienda editada satisfactoriamente!');
+                    reset();
+                    
+                }).catch((err) => {
+
+                    console.error(err);
+                    toast.error('Ha ocurrido un error inesperado');
+                    setsending(false);
+                });
+
+            }          
         }
     });
 
@@ -163,7 +219,13 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
 
     useEffect(() => {
       if(loading){
-        getData();
+        if(edit){   
+            setTimeout(() => {
+                setloading(false);
+            }, 1000);
+        }else{
+            getData();
+        }
       }
     }, []);
     
@@ -195,7 +257,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
         >
             <Box sx={{...style, p: 5, borderRadius: 2}}>
                 <Typography variant="h5" alignItems="center" sx={{mb: 3}}>
-                    Crear tienda
+                    {edit ? `Editar tienda` : `Crear tienda`}
                 </Typography>
                 {!loading ?
                     <div>
@@ -207,39 +269,42 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                             >
                                 <Grid container columnSpacing={3}>
                                     <Grid item md={7} xs={12}>
-                                        <FormControl fullWidth size="small" sx={{mb: 2}}>
-                                            <InputLabel id="status-autowidth-label">
-                                                Cuenta de usuario (Email)
-                                            </InputLabel>
-                                            <Select
-                                                fullWidth
-                                                labelId="status-autowidth-label"
-                                                id="status-autowidth"
-                                                // value={values.isActived}
-                                                onChange={(e) => formik.setFieldValue('accountId', e.target.value)}
-                                                helperText={touched.accountId && errors.accountId} 
-                                                error={Boolean(touched.accountId && errors.accountId)} 
+                                        {!edit &&
+                                            <FormControl fullWidth size="small" sx={{mb: 2}}>
+                                                <InputLabel id="status-autowidth-label">
+                                                    Cuenta de usuario (Email)
+                                                </InputLabel>
+                                                <Select
+                                                    fullWidth
+                                                    labelId="status-autowidth-label"
+                                                    id="status-autowidth"
+                                                    // value={values.isActived}
+                                                    onChange={(e) => formik.setFieldValue('accountId', e.target.value)}
+                                                    helperText={touched.accountId && errors.accountId} 
+                                                    error={Boolean(touched.accountId && errors.accountId)} 
 
-                                                label="Cuenta de usuario (Email)"
-                                                MenuProps={MenuProps}
-                                            >
-                                                {usersList.map((item, key) => {
-                                                    let dataItem = item;
-                                                    return <MenuItem 
-                                                        key={key} 
-                                                        value={dataItem.id}
-                                                    >
-                                                        {dataItem.email}
-                                                    </MenuItem>
-                                                })}
-                                            </Select>
-                                        </FormControl>
+                                                    label="Cuenta de usuario (Email)"
+                                                    MenuProps={MenuProps}
+                                                >
+                                                    {usersList.map((item, key) => {
+                                                        let dataItem = item;
+                                                        return <MenuItem 
+                                                            key={key} 
+                                                            value={dataItem.id}
+                                                        >
+                                                            {dataItem.email}
+                                                        </MenuItem>
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                        }
                                         <FormControl fullWidth size="small" sx={{mb: 2}}>
                                             <TextField
                                                 label="Nombre de la tienda"
                                                 size="small"
                                                 fullWidth
                                                 // value={values.comission}
+                                                defaultValue={values.name}
                                                 helperText={touched.name && errors.name} 
                                                 error={Boolean(touched.name && errors.name)} 
                                                 onChange={(e) => formik.setFieldValue('name', e.target.value)}
@@ -258,6 +323,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                                 minRows={3}
                                                 multiline
                                                 // value={values.comission}
+                                                defaultValue={values.description}
                                                 helperText={touched.description && errors.description} 
                                                 error={Boolean(touched.description && errors.description)} 
                                                 onChange={(e) => formik.setFieldValue('description', e.target.value)}
@@ -282,6 +348,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                                             labelId="status-autowidth-label"
                                                             id="status-autowidth"
                                                             // value={values.isActived}
+                                                            value={values.sigla}
                                                             onChange={(e) => formik.setFieldValue('sigla', e.target.value)}
                                                             helperText={touched.sigla && errors.sigla} 
                                                             error={Boolean(touched.sigla && errors.sigla)} 
@@ -308,6 +375,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                                             size="small"
                                                             fullWidth
                                                             // value={values.comission}
+                                                            defaultValue={values.number}
                                                             helperText={touched.number && errors.number} 
                                                             error={Boolean(touched.number && errors.number)} 
                                                             onChange={(e) => formik.setFieldValue('number', e.target.value)}
@@ -339,6 +407,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                         }
                                         
                                         <ImageUploader
+                                            value={values.logo}
                                             onChange={(val) => formik.setFieldValue('logo', val)}
                                         />
                                     </Grid>
@@ -421,6 +490,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                                             size="small"
                                                             fullWidth
                                                             // value={values.comission}
+                                                            defaultValue={values.address}
                                                             helperText={touched.address && errors.address} 
                                                             error={Boolean(touched.address && errors.address)} 
                                                             onChange={(e) => formik.setFieldValue('address', e.target.value)}
@@ -439,6 +509,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                                             size="small"
                                                             fullWidth
                                                             // value={values.comission}
+                                                            defaultValue={values.phone}
                                                             helperText={touched.phone && errors.phone} 
                                                             error={Boolean(touched.phone && errors.phone)} 
                                                             onChange={(e) => formik.setFieldValue('phone', e.target.value)}
@@ -465,7 +536,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                                         loading={sending}
                                         disabled={sending}
                                     >
-                                        Guardar
+                                        {edit ? `Editar` : `Guardar`}
                                     </LoadingButton>
                                     <Button 
                                         disabled={sending} 
