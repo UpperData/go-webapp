@@ -30,7 +30,7 @@ function AdmTiendas() {
     const [showModalCreate, setshowModalCreate] = useState(false);
 
     const [list, setlist]                       = useState([]);
-    const [storeToEdit, setstoreToEdit]            = useState(null);
+    const [storeToEdit, setstoreToEdit]         = useState(null);
 
     const getData = () => {
         const url = '/adMin/SToRE/get/*';
@@ -157,7 +157,10 @@ function AdmTiendas() {
                                                         variant="contained" 
                                                         color="primary" 
                                                         fullWidth 
-                                                        onClick={() => setshowModalCreate(true)}
+                                                        onClick={() => {
+                                                            setstoreToEdit(null);
+                                                            setshowModalCreate(true);
+                                                        }}
                                                     >
                                                         Nueva tienda
                                                     </Button>
