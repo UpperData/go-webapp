@@ -63,19 +63,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
     const [usersList, setusersList] = useState([]);
 
     const [showModalAddDirection,   setshowModalAddDirection] = useState(false);
-    const [direction, setdirection] = useState(
-        edit ? 
-        {
-            ciudad: {id: edit.parroquium.province.state.id, name: edit.parroquium.province.state.name},
-            estado: {id: edit.parroquium.province.state.id, name: edit.parroquium.province.state.name},
-            municipio: {id: edit.parroquium.province.id, name: edit.parroquium.province.name},
-            parroquia: {id: edit.parroquium.id, name: edit.parroquium.name}
-        }
-        :
-        null
-    );
-
-    console.log(edit);
+    const [direction, setdirection] = useState(null);
 
     const formSchema = Yup.object().shape({
         accountId:      Yup.string().nullable().required('Seleccione una cuenta'),
@@ -189,7 +177,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
                     resetForm();
                     toast.success('Tienda editada satisfactoriamente!');
                     reset();
-                    
+
                 }).catch((err) => {
 
                     console.error(err);
@@ -203,6 +191,7 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
 
     const { errors, touched, handleSubmit, isSubmitting, getFieldProps,setFieldValue, values } = formik;
 
+    console.log(edit);
     console.log(errors);
     console.log(direction);
 
@@ -220,6 +209,13 @@ function ModalStore({ show = false, handleShowModal = (show) => {}, reset = () =
     useEffect(() => {
       if(loading){
         if(edit){   
+            let directionData = edit.parroquium;
+            setdirection({
+                ciudad: {id: directionData.province.state.id, name: directionData.province.state.name},
+                estado: {id: directionData.province.state.id, name: directionData.province.state.name},
+                municipio: {id: directionData.province.id, name: directionData.province.name},
+                parroquia: {id: directionData.id, name: directionData.name}
+            });
             setTimeout(() => {
                 setloading(false);
             }, 1000);

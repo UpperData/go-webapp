@@ -196,13 +196,15 @@ function AdmTiendas() {
                                             }
                                         </Box>
                                         
-                                        <ModalStore
-                                            show={showModalCreate}     
-                                            handleShowModal={(show) => setshowModalCreate(show)}    
-                                            reset={() => resetList()}
-                                            edit={storeToEdit}
-                                            // storeId={storeSelected}       
-                                        />
+                                        {showModalCreate &&
+                                            <ModalStore
+                                                show={showModalCreate}     
+                                                handleShowModal={(show) => setshowModalCreate(show)}    
+                                                reset={() => resetList()}
+                                                edit={storeToEdit}
+                                                // storeId={storeSelected}       
+                                            />
+                                        }
                                 </div>
                             :
                                 <Loader />
