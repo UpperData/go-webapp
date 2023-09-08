@@ -120,6 +120,10 @@ header{
 }
 */
 
+.react-pdf__Page__textContent, .react-pdf__Page__annotations{
+    display: none;
+}
+
 .badgedata{
     display: inline-flex;
     justify-content: center;

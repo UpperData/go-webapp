@@ -131,7 +131,7 @@ function CurrencyExchange() {
         <Page title="Tipo de Cambio | RepuestosGo">
             <Container maxWidth="xl">
                 <Box sx={{ pb: 3 }}>
-                    <Typography variant="h4">
+                    <Typography variant="h4" color="white.main">
                         Tipo de Cambio
                     </Typography>
                 </Box>

@@ -219,7 +219,8 @@ function ModalDirection(props) {
                 style={{ 
                     display:'flex', 
                     alignItems:'center', 
-                    justifyContent:'center' 
+                    justifyContent:'center',
+                    zIndex: 1300
                 }}
             >
                 <Box sx={{...style, p: 5, borderRadius: 2}}>

@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from '@iconify/react';
 import { NavLink as RouterLink, matchPath, useLocation } from 'react-router-dom';
 import arrowIosForwardFill from '@iconify/icons-eva/arrow-ios-forward-fill';
 import arrowIosDownwardFill from '@iconify/icons-eva/arrow-ios-downward-fill';
 // material
 import { alpha, useTheme, styled } from '@mui/material/styles';
 import { Box, List, Collapse, ListItemText, ListItemIcon, ListItemButton } from '@mui/material';
-
 // ----------------------------------------------------------------------
+
+import Icon from '@mdi/react';
+// import IconsList from '@mdi/js';
 
 const ListItemStyle = styled((props) => <ListItemButton disableGutters {...props} />)(
   ({ theme }) => ({
@@ -93,6 +94,9 @@ function NavItem({ item, active }) {
       isActiveRootInSub = true;
     }
 
+    let iconPath = icon ? require('@mdi/js')[icon.trim()] : ''; // eslint-disable-line global-require
+
+
     return (
       <>
         <ListItemStyle
@@ -102,8 +106,16 @@ function NavItem({ item, active }) {
           }}
         >
           <ListItemIconStyle>
+            
             {icon && typeof icon !== "string" && icon}
-            {icon && typeof icon === "string" && <Box sx={{fontSize: 20}}><i className={"mdi "+icon} /></Box>}
+            {icon && typeof icon === "string" && 
+              <Box 
+                sx={{fontSize: 20}}
+              >
+                <Icon path={iconPath} size={1} />
+              </Box>
+            }
+          
           </ListItemIconStyle>
           <ListItemText disableTypography primary={module} />
           {info && info}
@@ -163,6 +175,8 @@ function NavItem({ item, active }) {
     );
   }
 
+  let iconPath = icon ? require('@mdi/js')[icon.trim()] : ''; // eslint-disable-line global-require
+
   return (
     <ListItemStyle
       component={RouterLink}
@@ -171,7 +185,14 @@ function NavItem({ item, active }) {
         ...(isActiveRoot && activeRootStyle)
       }}
     >
-      <ListItemIconStyle>{icon && icon}</ListItemIconStyle>
+      {icon &&
+        <ListItemIconStyle>
+          <Icon path={iconPath} size={1} />
+        </ListItemIconStyle>
+      }
+      {/*
+        <ListItemIconStyle>{icon && icon}</ListItemIconStyle>
+      */}
       <ListItemText disableTypography primary={title} />
       {info && info}
     </ListItemStyle>
@@ -217,7 +238,11 @@ export default function NavSection({ navConfig, ...other }) {
     <Box {...other}>
       <List disablePadding>
         {navConfig.map((item) => (
-          <NavItem key={item.hasOwnProperty("module") ? slugify(item.module) : item.title} item={item} active={match} />
+          <NavItem 
+            key={item.hasOwnProperty("module") ? slugify(item.module) : item.title} 
+            item={item} 
+            active={match} 
+          />
         ))}
       </List>
     </Box>

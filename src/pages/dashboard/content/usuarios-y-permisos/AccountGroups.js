@@ -247,7 +247,7 @@ function AccountGroups() {
                                             variant="contained" 
                                             color="primary"
                                             type="button"
-                                            sx={{pmx: 1}}
+                                            sx={{pmx: 1, py: 1.5}}
                                             onClick={() => addGroup()}
                                             loading={sending}
                                             disabled={nameNewGroup === "" || nameNewGroup.length <= 5}

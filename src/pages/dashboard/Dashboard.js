@@ -35,6 +35,9 @@ import Appointment from './content/reports/Appointment';
 import Inventory from './content/reports/Inventory';
 import Rrhh from './content/reports/Rrhh';
 
+import Contracts from './content/tiendas/Contracts';
+import AdmTiendas from './content/tiendas/AdmTiendas';
+
 function PrivateRoute({ children }) {
     // const auth = useAuth();
     let isAuth = true;
@@ -151,6 +154,10 @@ function Dashboard() {
                 {/* finanzas */}
                 <Route path="finace/vouCHer/"           element={<PrivateRoute><Bills /></PrivateRoute>}/>
                 <Route path="FinaNces/ChangeType"       element={<PrivateRoute><CurrencyExchange /></PrivateRoute>}/>
+
+                {/* Tiendas */}
+                <Route path='StoRE/ContraCts' element={<PrivateRoute><Contracts /></PrivateRoute>} />
+                <Route path='sTOre/aDmon' element={<PrivateRoute><AdmTiendas /></PrivateRoute>} />
 
                 {/* reportes */}
                 <Route path="Reports/atencioN"          element={<PrivateRoute><Appointment /></PrivateRoute>}/>
