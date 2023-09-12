@@ -37,6 +37,7 @@ import Rrhh from './content/reports/Rrhh';
 
 import Contracts from './content/tiendas/Contracts';
 import AdmTiendas from './content/tiendas/AdmTiendas';
+import Administracion from './content/inventario/Administracion';
 
 function PrivateRoute({ children }) {
     // const auth = useAuth();
@@ -129,35 +130,36 @@ function Dashboard() {
                 <Route path="ACcoUNt/prOfile"    element={<PrivateRoute><Perfil /></PrivateRoute>}/>
 
                 {/* users */}
-                <Route path="admin/ACCounT"    element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
-                <Route path="rEstoRe/PAssWord"    element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
-                    {/* <Route path="aCtivE/ACCounT"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
-                <Route path="GroUP/aCCOunT"    element={<PrivateRoute><AccountGroups /></PrivateRoute>}/>
-                <Route path="grant/acCOUnT"    element={<PrivateRoute><Permissions /></PrivateRoute>}/>
-                    {/* <Route path="account/activate/"    element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
-                <Route path="Permissions/MeMbership/"    element={<PrivateRoute><Membership /></PrivateRoute>}/>
+                <Route path="admin/ACCounT"                     element={<PrivateRoute><CreateAccount /></PrivateRoute>}/>
+                <Route path="rEstoRe/PAssWord"                  element={<PrivateRoute><RestorePassword/></PrivateRoute>}/>
+                    {/* <Route path="aCtivE/ACCounT"            element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
+                <Route path="GroUP/aCCOunT"                     element={<PrivateRoute><AccountGroups /></PrivateRoute>}/>
+                <Route path="grant/acCOUnT"                     element={<PrivateRoute><Permissions /></PrivateRoute>}/>
+                    {/* <Route path="account/activate/"         element={<PrivateRoute><InConstruction /></PrivateRoute>}/> */}
+                <Route path="Permissions/MeMbership/"           element={<PrivateRoute><Membership /></PrivateRoute>}/>
 
                 {/* rrhh */}
-                <Route path="rRHH/EmPloyEE/FILE"            element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
-                <Route path="RRhH/Cargos"                   element={<PrivateRoute><Cargos /></PrivateRoute>}/>
+                <Route path="rRHH/EmPloyEE/FILE"                element={<PrivateRoute><FichaPersonal /></PrivateRoute>}/>
+                <Route path="RRhH/Cargos"                       element={<PrivateRoute><Cargos /></PrivateRoute>}/>
 
                 {/* citas */}
                 <Route path="appointment/admin"                 element={<PrivateRoute><AdministrarCita /></PrivateRoute>}/>
                 <Route path="appointment/report"                element={<PrivateRoute><InformeMedico /></PrivateRoute>}/>
                 <Route path="CITaS/AgEnt"                       element={<PrivateRoute><Agenda /></PrivateRoute>}/>
-                <Route path="CITaS/historyByPatient/:id"  element={<PrivateRoute><PatientHistory /></PrivateRoute>}/>
+                <Route path="CITaS/historyByPatient/:id"        element={<PrivateRoute><PatientHistory /></PrivateRoute>}/>
 
                 {/* inventario */}
-                <Route path="InvenTorY/ADMIN"           element={<PrivateRoute><Inventario /></PrivateRoute>}/>
-                <Route path="InVeNTorY/assigment"       element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
-            
+                {/* <Route path="InvenTorY/ADMIN"               element={<PrivateRoute><Inventario /></PrivateRoute>}/> */}
+                <Route path="InVeNTorY/assigment"               element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
+                <Route path="InvenTory/ADMIN"                   element={<PrivateRoute><Administracion /></PrivateRoute>}/>
+
                 {/* finanzas */}
-                <Route path="finace/vouCHer/"           element={<PrivateRoute><Bills /></PrivateRoute>}/>
-                <Route path="FinaNces/ChangeType"       element={<PrivateRoute><CurrencyExchange /></PrivateRoute>}/>
+                <Route path="finace/vouCHer/"                   element={<PrivateRoute><Bills /></PrivateRoute>}/>
+                <Route path="FinaNces/ChangeType"               element={<PrivateRoute><CurrencyExchange /></PrivateRoute>}/>
 
                 {/* Tiendas */}
-                <Route path='StoRE/ContraCts' element={<PrivateRoute><Contracts /></PrivateRoute>} />
-                <Route path='sTOre/aDmon' element={<PrivateRoute><AdmTiendas /></PrivateRoute>} />
+                <Route path='StoRE/ContraCts'                   element={<PrivateRoute><Contracts /></PrivateRoute>} />
+                <Route path='sTOre/aDmon'                       element={<PrivateRoute><AdmTiendas /></PrivateRoute>} />
 
                 {/* reportes */}
                 <Route path="Reports/atencioN"          element={<PrivateRoute><Appointment /></PrivateRoute>}/>

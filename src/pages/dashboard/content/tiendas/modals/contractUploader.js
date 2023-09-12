@@ -9,7 +9,7 @@ import { base64toBlob } from '../../../../../utils/functions';
 
 import {SizeMe} from 'react-sizeme';
 
-function ContractUploader({onChange = () => 0,}) {
+function ContractUploader({onChange = () => 0, value = ""}) {
 
     const [pdfFile, setpdfFile] = useState(null);
     const [urlPreview, seturlPreview] = useState(null);
@@ -57,7 +57,7 @@ function ContractUploader({onChange = () => 0,}) {
 
     return (
         <div>
-            {urlPreview &&
+            {value && value !== "" &&
                 <Box sx={{mb: 2}} boxShadow={5}>
                     <SizeMe
                         monitorHeight

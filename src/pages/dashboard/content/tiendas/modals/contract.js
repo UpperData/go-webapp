@@ -53,7 +53,7 @@ const statusList = [
     }
 ];
 
-function ModalContract({ show = false, handleShowModal = (show) => {}, storeId = null, reset = () => {}  }) {
+function ModalContract({ show = false, handleShowModal = (show) => {}, storeId = null, reset = () => {}, edit = null  }) {
     
     const [sending, setsending] = useState(false);
     const formSchema = Yup.object().shape({
@@ -65,7 +65,17 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
     });
 
     const formik = useFormik({
-        initialValues: {
+        enableReinitialize: true,
+        initialValues: edit ? 
+        {
+            startDate:      Date(edit.startDate),
+            endDate:        Date(edit.endDate),
+            comission:      edit.comission,
+            fileContract:   edit.fileContract,
+            isActived:      edit.isActived ? 'A' : 'I'
+        }
+        :
+        {
             startDate:      null,
             endDate:        null,
             comission:      0,
@@ -84,27 +94,28 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
             }
 
             console.log(data);
+            setsending(true);
 
-            // setsending(true);
-            const url = '/admIn/sTORE/contract/Create';
+            if(edit){
+                // edit
+            }else{
+                const url = '/admIn/sTORE/contract/Create';
+                axios.post(url, data).then((res) => {
+                    console.log(res.data);
 
-            /*
-            axios.post(url, data).then((res) => {
-                console.log(res.data);
+                    setsending(false);
+                    resetForm();
+                    toast.success('Contrato creado satisfactoriamente!');
+                    reset();
 
-                setsending(false);
-                resetForm();
-                toast.success('Contrato creado satisfactoriamente!');
-                reset();
+                }).catch((err) => {
 
-            }).catch((err) => {
+                    console.error(err);
+                    toast.error('Ha ocurrido un error inesperado');
+                    setsending(false);
 
-                console.error(err);
-                toast.error('Ha ocurrido un error inesperado');
-                setsending(false);
-
-            });
-            */
+                });
+            }
         }
     });
 
@@ -126,7 +137,7 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
             >
                 <Box sx={{...style, p: 5, borderRadius: 2}}>
                     <Typography variant="h5" alignItems="center" sx={{mb: 3}}>
-                        Crear contrato
+                        {edit ? `Editar contrato` : `Crear contrato`}
                     </Typography>
                     <div>
 
@@ -153,6 +164,7 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
                                                         
                                                         renderInput={
                                                             (params) => <TextField 
+                                                                defaultValue={values.startDate}
                                                                 fullWidth
                                                                 size='small' 
                                                                 {...getFieldProps('startDate')}
@@ -175,6 +187,7 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
                                                         
                                                         renderInput={
                                                             (params) => <TextField 
+                                                                defaultValue={values.endDate}
                                                                 fullWidth
                                                                 size='small' 
                                                                 {...getFieldProps('endDate')}
@@ -196,7 +209,8 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
                                                         maxLength: 5,
                                                         step: ".01"
                                                     }}
-                                                    value={values.comission}
+                                                    defaultValue={values.comission}
+                                                    // value={values.comission}
                                                     helperText={touched.comission && errors.comission} 
                                                     error={Boolean(touched.comission && errors.comission)} 
                                                     onChange={(e) => formik.setFieldValue('comission', parseFloat(e.target.value).toFixed(1))}
@@ -240,10 +254,10 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
                                                 type="submit"
                                                 sx={{pmx: 1, py: 1.5}}
                                                 // onClick={() => addGroup()}
-                                                // loading={isSubmitting}
-                                                // disabled={nameNewGroup === "" || nameNewGroup.length <= 5}
+                                                loading={sending}
+                                                disabled={sending}
                                             >
-                                                Guardar
+                                                {edit ? `Editar` : `Guardar`}
                                             </LoadingButton>
                                             <Button 
                                                 // disabled={sending} 
@@ -261,6 +275,7 @@ function ModalContract({ show = false, handleShowModal = (show) => {}, storeId =
                                                 </Alert>
                                             }
                                             <ContractUploader 
+                                                value={values.fileContract}
                                                 onChange={(fileString) => setFieldValue('fileContract', fileString)}
                                             />
                                         </Grid>

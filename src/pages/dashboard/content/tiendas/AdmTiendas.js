@@ -10,6 +10,7 @@ import Page from '../../../../components/Page';
 import Loader from "../../../../components/Loader/Loader";
 import ModalContract from "./modals/contract";
 import ModalStore from "./modals/store";
+import ChangeStatusStoreModal from "./modals/changeStatusStoreModal";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -28,6 +29,7 @@ function AdmTiendas() {
     const [sending, setsending]                 = useState(false);
 
     const [showModalCreate, setshowModalCreate] = useState(false);
+    const [showModalStatus, setshowModalStatus] = useState(false);
 
     const [list, setlist]                       = useState([]);
     const [storeToEdit, setstoreToEdit]         = useState(null);
@@ -56,6 +58,11 @@ function AdmTiendas() {
             }
         }
     });
+
+    const changeStatusToStore = (storedata) => {
+        setstoreToEdit(storedata);
+        setshowModalStatus(true);
+    }
 
     const editStore = (storedata) => {
         setstoreToEdit(storedata);
@@ -101,6 +108,8 @@ function AdmTiendas() {
             field: 'isActived',     
             flex: 1,
             // minWidth: 120,
+            width: 100,
+            maxWidth: 100,
             sortable: false,
             renderCell: (cellValues) => {
                 let dataItem = cellValues.row.isActived ? 'Activa' : 'Inactiva';
@@ -111,19 +120,36 @@ function AdmTiendas() {
             headerName: ``,   
             field: 'id', 
             flex: 1,
-            innerWidth: 50,
-            width: 120,
-            maxWidth: 120,
+            innerWidth: 400,
+            width: 400,
+            maxWidth: 400,
             sortable: false,
-            renderCell: (cellValues) =>  <Button 
-                variant="contained" 
-                color="primary" 
-                fullWidth 
-                onClick={() => editStore(cellValues.row)}
-            >
-                Editar
-            </Button>
-            
+            renderCell: (cellValues) =>  {
+                const id = cellValues.row.id;
+                let text = cellValues.row.isActived ? 'Desactivar' : 'Activar';
+
+                return (
+                    <>
+                        <Button 
+                            sx={{mr: 1}}
+                            variant="contained" 
+                            color="primary" 
+                            fullWidth 
+                            onClick={() => changeStatusToStore(cellValues.row)}
+                        >
+                            {text}
+                        </Button>
+                        <Button 
+                            variant="contained" 
+                            color="primary" 
+                            fullWidth 
+                            onClick={() => editStore(cellValues.row)}
+                        >
+                            Editar
+                        </Button>
+                    </>
+                )
+            }
         },
     ];
 
@@ -202,6 +228,17 @@ function AdmTiendas() {
                                                 handleShowModal={(show) => setshowModalCreate(show)}    
                                                 reset={() => resetList()}
                                                 edit={storeToEdit}
+                                                // storeId={storeSelected}       
+                                            />
+                                        }
+
+                                        {showModalStatus &&
+                                            <ChangeStatusStoreModal
+                                                show={showModalStatus}     
+                                                handleShowModal={(show) => setshowModalStatus(show)}    
+                                                reset={() => resetList()}
+                                                store={storeToEdit}
+                                                active={storeToEdit['isActived']}
                                                 // storeId={storeSelected}       
                                             />
                                         }

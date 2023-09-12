@@ -9,6 +9,7 @@ import moment from "moment";
 import Page from '../../../../components/Page';
 import Loader from "../../../../components/Loader/Loader";
 import ModalContract from "./modals/contract";
+import ChangeStatusContractModal from "./modals/changeStatusContractModal";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -32,11 +33,23 @@ function Contracts() {
     const [list, setlist]                       = useState([]);
 
     const [showModalCreate, setshowModalCreate] = useState(false);
+    const [showModalStatus, setshowModalStatus] = useState(false);
 
     const [storeList, setstoreList]             = useState([]);
     const [storeSelected, setstoreSelected]     = useState(null);
+    const [contractToEdit, setcontractToEdit]   = useState(null);
 
     const validCreation = (storeList.length > 0 && storeList.filter(item => item.isActived === true).length > 0);
+
+    const editContract = (contract) => {
+        setcontractToEdit(contract);
+        setshowModalCreate(true);
+    }
+
+    const changeStatusContract = (contract) => {
+        setcontractToEdit(contract);
+        setshowModalStatus(true);
+    }
 
     let columns = [
         { 
@@ -71,6 +84,27 @@ function Contracts() {
                 let active = cellValues.row.isActived;
                 return active ? 'Activo' : 'Inactivo';
             },
+        },
+        { 
+            headerName: ``,   
+            field: 'id', 
+            flex: 1,
+            width: 150,
+            maxWidth: 150,
+            sortable: false,
+            renderCell: (cellValues) =>  {
+                let active  = cellValues.row.isActived;
+                let text    = active ? 'Revocar' : 'Activar';
+
+                return <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    onClick={() => changeStatusContract(cellValues.row)}
+                >
+                    {text}
+                </Button>
+            }
         },
     ];
 
@@ -231,12 +265,29 @@ function Contracts() {
                     </Card>
                 </Grid>
 
-                <ModalContract 
-                    show={showModalCreate}     
-                    handleShowModal={(show) => setshowModalCreate(show)}    
-                    storeId={storeSelected} 
-                    reset={() => resetList()}      
-                />
+                {showModalCreate &&
+                    <ModalContract 
+                        show={showModalCreate}     
+                        handleShowModal={(show) => setshowModalCreate(show)}    
+                        storeId={storeSelected} 
+                        reset={() => resetList()}    
+                        edit={contractToEdit}  
+                    />
+                }
+
+                {showModalStatus &&
+                    <ChangeStatusContractModal 
+                        show={showModalStatus}     
+                        handleShowModal={(show) => {
+                            setshowModalStatus(show);
+                            setcontractToEdit(null);
+                        }}    
+                        storeId={storeSelected} 
+                        reset={() => resetList()}    
+                        edit={contractToEdit}  
+                        active={contractToEdit.isActived}
+                    />
+                }
             </Container>
         </Page>
     );
