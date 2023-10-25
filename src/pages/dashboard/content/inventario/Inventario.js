@@ -5,8 +5,6 @@ import { useFormik, Form, FormikProvider } from 'formik';
 // material
 import { Box, Grid, Stack, ButtonGroup, Tooltip, Container, Typography, Alert,  Card, CardContent, Hidden, Button, Modal, TextField, Checkbox, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
-import { LoadingButton } from '@mui/lab';
-import { alpha, styled } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
 
 // components
@@ -15,7 +13,7 @@ import Page from '../../../../components/Page';
 import axios from "../../../../auth/fetch"
 import Loader from '../../../../components/Loader/Loader';
 
-import { Icon } from '@iconify/react';
+import Icon from '@mdi/react';
 import CaretDown from "@iconify/icons-ant-design/caret-down"
 import CaretUp from "@iconify/icons-ant-design/caret-up"
 import CaretRight from "@iconify/icons-ant-design/caret-right"
@@ -24,25 +22,15 @@ import { getPermissions } from "../../../../utils/getPermissions";
 import { useSelector } from "react-redux";
 
 import ExportExcel from "react-export-excel"
+import AddArticleModal from "./modal/AddArticleModal";
+import AddInventoryModal from "./modal/AddInventoryModal";
+import ChangePublishedStatusModal from "./modal/ChangePublishedStatusModal";
 
 const ExcelFile     = ExportExcel.ExcelFile;
 const ExcelSheet    = ExportExcel.ExcelSheet;
 const ExcelColumn   = ExportExcel.ExcelColumn;
 
 // ----------------------------------------------------------------------
-
-const RootStyle = styled(Card)(({ theme }) => ({
-    boxShadow: 'none',
-    textAlign: 'center',
-    padding: theme.spacing(5, 5),
-    width: "95%",
-    margin: "auto",
-    maxWidth: "600px",
-    backgroundColor: "#fff",
-}));
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
 
 function Inventario() {
 
@@ -54,23 +42,22 @@ function Inventario() {
     const [data, setdata]                               = useState(null);
     const [list, setlist]                               = useState([]);
 
+    const [typeForm, settypeForm]                       = useState("create");
+    const [itemToEdit, setitemToEdit]                   = useState(null);
+
     const [openSaveChanges, setopenSaveChanges]         = useState(false);
     const [sending, setsending]                         = useState(false);
 
-    const [openModalAddItem, setopenModalAddItem]       = useState(false);
+    const [openModalAddItem, setopenModalAddItem]           = useState(false);
+    const [openModalPublishItem, setopenModalPublishItem]   = useState(false);
 
     const [alertSuccessMessage, setalertSuccessMessage] = useState("");
     const [alertErrorMessage,   setalertErrorMessage]   = useState("");
-
-    const [typeForm, settypeForm]                       = useState("create");
-    const [itemToEdit, setitemToEdit]                   = useState(null);
 
     // const [editingItemInTable, seteditingItemInTable]   = useState(null);
     const [changeInputStock, setchangeInputStock]       = useState(false);
 
     const urlGetData        = "/InveTorY/get/ALL";
-    const urlNewItem        = "/INVETOry/aricle/new";
-    const urlEditItem       = "/InVETOrY/aricLe/EdIT";
     const urlEditItemData   = "/InvEToRY/UpdaTE/ARTICLE";
 
     // Permissions
@@ -78,104 +65,14 @@ function Inventario() {
     let MenuPermissionList                      = useSelector(state => state.dashboard.menu);
     let permissions                             = getPermissions(location, MenuPermissionList);
 
-    const LoginSchema =     Yup.object().shape({
-        name:               Yup.string().required('Debe ingresar un nombre'),  
-        description:        Yup.string().required('Debe ingresar una descripción'),
-        // existence:          Yup.string().required('Ingrese stock'),
-    });
-
-    const formik = useFormik({
-        validateOnChange: false,
-        initialValues: {
-            name:             "",
-            description:      "",
-            existence:        "",
-        },
-        validationSchema: LoginSchema,
-        onSubmit: async (values, {resetForm}) => {
-            try {
-
-                let data = {
-                    name:               values.name,
-                    description:        values.description
-                }
-
-                if(typeForm === "create"){
-                    data.existence = values.existence;
-                }else{
-                    data.id        = itemToEdit.id;
-                }
-
-                console.log(data);
-                setsending(true);
-
-                axios({
-                    method: typeForm === "create" ? "POST" : "PUT",
-                    url:    typeForm === "create" ? urlNewItem : urlEditItem,
-                    data
-                }
-                    // config
-                ).then((res) => {
-
-                    console.log(res);
-                    setsending(false);
-
-                    if(res.data.result){
-                        setalertSuccessMessage(res.data.message);
-                        resetForm();
-                        setopenModalAddItem(false);
-                        getList();
-
-                        setTimeout(() => {
-                            setalertSuccessMessage("");
-                        }, 20000);
-                    }
-
-                }).catch((err) => {
-                    let fetchError = err;
-
-                    console.error(fetchError);
-                    if(fetchError.response){
-                        console.log(err.response);
-                        setalertErrorMessage(err.response.data.data.message);
-                        setTimeout(() => {
-                            setalertErrorMessage("");
-                        }, 20000);
-                        setsending(false);
-                    }
-                });
-
-            } catch(e) {
-                // setformErrors(e);
-
-                /*
-                    const config = {
-                        onUploadProgress: progressEvent => {
-                        let progressData = progress;
-                        progressData = (progressEvent.loaded / progressEvent.total) * 100;
-
-                        console.log(progressData);
-
-                        setprogress(progressData);
-                        setcount(count + progressData);
-                        }
-                    }
-                */
-            }
-        }
-    });
-
-    const { errors, touched, values, isSubmitting, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
-    
-
     const getList = async () => {
 
         setsearch(true);
         axios.get(urlGetData)
         .then((res) => {
 
-            console.log("---Data---");
-            console.log(res);
+            // console.log("---Data---");
+            // console.log(res);
 
             settypeForm("create");
             setitemToEdit(null);
@@ -205,50 +102,31 @@ function Inventario() {
                 await getList();
             }
         }
-    });
-
-    const changeStock = (id, newCount) => {
-        if(newCount >= 0){
-            setchangeInputStock(true);
-
-            let list        = [...data];
-            let item        = list.find(item => item.id === id);
-            let index       = list.indexOf(item);
-            
-            // console.log(list);
-            // console.log(index);
-            // console.log(list[index]);
-
-            item.existence  = newCount;
-            list[index]     = item;
-
-
-            setlist(list);
-            setcount(count * 20);
-        }
-    }
+    }, []);
 
     const editItem = (data) => {
         console.log("Edit", data);
 
-        setFieldValue("name",           data.article.name);
-        setFieldValue("description",    data.article.description);
+        // setFieldValue("name",           data.article.name);
+        // setFieldValue("description",    data.article.description);
 
         settypeForm("edit");
         setitemToEdit(data);
         setopenModalAddItem(true);
     }
 
-    const handleCloseModalAddItem = () => {
-        setopenModalAddItem(false);
+    const editPublishedItem = (data) => {
+        setitemToEdit(data);
+        setopenModalPublishItem(true);
     }
 
     const openModal = () => {
         setitemToEdit(null);
-        resetForm();
         settypeForm("create");
         setopenModalAddItem(true);
     }
+
+    let iconPath =  require('@mdi/js')['mdiCheckboxBlank'];
 
     let columns = [
         // { field: 'id',          headerName: 'ID', width: 70 },
@@ -281,8 +159,8 @@ function Inventario() {
             field: 'existence',    
             headerName: 'Existencia',
             sortable: false,
-            maxWidth: 220,
-            minWidth: 200,
+            maxWidth: 120,
+            minWidth: 120,
             flex: 1,
             headerAlign: 'center',
             renderCell: (cellValues) => {
@@ -300,34 +178,9 @@ function Inventario() {
                     colorAlert = "#D0302A";
                 }
 
-                return  <Grid container alignItems="center">
-                            <Grid xs={4} item sx={{px: .5}}>
-                                <Button disabled={sending} onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
-                                    <Icon icon={CaretLeft} />
-                                </Button>
-                            </Grid>
-                            <Grid xs={4} item>
-                                <TextField
-                                    hiddenLabel
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="lastname"
-                                    type="number"
-                                    label=""
-                                    sx={{ borderColor: colorAlert}}
-                                    InputProps={{
-                                        readOnly: true,
-                                        style: {textAlign: 'center', color: colorAlert}
-                                    }}
-                                    value={count}
-                                />
-                            </Grid>
-                            <Grid xs={4} item sx={{px: .5}}>
-                                <Button disabled={sending} onClick={() => changeStock(data.row.id, count + 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
-                                    <Icon icon={CaretRight} />
-                                </Button>
-                            </Grid>
-                        </Grid>
+                return  <Typography color="#D0302A">
+                    {count}
+                </Typography>
             }
         },
         { 
@@ -338,7 +191,7 @@ function Inventario() {
             minWidth: 100,
             flex: 1,
             headerAlign: 'center',
-            editable: true,
+            editable: false,
             type: 'number',
             renderCell: (cellValues) => {
                 let data = cellValues;
@@ -355,7 +208,7 @@ function Inventario() {
             field: 'minStock',    
             headerName: 'Mínimo',
             sortable: false,
-            maxWidth: 120,
+            maxWidth: 90,
             minWidth: 90,
             flex: 1,
             headerAlign: 'center',
@@ -408,8 +261,8 @@ function Inventario() {
         { 
             field: 'asignados',     
             headerName: `Transito`,
-            maxWidth: 150,
-            minWidth: 100,
+            maxWidth: 90,
+            minWidth: 90,
             flex: 1,
             sortable: false,
             renderCell: (cellValues) => {
@@ -419,7 +272,27 @@ function Inventario() {
                     {text === null ? 0 : text}
                 </Typography>
             }
-        }
+        },
+        { 
+            field: 'id',    
+            headerName: '',
+            sortable: false,
+            maxWidth: 120,
+            minWidth: 120,
+            flex: 1,
+            headerAlign: 'center',
+            renderCell: (cellValues) => {
+                let isPublished = cellValues.row.isPublished;
+
+                return <Button
+                    variant="contained" 
+                    color="primary" 
+                    onClick={() => editPublishedItem(cellValues.row)}
+                >
+                    {isPublished ? 'Ocultar' : 'Publicar'}
+                </Button>
+            }
+        },
     ];
 
     const editItemData = (itemData) => {
@@ -484,7 +357,39 @@ function Inventario() {
         }
     }
 
+    const resetList = () => {
+        getList();
+        setopenModalAddItem(false);
+        setopenModalPublishItem(false);
+        setitemToEdit(null);
+    }
+
     let items = list !== null ? list.filter(item => item.hasOwnProperty("id")) : [];
+
+    const changeStock = (id, newCount) => {
+        if(newCount >= 0){
+            setchangeInputStock(true);
+
+            let list        = [...data];
+            let item        = list.find(item => item.id === id);
+            let index       = list.indexOf(item);
+            
+            // console.log(list);
+            // console.log(index);
+            // console.log(list[index]);
+
+            item.existence  = newCount;
+            list[index]     = item;
+
+
+            setlist(list);
+            setcount(count * 20);
+        }
+    }
+
+    const handleCloseModalAddItem = () => {
+        setopenModalAddItem(false);
+    }
 
     return (
         <Page title="Inventario | RepuestosGo">
@@ -494,147 +399,76 @@ function Inventario() {
                     Inventario
                 </Typography>
             </Box>
-            
-            <Modal
-                open={openModalAddItem}
-                onClose={handleCloseModalAddItem}
-                aria-labelledby="modal-add-item-to-inventory"
-                aria-describedby="modal-add-item-to-inventory"
-                style={{ 
-                    display:'flex', 
-                    alignItems:'center', 
-                    justifyContent:'center' 
-                }}
-            >
-                <RootStyle>
 
-                <FormikProvider value={formik}>
-                    <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+            {openModalPublishItem &&
+                <ChangePublishedStatusModal 
+                    show={openModalPublishItem}
+                    handleShowModal={(show) => {
+                        setopenModalPublishItem(false);
+                    }}
+                    edit={itemToEdit}
+                    reset={() => resetList()}
+                />
+            }
 
-                    <Typography id="modal-modal-title" variant="h3" component="h3">
-                        {typeForm === "create" ? "Agregar un producto" : "Editar un producto"}
-                    </Typography>
-
-                    <Grid container sx={{ mt: 3 }} columnSpacing={3}>
-                        <Grid sx={{mb: 2}} item md={typeForm === "create" ? 8 : 12} xs={12}>
-                            <Stack spacing={3}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="name"
-                                    type="text"
-                                    label="Nombres"
-
-                                    {...getFieldProps('name')}
-                                    error={Boolean(touched.name && errors.name)}
-                                    helperText={touched.name && errors.name}
-                                />         
-                            </Stack>
-                        </Grid>
-                        {typeForm === "create" &&
-                            <Grid sx={{mb: 2}} item md={4} xs={12}>
-                                <Stack spacing={3}>
-                                    <TextField
-                                        size='small'
-                                        fullWidth
-                                        autoComplete="existence"
-                                        type="text"
-                                        label="Existencia"
-
-                                        InputProps={{
-                                            type: "number"
-                                        }}
-
-                                        {...getFieldProps('existence')}
-                                        error={Boolean(touched.existence && errors.existence)}
-                                        helperText={touched.existence && errors.existence}
-                                    />         
-                                </Stack>
-                            </Grid>
-                        }
-                        <Grid sx={{mb: 2}} item xs={12}>
-                            <Stack spacing={3}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    autoComplete="description"
-                                    type="text"
-                                    label="Descripción"
-
-                                    multiline
-                                    rows={2}
-                                    maxRows={4}
-
-                                    {...getFieldProps('description')}
-                                    error={Boolean(touched.description && errors.description)}
-                                    helperText={touched.description && errors.description}
-                                />         
-                            </Stack>
-                        </Grid>
-                    </Grid>
-
-                    <LoadingButton
-                        fullWidth
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        loading={sending}
-                        color="primary"
-                        disabled={
-                            (!permissions.crea && typeForm === "create") || 
-                            (!permissions.edita && typeForm === "edit")  || 
-                            (values.name === "" || values.description === "")
-                        }
-                    >
-                        {typeForm === "create" ? "Agregar" : "Editar"}
-                    </LoadingButton>
-
-                    </Form>
-                </FormikProvider>
-                    
-                </RootStyle>
-            </Modal>
+            {openModalAddItem &&
+                <AddInventoryModal 
+                    show={openModalAddItem}
+                    handleShowModal={(show) => {
+                        setopenModalAddItem(false);
+                    }}
+                    permissions={permissions}
+                    edit={itemToEdit}
+                    reset={() => resetList()}
+                />
+            }
             
             <Grid sx={{ pb: 3 }} item xs={12}>
                 {!loading &&
                     <Card>
                         <CardContent>
-
                             <Grid container justifyContent="space-between" columnSpacing={3}>
                                 <Grid sx={{mb: 2}} item md={3} xs={12}>
-                                    <Button onClick={() => openModal()} variant="contained" color="primary" fullWidth sx={{px : 3}} size="normal">
-                                        Nuevo Artículo
+                                    <Button 
+                                        onClick={() => openModal()} 
+                                        variant="contained" 
+                                        color="primary" 
+                                        fullWidth sx={{px : 3}} 
+                                        size="normal"
+                                    >
+                                        Añadir inventario
                                     </Button>
                                 </Grid>
-                                
-                                    <Grid sx={{mb: 2}} item md={4} xs={12}>
-                                        {data !== null
-                                        ?
-                                            <ExcelFile
-                                                filename="inventario"
-                                                element={
-                                                    <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="normal">
-                                                        Descargar Hoja de Inventario
-                                                    </Button>
-                                                }
-                                            >
-                                                <ExcelSheet data={list} name="Inventario">
-                                                    
-                                                        <ExcelColumn label="Producto" value={(col) => col.article.name} />
-                                                        <ExcelColumn label="Existencia" value="existence" />
-                                                        <ExcelColumn label="Precio (usd)" value="price" />
-                                                        <ExcelColumn label="Stock mínimo" value="minStock" />
-                                                        <ExcelColumn label="Almacén" value="almacen" />
-                                                        <ExcelColumn label="Transito" value="asignados" />
-                                                    
-                                                </ExcelSheet>
-                                            </ExcelFile>
-                                        :
-                                            <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
-                                                Descargar Hoja de Inventario
-                                            </Button>
-                                        }
-                                    </Grid>
+                                {/* 
+                                <Grid sx={{mb: 2}} item md={4} xs={12}>
+                                    {data !== null
+                                    ?
+                                        <ExcelFile
+                                            filename="inventario"
+                                            element={
+                                                <Button variant="contained" color="secondary" fullWidth sx={{px : 3}} size="normal">
+                                                    Descargar Hoja de Inventario
+                                                </Button>
+                                            }
+                                        >
+                                            <ExcelSheet data={list} name="Inventario">
+                                                
+                                                    <ExcelColumn label="Producto" value={(col) => col.article.name} />
+                                                    <ExcelColumn label="Existencia" value="existence" />
+                                                    <ExcelColumn label="Precio (usd)" value="price" />
+                                                    <ExcelColumn label="Stock mínimo" value="minStock" />
+                                                    <ExcelColumn label="Almacén" value="almacen" />
+                                                    <ExcelColumn label="Transito" value="asignados" />
+                                                
+                                            </ExcelSheet>
+                                        </ExcelFile>
+                                    :
+                                        <Button disabled variant="contained" color="secondary" fullWidth sx={{px : 3}} size="large">
+                                            Descargar Hoja de Inventario
+                                        </Button>
+                                    }
+                                </Grid>
+                                */}
                                 
                             </Grid>
 
@@ -653,9 +487,11 @@ function Inventario() {
                             {data !== null && data.length > 0 !== "" &&
                                 <div className="inventario-content-table">
 
-                                    <Alert sx={{mb: 3}} severity="info">
-                                        Puede modificar el valor de los elementos haciendo click.
-                                    </Alert>
+                                    {/*
+                                        <Alert sx={{mb: 3}} severity="info">
+                                            Puede modificar el valor de los elementos haciendo click.
+                                        </Alert>
+                                    */}
 
                                     <Grid container columnSpacing={3} justifyContent="end">
                                         <Grid md="auto" item xs={12} sx={{mb: 2}}>
@@ -685,8 +521,8 @@ function Inventario() {
 
                                             onCellEditCommit={(params) => handleCellEditStop(params)}
                                             onCellFocusOut={(params)   => validateChanges(params)}
-
-                                            page={0}
+                                            
+                                            // page={0}
                                             pageSize={6}
                                             rowsPerPageOptions={[6,10,20]}
                                             // autoPageSize
@@ -703,8 +539,10 @@ function Inventario() {
 
                                     <ul style={{listStyle: "none"}}>
                                         <li>
-                                            <Typography variant="h6" color="success">
-                                                <i className="mdi mdi-checkbox-blank" style={{ color: "#54D62C" }} />
+                                            <Typography variant="h6" color="success" alignItems="center" flex>
+                                                <Typography component="span" color="#54D62C">
+                                                    <Icon path={iconPath} size={.9} />
+                                                </Typography>
                                                 <Typography sx={{ml: 2}} component="span" color="text.primary">
                                                     <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
                                                         Satisfactorio:
@@ -714,8 +552,10 @@ function Inventario() {
                                             </Typography>
                                         </li>
                                         <li>
-                                            <Typography variant="h6" color="warning">
-                                                <i className="mdi mdi-checkbox-blank" style={{ color: "#FFC107" }} />
+                                            <Typography variant="h6" color="warning" alignItems="center" flex>
+                                                <Typography component="span" color="#FFC107">
+                                                    <Icon path={iconPath} size={.9} />
+                                                </Typography>
                                                 <Typography sx={{ml: 2}} component="span" color="text.primary">
                                                     <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
                                                         Advertencia:
@@ -725,8 +565,10 @@ function Inventario() {
                                             </Typography>
                                         </li>
                                         <li>
-                                            <Typography variant="h6" color="primary">
-                                                <i className="mdi mdi-checkbox-blank" />
+                                            <Typography variant="h6" color="primary" alignItems="center" flex>
+                                                <Typography component="span">
+                                                    <Icon path={iconPath} size={.9} />
+                                                </Typography>
                                                 <Typography sx={{ml: 2}} component="span" color="text.primary">
                                                     <Typography sx={{fontWeight: "bold", mr: 1}} component="span">
                                                         Alerta:
@@ -761,3 +603,34 @@ function Inventario() {
 
 
 export default Inventario;
+
+/*
+    <Grid container alignItems="center">
+                <Grid xs={4} item sx={{px: .5}}>
+                    <Button disabled={sending} onClick={() => changeStock(data.row.id, count - 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                        <Icon icon={CaretLeft} />
+                    </Button>
+                </Grid>
+                <Grid xs={4} item>
+                    <TextField
+                        hiddenLabel
+                        size='small'
+                        fullWidth
+                        autoComplete="lastname"
+                        type="number"
+                        label=""
+                        sx={{ borderColor: colorAlert}}
+                        InputProps={{
+                            readOnly: true,
+                            style: {textAlign: 'center', color: colorAlert}
+                        }}
+                        value={count}
+                    />
+                </Grid>
+                <Grid xs={4} item sx={{px: .5}}>
+                    <Button disabled={sending} onClick={() => changeStock(data.row.id, count + 1)} type="button" size="small" sx={{py: 1.5, px: 0, minWidth: 0, width: "100%"}} color="primary" variant="contained">
+                        <Icon icon={CaretRight} />
+                    </Button>
+                </Grid>
+    </Grid>
+*/

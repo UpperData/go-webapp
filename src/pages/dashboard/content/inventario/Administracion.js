@@ -21,7 +21,7 @@ const MenuProps = {
 };
 
 
-function Administracion() {
+function Administracion() { 
 
     const [loading, setloading]                 = useState(true);
     const [search, setsearch]                   = useState(true);

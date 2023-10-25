@@ -149,9 +149,9 @@ function Dashboard() {
                 <Route path="CITaS/historyByPatient/:id"        element={<PrivateRoute><PatientHistory /></PrivateRoute>}/>
 
                 {/* inventario */}
-                {/* <Route path="InvenTorY/ADMIN"               element={<PrivateRoute><Inventario /></PrivateRoute>}/> */}
+                <Route path="InvenTorY/ADMIN"               element={<PrivateRoute><Inventario /></PrivateRoute>}/>
                 <Route path="InVeNTorY/assigment"               element={<PrivateRoute><Asignacion /></PrivateRoute>}/>
-                <Route path="InvenTory/ADMIN"                   element={<PrivateRoute><Administracion /></PrivateRoute>}/>
+                {/* <Route path="InvenTory/ADMIN"                   element={<PrivateRoute><Administracion /></PrivateRoute>}/> */}
 
                 {/* finanzas */}
                 <Route path="finace/vouCHer/"                   element={<PrivateRoute><Bills /></PrivateRoute>}/>
