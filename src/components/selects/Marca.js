@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {Select, MenuItem, InputLabel, FormControl, FormHelperText} from "@mui/material"
-import axios from "axios"
+import axios from "../../auth/fetch"
 
 const MarcaSelect = (props) => {
 
@@ -14,7 +14,7 @@ const MarcaSelect = (props) => {
     const [search, setsearch]       = useState(true);
 
     const getData = () => {
-        axios.get("https://carapi.app/api/makes").then((res) => {
+        axios.get("/CaRS/MAkeS").then((res) => {
             
             // console.log("Makes", res.data);
             if(res.data.hasOwnProperty('data')){

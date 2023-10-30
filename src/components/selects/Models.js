@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {Select, MenuItem, InputLabel, FormControl, FormHelperText} from "@mui/material"
-import axios from "axios"
+import axios from "../../auth/fetch"
 
 const ModelSelect = (props) => {
 
@@ -15,11 +15,11 @@ const ModelSelect = (props) => {
 
     const getData = () => {
         if(id && id !== ""){
-            axios.get(`https://carapi.app/api/models?make_id=${id}`).then((res) => {
+            axios.get(`/CaRS/MoDelS/id/${id}`).then((res) => {
                 
                 console.log('models', res.data);
                 if(res.data.hasOwnProperty('data')){
-                    setlist(res.data.data);
+                    setlist(res.data.data.data);
                     setcanReset(true);
                     setloading(false);
                 }
