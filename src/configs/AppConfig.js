@@ -1,4 +1,4 @@
-export const APP_NAME           = 'RepuestosGo';
+export const APP_NAME           = 'Repuestos Go';
 export const API_BASE_URL       = "https://mls-r.vps.co.ve"
 
 export const AUTH_PREFIX_PATH   = '/';
